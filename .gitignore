@@ -2,3 +2,5 @@ node_modules/
 .impeccable/
 .claude/
 brand/
+scroll-world/work/*.log
+scroll-world/work/*.json
