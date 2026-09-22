@@ -111,7 +111,7 @@ for (let y = 0; y < n; y++) {
   }
 }
 
-const shownUrl = url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+// The URL is not printed on the card; the QR itself carries it (see <desc>).
 
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
@@ -128,9 +128,8 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <path d="${modules}" fill="${INK}" shape-rendering="crispEdges"/>
   <rect x="0" y="${H - 290}" width="${W}" height="290" fill="${INK}"/>
   <rect x="0" y="${H - 290}" width="${W}" height="10" fill="${GOLD}"/>
-  ${painted("SCAN FOR MENU", W / 2, H - 178, 80, GOLD, RED_DEEP, 2)}
-  ${painted("+ HOW TO PAY", W / 2, H - 92, 80, WHITE, BLUE, 2)}
-  ${textPath(body, shownUrl, W / 2, H - 30, 30, "#BFBFBF", 1)}
+  ${painted("SCAN FOR MENU", W / 2, H - 160, 80, GOLD, RED_DEEP, 2)}
+  ${painted("+ HOW TO PAY", W / 2, H - 70, 80, WHITE, BLUE, 2)}
 </svg>
 `;
 
