@@ -88,7 +88,6 @@ const MENU = [
 const PAYMENTS = [
   { kind: "cashapp", label: "Cash App", handle: "$KraveKulture", link: "https://cash.app/$KraveKulture" },
   { kind: "zelle", label: "Zelle", handle: "FILL-IN phone or email", link: "" },
-  { kind: "venmo", label: "Venmo", handle: "@FILL-IN", link: "https://venmo.com/u/FILL-IN" },
   // Uncomment the ones you take:
   // { kind: "card", label: "Tap to Pay at the window", handle: "Visa · Mastercard · Amex · Apple Pay", link: "" },
   // { kind: "cash", label: "Cash", handle: "Exact change appreciated", link: "" },
