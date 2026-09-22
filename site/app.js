@@ -200,34 +200,45 @@
 
   function scrollSpy() {
     const links = Array.from(document.querySelectorAll("#rail-links a, .bar a[href^='#']"));
-    if (!links.length || !("IntersectionObserver" in window)) return;
-    const targets = links
-      .map((a) => document.getElementById(a.getAttribute("href").slice(1)))
-      .filter(Boolean);
-    const seen = new Map();
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => seen.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0));
-        let best = null;
-        let bestRatio = 0;
-        seen.forEach((ratio, id) => {
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
-            best = id;
+    if (!links.length) return;
+    const pairs = links
+      .map((a) => ({ a, el: document.getElementById(a.getAttribute("href").slice(1)) }))
+      .filter((p) => p.el);
+    const sections = [];
+    pairs.forEach((p) => {
+      if (!sections.includes(p.el)) sections.push(p.el);
+    });
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const line = window.scrollY + Math.min(window.innerHeight * 0.4, 320);
+      let current = sections[0];
+      sections.forEach((s) => {
+        if (s.offsetTop <= line) current = s;
+      });
+      const bottomed = window.innerHeight + window.scrollY >= document.body.scrollHeight - 2;
+      if (bottomed) current = sections[sections.length - 1];
+      pairs.forEach(({ a, el }) => {
+        const on = el === current;
+        if (on) {
+          if (a.getAttribute("aria-current") !== "true") {
+            a.setAttribute("aria-current", "true");
+            if (a.closest("#rail-links")) a.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
           }
-        });
-        links.forEach((a) => {
-          const on = best && a.getAttribute("href") === "#" + best;
-          if (on) a.setAttribute("aria-current", "true");
-          else a.removeAttribute("aria-current");
-          if (on && a.closest("#rail-links")) {
-            a.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
-          }
-        });
-      },
-      { rootMargin: "-40% 0px -45% 0px", threshold: [0, 0.2, 0.5, 1] }
-    );
-    targets.forEach((t) => io.observe(t));
+        } else {
+          a.removeAttribute("aria-current");
+        }
+      });
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    update();
   }
 
   function railHint() {
@@ -253,6 +264,5 @@
     scrollSpy();
     railHint();
     year();
-    document.querySelectorAll(".paint-on").forEach((n) => n.classList.add("is-ready"));
   });
 })();

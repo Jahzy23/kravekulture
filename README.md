@@ -10,7 +10,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu-data.js` **the only file you edit** to change dishes, prices, payment handles, city, phone
   - `qr.html` print page for the QR card
   - `styles.css`, `app.js`, `fonts/`, `images/`
-- `make-qr.js` — generates the QR code (vector SVG + PNG preview) for any URL
+- `make-qr.js` — generates the QR code (one vector SVG card) for any URL
 - `site/qr/` — generated QR files (also served on the live site at `/qr/` and shown on `/qr.html`)
 - `tools/fonts/` — TTF copies of the display fonts used to draw text into the QR card
 
@@ -27,14 +27,14 @@ Open `site/menu-data.js`. Change names, prices, flavors, or payment handles. Sav
 
 ```bash
 npm install
-node make-qr.js https://YOUR-SITE-URL/menu
+node make-qr.js https://YOUR-SITE-URL/menu.html
 ```
 
-Writes `site/qr/qr-menu.svg` (plain vector), `site/qr/qr-menu-card.svg` (print-ready branded card, all text as vector paths) and `site/qr/qr-menu.png` (2048px preview). Rerun whenever the URL changes, for example after you buy a domain.
+Writes one file, `site/qr/krave-kulture-qr.svg`: the QR code on a painted Krave Kulture card, all lettering converted to vector paths. Print it at any size.
 
 ## Deploy
 
-Vercel deploys the `site/` folder automatically on every push to `main`. Any static host works too: upload the contents of `site/`.
+GitHub Actions deploys the `site/` folder to GitHub Pages on every push to `main` (live at https://jahzy23.github.io/kravekulture/). Any static host works too: upload the contents of `site/`.
 
 ## Replace the photos and logo
 
