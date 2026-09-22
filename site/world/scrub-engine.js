@@ -87,6 +87,7 @@ function mountScrollWorld(container, config) {
   const SEGMENTS = [];
   SECTIONS.forEach((s, i) => {
     const dive = { kind: 'dive', si: i, clip: s.clip, clipM: s.clipMobile, still: s.still, stillM: s.stillMobile,
+                   stillSrcset: s.stillSrcset, stillMSrcset: s.stillMobileSrcset,
                    accent: s.accent, w: s.scroll || DIVE_W, linger: s.linger || 0 };
     SEGMENTS.push(dive);
     s._seg = dive;
@@ -96,6 +97,7 @@ function mountScrollWorld(container, config) {
     if (i < N - 1 && CONNECTORS[i]) {
       SEGMENTS.push({ kind: 'conn', si: i, clip: CONNECTORS[i], clipM: CONNECTORS_M[i],
                       still: SECTIONS[i + 1].still, stillM: SECTIONS[i + 1].stillMobile,
+                      stillSrcset: SECTIONS[i + 1].stillSrcset, stillMSrcset: SECTIONS[i + 1].stillMobileSrcset,
                       accent: SECTIONS[i + 1].accent, w: CONN_W });
     }
   });
@@ -140,7 +142,12 @@ function mountScrollWorld(container, config) {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
     const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
     const poster = (isMobile() && s.stillM) ? s.stillM : s.still;
+    const posterSrcset = (isMobile() && s.stillM) ? s.stillMSrcset : s.stillSrcset;
     if (poster) img.src = poster;
+    // Optional: pass `stillSrcset`/`stillMobileSrcset` per section ("small.webp 900w,
+    // big.webp 1800w") to serve a lighter poster at narrow viewports. Omit them and
+    // nothing changes — `img.src` above is the whole picture on its own.
+    if (posterSrcset) { img.srcset = posterSrcset; img.sizes = '100vw'; }
     scene.appendChild(img); stage.appendChild(scene);
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
     s.loading = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
@@ -252,7 +259,12 @@ function mountScrollWorld(container, config) {
       const c = copies[i];
       c.style.opacity = cop;
       c.style.transform = reduce ? 'none' : `translateY(${(0.5 - pr) * 4}vh)`;
-      c.style.pointerEvents = cop > 0.5 ? 'auto' : 'none';
+      const shown = cop > 0.5;
+      c.style.pointerEvents = shown ? 'auto' : 'none';
+      // pointer-events:none only blocks the mouse/touch hit-test — a keyboard user
+      // can still Tab into an invisible scene's CTA links. `inert` (supported in all
+      // current engines) also drops it from the tab order and the a11y tree.
+      c.toggleAttribute('inert', !shown);
     }
 
     const cur = SEGMENTS[ci];
