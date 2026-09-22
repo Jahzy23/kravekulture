@@ -46,7 +46,7 @@
     .sw-root .sw-nav__item { font-family: var(--sw-font-display); font-size: 0.7rem; letter-spacing: 0.04em; }
     .sw-root .sw-brand__name { font-size: 1.15rem; letter-spacing: 0.02em; }
     .sw-root .sw-brand__mark { display: none; }
-    .sw-root .sw-brand__badge { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 6px 14px -6px rgba(17, 17, 17, 0.6); }
+    .sw-root .sw-brand__badge { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; box-shadow: 0 6px 14px -6px rgba(17, 17, 17, 0.6); }
     /* No scroll-cue affordance: the diorama itself signals there's more (Krave Kulture design taste pass). */
     .sw-root .sw-hint { display: none; }
     ::selection { background: #f2b632; color: #111; }
@@ -170,9 +170,9 @@
       if (!mark) return;
       var img = document.createElement('img');
       img.className = 'sw-brand__badge';
-      img.src = 'images/logo-150.jpg';
+      img.src = 'images/logo-512.webp';
       img.alt = '';
-      img.width = 36; img.height = 36;
+      img.width = 44; img.height = 44;
       mark.replaceWith(img);
     })();
   </script>

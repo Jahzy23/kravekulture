@@ -98,6 +98,6 @@ inject("site/index.html", [
 ]);
 
 inject("site/menu.html", [
-  foodEstablishment(MENU, LOCATION, { image: `${SITE_URL}/images/logo-300.png`, url: `${SITE_URL}/menu.html` }),
+  foodEstablishment(MENU, LOCATION, { image: `${SITE_URL}/images/logo-512.png`, url: `${SITE_URL}/menu.html` }),
   menuSchema(MENU),
 ]);

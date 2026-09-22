@@ -222,7 +222,7 @@ button {
   padding: clamp(18px, 4vw, 40px) 0 clamp(20px, 4vw, 36px);
 }
 .sign-badge {
-  width: clamp(76px, 20vw, 132px);
+  width: clamp(84px, 22vw, 150px);
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
@@ -915,8 +915,8 @@ button {
   align-items: center;
 }
 .foot img {
-  width: 56px;
-  height: 56px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
 }
 .foot-tag {
