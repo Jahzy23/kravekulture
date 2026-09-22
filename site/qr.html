@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>QR Code — Krave Kulture</title>
+  <meta name="description" content="Print-ready QR code that opens the Krave Kulture menu and payment page.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#c4261d">
+  <link rel="icon" href="images/logo-150.jpg">
+  <link rel="preload" href="fonts/bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/big-shoulders-text.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="awning" aria-hidden="true"></div>
+
+  <header class="sign">
+    <div class="wrap sign-inner">
+      <a class="sign-badge" href="index.html" aria-label="Krave Kulture home">
+        <img src="images/logo-300.png" width="300" height="300" alt="Krave Kulture badge">
+      </a>
+      <h1 class="painted sign-name">Krave Kulture</h1>
+      <p class="sign-tag">Scan for menu <span>+</span> how to pay</p>
+    </div>
+  </header>
+
+  <main class="wrap qr-page">
+    <h2 class="display">Print this QR code</h2>
+    <p>Stick it on the trailer window, the tip jar, or a table card. It opens the menu and payment page. The SVG files are vector, so they print sharp at any size.</p>
+    <figure class="qr-card">
+      <img src="qr/qr-menu-card.svg" width="1000" height="1400" alt="QR code card: Krave Kulture, scan for menu and how to pay">
+    </figure>
+    <p class="qr-url">Points to: <a href="menu.html">jahzy23.github.io/kravekulture/menu.html</a></p>
+    <div class="qr-actions">
+      <a class="btn" href="qr/qr-menu-card.svg" download>Download card (SVG)</a>
+      <a class="btn btn-white" href="qr/qr-menu.svg" download>Plain QR (SVG)</a>
+      <a class="btn btn-white" href="qr/qr-menu.png" download>PNG preview</a>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <img src="images/logo-150.jpg" width="56" height="56" alt="">
+      <p class="foot-tag">Krave it. Taste it. Live the Kulture.</p>
+      <p class="foot-small">&copy; <span data-year>2026</span> Krave Kulture &middot; <a href="menu.html">Menu &amp; how to pay</a> &middot; <a href="index.html">Home</a></p>
+    </div>
+  </footer>
+  <script src="menu-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

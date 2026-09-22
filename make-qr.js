@@ -5,7 +5,7 @@
  * Usage:
  *   node make-qr.js https://your-site-url/menu.html
  *
- * Writes into ./qr/ :
+ * Writes into ./site/qr/ (also served on the live site at /qr/):
  *   qr-menu.svg          plain vector QR (black on white, ECC level H)
  *   qr-menu-card.svg     print-ready branded card, text converted to paths (fully vector)
  *   qr-menu.png          2048px raster preview for quick sharing
@@ -23,7 +23,7 @@ if (!url || !/^https?:\/\//.test(url)) {
   process.exit(1);
 }
 
-const OUT = path.join(__dirname, "qr");
+const OUT = path.join(__dirname, "site", "qr");
 fs.mkdirSync(OUT, { recursive: true });
 
 // Brand tokens (mirrors site/styles.css)
@@ -124,7 +124,7 @@ async function main() {
   fs.writeFileSync(path.join(OUT, "qr-menu-card.svg"), svg);
 
   console.log("QR target:", url);
-  console.log("Wrote:", fs.readdirSync(OUT).map((f) => path.join("qr", f)).join(", "));
+  console.log("Wrote:", fs.readdirSync(OUT).map((f) => path.join("site", "qr", f)).join(", "));
 }
 
 main().catch((e) => {

@@ -26,7 +26,7 @@ const MENU = [
     photo: "images/griot-plate.jpg",
     photoAlt: "Griot complete: fried pork, rice, fried plantains, macaroni and pikliz",
     items: [
-      { name: "Griot Complete", desc: "Fried pork.", price: 20, tag: "popular" },
+      { name: "Griot Complete", desc: "Fried pork.", price: 20 },
       { name: "Turkey Complete", desc: "Kodenn.", price: 20 },
       { name: "Goat Complete", desc: "Kabrit.", price: 25 },
       { name: "Shrimp Complete", desc: "Kribich.", price: 22 },
@@ -89,8 +89,9 @@ const PAYMENTS = [
   { kind: "cashapp", label: "Cash App", handle: "$FILL-IN", link: "https://cash.app/$FILL-IN" },
   { kind: "zelle", label: "Zelle", handle: "FILL-IN phone or email", link: "" },
   { kind: "venmo", label: "Venmo", handle: "@FILL-IN", link: "https://venmo.com/u/FILL-IN" },
-  { kind: "card", label: "Tap to Pay at the window", handle: "Visa · Mastercard · Amex · Apple Pay", link: "" },
-  { kind: "cash", label: "Cash", handle: "Exact change appreciated", link: "" },
+  // Uncomment the ones you take:
+  // { kind: "card", label: "Tap to Pay at the window", handle: "Visa · Mastercard · Amex · Apple Pay", link: "" },
+  // { kind: "cash", label: "Cash", handle: "Exact change appreciated", link: "" },
 ];
 
 /* Where the truck is. Update per event or point people to Instagram. */

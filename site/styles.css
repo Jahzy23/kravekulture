@@ -164,12 +164,14 @@ button {
   color: var(--paint-face, var(--white));
   --s: var(--paint-shade, var(--blue));
   text-shadow:
-    0.015em 0.015em 0 var(--s),
+    0.01em 0.01em 0 var(--s),
+    0.02em 0.02em 0 var(--s),
     0.03em 0.03em 0 var(--s),
-    0.045em 0.045em 0 var(--s),
+    0.04em 0.04em 0 var(--s),
+    0.05em 0.05em 0 var(--s),
     0.06em 0.06em 0 var(--s),
-    0.075em 0.075em 0 var(--s),
-    0.09em 0.09em 0 var(--s);
+    0.07em 0.07em 0 var(--s),
+    0.08em 0.08em 0 var(--s);
 }
 
 /* ---------- awning ---------- */
@@ -224,7 +226,7 @@ button {
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 6px 0 var(--red-deep), var(--shadow-paint);
+  box-shadow: 0 12px 28px -12px rgba(17, 17, 17, 0.7);
   background: var(--ink);
 }
 .sign-badge img {
@@ -250,7 +252,7 @@ button {
   line-height: 1.1;
   letter-spacing: 0.02em;
   padding: 8px 12px 6px;
-  box-shadow: 0 4px 0 var(--red-deep);
+  box-shadow: var(--shadow-paint);
 }
 .sign-tag span {
   color: var(--red);
@@ -275,6 +277,39 @@ button {
   content: "\2022";
   margin: 0 0.7em;
   color: var(--gold);
+}
+
+@media (min-width: 900px) {
+  .sign-inner {
+    grid-template-columns: auto 1fr auto;
+    gap: 16px 36px;
+  }
+  .sign-badge {
+    width: 160px;
+  }
+  .sign-name {
+    font-size: clamp(3.4rem, 6.4vw, 6rem);
+    align-self: center;
+  }
+  .sign-tag {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    transform: rotate(-2deg);
+    font-size: 1.2rem;
+    padding: 12px 16px 10px;
+  }
+  .hero-sign .sign-inner {
+    grid-template-columns: auto 1fr auto;
+  }
+  .hero-sign .sign-badge {
+    width: 190px;
+  }
+  .hero-actions {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
 }
 
 /* paint-on reveal */
@@ -365,21 +400,20 @@ button {
 .rail a::after {
   content: "";
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 6px;
-  height: 5px;
-  background: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 260ms var(--ease-out);
+  left: 10px;
+  right: 10px;
+  bottom: 4px;
+  height: 9px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath fill='%23f2b632' d='M2 7.5C20 3 45 1.5 70 2.4c30 1 58 3.8 88 2.6 15-.6 28-1.9 38-1.6 1.2 0 2 .9 1.7 2.1-.5 2.2-2 3.6-4.2 3.9-24 3.3-52 2.8-82 2.1-31-.8-62 .6-92 .4-9-.1-16.7-.7-21.2-1.9C-1 9.3.3 8 2 7.5z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 320ms var(--ease-out);
 }
 .rail a:hover,
 .rail a[aria-current="true"] {
   color: var(--gold);
 }
 .rail a[aria-current="true"]::after {
-  transform: scaleX(1);
+  clip-path: inset(0 0 0 0);
 }
 .rail a:focus-visible {
   outline-offset: -4px;
@@ -524,6 +558,7 @@ button {
 .plate img {
   width: 100%;
   aspect-ratio: 4 / 3;
+  max-height: 180px;
   object-fit: cover;
   background: var(--whitewash-deep);
 }
@@ -636,6 +671,9 @@ button {
 }
 
 @media (min-width: 900px) {
+  .plate img {
+    max-height: none;
+  }
   .stall-body {
     display: grid;
     grid-template-columns: 5fr 7fr;
@@ -802,7 +840,7 @@ button {
   border: var(--rule) solid var(--ink);
   background: var(--gold);
   color: var(--ink);
-  box-shadow: 0 5px 0 var(--ink);
+  box-shadow: 0 8px 18px -10px rgba(17, 17, 17, 0.65);
   transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), background 160ms var(--ease-out);
 }
 .btn svg {
@@ -811,11 +849,11 @@ button {
 }
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 7px 0 var(--ink);
+  box-shadow: 0 12px 22px -10px rgba(17, 17, 17, 0.7);
 }
 .btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 2px 0 var(--ink);
+  transform: translateY(1px);
+  box-shadow: 0 3px 8px -6px rgba(17, 17, 17, 0.7);
 }
 .btn-blue {
   background: var(--blue);
@@ -930,14 +968,8 @@ button {
   margin-top: 8px;
 }
 .hero-actions .btn {
-  box-shadow: 0 5px 0 var(--red-deep);
   border-color: var(--red-deep);
-}
-.hero-actions .btn:hover {
-  box-shadow: 0 7px 0 var(--red-deep);
-}
-.hero-actions .btn:active {
-  box-shadow: 0 2px 0 var(--red-deep);
+  box-shadow: 0 10px 20px -10px rgba(60, 10, 8, 0.8);
 }
 
 .plates {
@@ -1058,5 +1090,51 @@ button {
   }
   .plate {
     display: none;
+  }
+}
+
+/* ---------- QR print page ---------- */
+.qr-page {
+  padding: clamp(20px, 4vw, 40px) 0 clamp(40px, 6vw, 72px);
+  display: grid;
+  gap: 24px;
+}
+.qr-page h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+}
+.qr-page p {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: 1.1rem;
+}
+.qr-card {
+  margin: 0;
+  width: min(100%, 420px);
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+}
+.qr-card img {
+  width: 100%;
+  height: auto;
+}
+.qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.qr-url {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+@media print {
+  .qr-page > *:not(.qr-card) {
+    display: none;
+  }
+  .qr-card {
+    width: 100%;
+    border: 0;
   }
 }
