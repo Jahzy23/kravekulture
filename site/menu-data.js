@@ -86,7 +86,7 @@ const MENU = [
    kind: "cashapp" | "zelle" | "venmo" | "applepay" | "card" | "cash"
    --------------------------------------------------------------------- */
 const PAYMENTS = [
-  { kind: "cashapp", label: "Cash App", handle: "$FILL-IN", link: "https://cash.app/$FILL-IN" },
+  { kind: "cashapp", label: "Cash App", handle: "$KraveKulture", link: "https://cash.app/$KraveKulture" },
   { kind: "zelle", label: "Zelle", handle: "FILL-IN phone or email", link: "" },
   { kind: "venmo", label: "Venmo", handle: "@FILL-IN", link: "https://venmo.com/u/FILL-IN" },
   // Uncomment the ones you take:
