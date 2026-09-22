@@ -1,5 +1,12 @@
 # Generate the six scene stills in the Codex app (free with your ChatGPT plan)
 
+> Status (2026-09-22): the live posters were generated through the Cloudinary
+> generate-image tool (model `gpt-image-2`, 1536×1024) instead of the Codex app, with
+> one re-roll of the kitchen scene so the trailer matches the black truck. The source
+> PNGs are kept in the Cloudinary media library under `kravekulture/still_*` and are
+> gitignored here. This file stays as the manual route if the stills ever need redoing
+> by hand. Same prompts either way.
+
 Scripted Codex cannot reach the image tool, but the Codex app can. Open the Codex app,
 point it at this folder (`kravekulture`), and paste the block below as one message.
 It saves six PNGs into `scroll-world/work/`. When they exist, tell Claude "stills are in"
