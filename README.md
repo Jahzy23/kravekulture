@@ -10,6 +10,8 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu-data.js` **the only file you edit** to change dishes, prices, payment handles, city, phone
   - `qr.html` print page for the QR card
   - `styles.css`, `app.js`, `fonts/`, `images/`
+  - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
+- `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
 - `make-qr.js` — generates the QR code (one vector SVG card) for any URL
 - `site/qr/` — generated QR files (also served on the live site at `/qr/` and shown on `/qr.html`)
 - `tools/fonts/` — TTF copies of the display fonts used to draw text into the QR card
@@ -51,7 +53,11 @@ Update the `<lastmod>` dates in `site/sitemap.xml` at the same time.
 
 ## Deploy
 
-GitHub Actions deploys the `site/` folder to GitHub Pages on every push to `main` (live at https://jahzy23.github.io/kravekulture/). Any static host works too: upload the contents of `site/`.
+The live site is hosted on **Vercel** (project `kravekulture`, team `305`), git-linked to this repo with root directory `site/` — every push to `main` auto-deploys, no GitHub Actions involved. Security headers (`X-Content-Type-Options`, `X-Frame-Options`, per-page `Content-Security-Policy`) are set in `site/vercel.json`; GitHub Pages does not support custom response headers at all, which is why the site moved off it.
+
+`jahzy23.github.io/kravekulture` (the old host) is kept alive on purpose: GitHub Actions (`.github/workflows/pages.yml`) now deploys the tiny `redirect/` folder there instead of `site/`, so any already-printed QR code or old bookmark still lands on the real site. Never point that workflow back at `site/`.
+
+If the Vercel URL ever changes (custom domain, project rename), update `redirect/*.html` and every URL in `make-schema.js`, `site/*.html` (canonical/og/twitter), `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, then re-run `node make-schema.js` and regenerate the QR code.
 
 ## Replace the photos and logo
 

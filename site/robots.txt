@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jahzy23.github.io/kravekulture/sitemap.xml
+Sitemap: https://kravekulture.vercel.app/sitemap.xml
