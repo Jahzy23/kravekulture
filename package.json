@@ -1,0 +1,16 @@
+{
+  "name": "kravekulture",
+  "version": "1.0.0",
+  "description": "Krave Kulture food truck site, menu and QR code",
+  "scripts": {
+    "qr": "node make-qr.js",
+    "serve": "python -m http.server 4173 --directory site"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "opentype.js": "^2.0.0",
+    "qrcode": "^1.5.4"
+  },
+  "private": true
+}

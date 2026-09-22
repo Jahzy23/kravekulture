@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Menu &amp; How to Pay — Krave Kulture</title>
+  <meta name="description" content="Krave Kulture food truck menu: Haitian, Caribbean and soul food plates in Miami, FL. Prices, sides, drinks, and how to pay.">
+  <meta name="theme-color" content="#c4261d">
+  <meta property="og:title" content="Krave Kulture — Menu &amp; How to Pay">
+  <meta property="og:description" content="Haitian, Caribbean and soul food from the Krave Kulture truck, Miami. Krave It. Taste It. Live the Kulture.">
+  <meta property="og:image" content="images/logo-300.png">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="images/logo-150.jpg">
+  <link rel="apple-touch-icon" href="images/logo-300.png">
+  <link rel="preload" href="fonts/bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/big-shoulders-text.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="sr-only" href="#menu-sections">Skip to menu</a>
+
+  <div class="awning" aria-hidden="true"></div>
+
+  <header class="sign">
+    <div class="wrap sign-inner">
+      <a class="sign-badge" href="index.html" aria-label="Krave Kulture home">
+        <img src="images/logo-300.png" width="300" height="300" alt="Krave Kulture badge: the food trailer under a Miami sunset, Haitian and American flags, crossed fork and knife">
+      </a>
+      <h1 class="painted sign-name paint-on">Krave Kulture</h1>
+      <p class="sign-tag paint-on">Krave it. <span>Taste it.</span> Live the Kulture.</p>
+    </div>
+  </header>
+
+  <div class="band">
+    <div class="wrap band-inner" aria-label="Haitian, Caribbean, soul food, Miami">
+      <span>Haitian</span><span>Caribbean</span><span>Soul Food</span><span data-city>Miami, FL</span>
+    </div>
+  </div>
+
+  <nav class="rail" aria-label="Menu sections">
+    <div class="wrap rail-inner" id="rail-links">
+      <!-- section links render here from menu-data.js -->
+    </div>
+  </nav>
+
+  <div class="tape" id="sample-tape" data-on="false" role="status">
+    <div class="wrap tape-inner">
+      Sample menu
+      <span>Real dishes and prices are coming. Ask at the window today.</span>
+    </div>
+  </div>
+
+  <main id="menu">
+    <div id="menu-sections">
+      <noscript>
+        <div class="wrap" style="padding:24px 0">
+          <p>The menu needs JavaScript to load. Ask at the window for today's prices, or see us on <a href="https://www.instagram.com/eatkravekulture/">Instagram</a>.</p>
+        </div>
+      </noscript>
+    </div>
+
+    <section class="stall" id="pay" aria-labelledby="pay-title">
+      <div class="board board-black">
+        <div class="wrap">
+          <div class="board-head">
+            <h2 class="display board-title" id="pay-title">How to Pay</h2>
+            <span class="board-kreyol">Kijan pou peye</span>
+          </div>
+          <p class="board-note">Order at the window, then pay any of these ways. Tap Copy to grab a handle.</p>
+        </div>
+      </div>
+      <div class="wrap pay-body">
+        <ul class="pay-list" id="pay-list">
+          <!-- payment methods render here from menu-data.js -->
+        </ul>
+      </div>
+    </section>
+
+    <section class="stall" id="find" aria-labelledby="find-title">
+      <div class="board board-blue">
+        <div class="wrap">
+          <div class="board-head">
+            <h2 class="display board-title" id="find-title">Find the Truck</h2>
+            <span class="board-kreyol">Kote kamyon an</span>
+          </div>
+        </div>
+      </div>
+      <div class="wrap find">
+        <p data-location-text>We move. Today's spot is always on Instagram.</p>
+        <div class="find-actions">
+          <a class="btn btn-blue" data-ig-link href="https://www.instagram.com/eatkravekulture/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>
+            <span data-ig-handle>@eatkravekulture</span>
+          </a>
+          <a class="btn btn-white" data-phone-wrap href="tel:">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+            <span>Call</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <img src="images/logo-150.jpg" width="56" height="56" alt="">
+      <p class="foot-tag">Krave it. Taste it. Live the Kulture.</p>
+      <p class="foot-small">&copy; <span data-year>2026</span> Krave Kulture &middot; <span data-city>Miami, FL</span> &middot; Menu changes with the market. <a href="index.html">Home</a></p>
+    </div>
+  </footer>
+
+  <nav class="bar" aria-label="Quick links">
+    <a href="#menu-sections">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      Menu
+    </a>
+    <a href="#pay">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="1.5"/><circle cx="12" cy="12" r="2.6"/></svg>
+      Pay
+    </a>
+    <a href="#find">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      Find us
+    </a>
+  </nav>
+
+  <script src="menu-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
