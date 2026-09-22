@@ -22,7 +22,7 @@
   --blue-tint: #dfe4f7;
   --gold: #f2b632;
   --gold-deep: #c98f12;
-  --gold-tint: #6b4a05;
+  --gold-tint: #5a3d04; /* 5.5:1 on --gold — #6b4a05 measured 4.42:1, under WCAG AA 4.5:1 */
   --white: #ffffff;
 
   --display: "Bungee", "Impact", "Arial Narrow", sans-serif;

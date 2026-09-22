@@ -23,6 +23,18 @@
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+  // Screen readers don't see the "Copy" -> "Copied" text swap unless it lands in a
+  // live region — the button's aria-label is static, so this is the only announcement.
+  function announceCopy(text) {
+    let live = $("#copy-announcer");
+    if (!live) {
+      live = el("div", { class: "sr-only", id: "copy-announcer", "aria-live": "polite", role: "status" });
+      document.body.appendChild(live);
+    }
+    live.textContent = "";
+    setTimeout(() => { live.textContent = text; }, 30);
+  }
+
   const ICONS = {
     cashapp:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M15 9.2c-.8-.7-1.9-1.1-3-1.1-1.8 0-3 .9-3 2.1 0 2.8 6 1.4 6 4.3 0 1.3-1.3 2.2-3.1 2.2-1.3 0-2.5-.4-3.4-1.2"/><path d="M12 6.5V8m0 8v1.5"/></svg>',
@@ -159,6 +171,7 @@
             await navigator.clipboard.writeText(p.handle);
             btn.dataset.state = "copied";
             btn.querySelector("span").textContent = "Copied";
+            announceCopy("Copied " + p.label + " " + p.handle);
             setTimeout(() => {
               delete btn.dataset.state;
               btn.querySelector("span").textContent = "Copy";
@@ -168,9 +181,12 @@
           }
         });
       }
+      const icon = p.link
+        ? el("a", { class: "pay-icon", href: p.link, target: "_blank", rel: "noopener", "aria-label": "Open " + p.label, html: ICONS[p.kind] || ICONS.cash })
+        : el("span", { class: "pay-icon", html: ICONS[p.kind] || ICONS.cash });
       host.appendChild(
         el("li", { class: "pay" }, [
-          el("span", { class: "pay-icon", html: ICONS[p.kind] || ICONS.cash }),
+          icon,
           el("span", { class: "pay-label", text: p.label }),
           copyable || isFill ? btn : el("span"),
           handleText,
