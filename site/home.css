@@ -1,0 +1,29 @@
+@font-face { font-family: "Bungee"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/bungee-400.woff2) format("woff2"); }
+@font-face { font-family: "Big Shoulders Text"; font-style: normal; font-weight: 400 700; font-display: swap; src: url(fonts/big-shoulders-text.woff2) format("woff2"); }
+
+/* Theme the engine with the storefront tokens. Unlayered, so it wins over the engine's @layer defaults. */
+:root, .sw-root {
+  --sw-bg: #f6f4ee;            /* == the stills' background */
+  --sw-ink: #111111;
+  --sw-ink-soft: #55534e;
+  --sw-accent: #c4261d;        /* per-section accents override at runtime */
+  --sw-font-display: "Bungee", Impact, "Arial Narrow", sans-serif;
+  --sw-font-body: "Big Shoulders Text", "Arial Narrow", "Helvetica Neue", sans-serif;
+}
+.sw-root { font-size: 18px; }
+.sw-root .sw-copy__title { font-weight: 400; letter-spacing: 0.01em; line-height: 0.98; }
+.sw-root .sw-copy__eyebrow { font-family: var(--sw-font-body); font-weight: 700; letter-spacing: 0.14em; }
+.sw-root .sw-copy__body { font-weight: 500; font-size: clamp(1.1rem, 1.35vw, 1.3rem); line-height: 1.4; }
+.sw-root .sw-copy__num { font-family: var(--sw-font-body); font-weight: 700; }
+.sw-root .sw-copy__tags li { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; border-radius: 0; }
+.sw-root .sw-btn, .sw-root .sw-topcta, .sw-root .sw-nav, .sw-root .sw-nav__item, .sw-root .sw-route__label { border-radius: 0; }
+.sw-root .sw-btn, .sw-root .sw-topcta { font-family: var(--sw-font-display); font-weight: 400; letter-spacing: 0.04em; font-size: 0.85rem; }
+.sw-root .sw-btn--primary { background: var(--sw-accent); }
+.sw-root .sw-nav__item { font-family: var(--sw-font-display); font-size: 0.7rem; letter-spacing: 0.04em; }
+.sw-root .sw-brand__name { font-size: 1.15rem; letter-spacing: 0.02em; }
+.sw-root .sw-brand__mark { display: none; }
+.sw-root .sw-brand__badge { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; box-shadow: 0 6px 14px -6px rgba(17, 17, 17, 0.6); }
+/* No scroll-cue affordance: the diorama itself signals there's more (Krave Kulture design taste pass). */
+.sw-root .sw-hint { display: none; }
+::selection { background: #f2b632; color: #111; }
+:focus-visible { outline: 3px solid #18359c; outline-offset: 3px; }
