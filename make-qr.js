@@ -48,7 +48,13 @@ function loadFont(file) {
 const bungee = loadFont("bungee-400.ttf");
 const body = loadFont("big-shoulders-text-700.ttf");
 
-/** Text as a single vector path, centered on cx with baseline y. */
+/** Text as a single vector path, centered on cx with baseline y.
+ *  Glyph outlines are read once in font units and transformed here; opentype's
+ *  getPath/toPathData produced NaN coordinates on repeated calls. */
+const r2 = (v) => {
+  if (!Number.isFinite(v)) throw new Error("Non-finite coordinate in glyph outline");
+  return (Math.round(v * 100) / 100).toString();
+};
 function textPath(font, text, cx, y, size, fill, tracking = 0) {
   const glyphs = font.stringToGlyphs(text);
   const scale = size / font.unitsPerEm;
@@ -59,10 +65,19 @@ function textPath(font, text, cx, y, size, fill, tracking = 0) {
   let x = cx - width / 2;
   let d = "";
   glyphs.forEach((g) => {
-    d += g.getPath(x, y, size).toPathData(2);
+    const cmds = (g.path && g.path.commands) || [];
+    for (const c of cmds) {
+      const X = (v) => r2(x + v * scale);
+      const Y = (v) => r2(y - v * scale);
+      if (c.type === "M") d += "M" + X(c.x) + " " + Y(c.y);
+      else if (c.type === "L") d += "L" + X(c.x) + " " + Y(c.y);
+      else if (c.type === "Q") d += "Q" + X(c.x1) + " " + Y(c.y1) + " " + X(c.x) + " " + Y(c.y);
+      else if (c.type === "C") d += "C" + X(c.x1) + " " + Y(c.y1) + " " + X(c.x2) + " " + Y(c.y2) + " " + X(c.x) + " " + Y(c.y);
+      else if (c.type === "Z") d += "Z";
+    }
     x += g.advanceWidth * scale + tracking;
   });
-  return `<path d="${d}" fill="${fill}"/>`;
+  return '<path d="' + d + '" fill="' + fill + '"/>';
 }
 
 /** Bungee lettering with the sign-painter block shade used on the site. */
