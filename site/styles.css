@@ -297,8 +297,9 @@ button {
     align-self: center;
     justify-self: end;
     transform: rotate(-2deg);
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     padding: 12px 16px 10px;
+    white-space: nowrap;
   }
   .hero-sign .sign-inner {
     grid-template-columns: auto 1fr auto;
