@@ -57,6 +57,8 @@ The live site is hosted on **Vercel** (project `kravekulture`, team `305`), git-
 
 `jahzy23.github.io/kravekulture` (the old host) is kept alive on purpose: GitHub Actions (`.github/workflows/pages.yml`) now deploys the tiny `redirect/` folder there instead of `site/`, so any already-printed QR code or old bookmark still lands on the real site. Never point that workflow back at `site/`.
 
+Vercel Web Analytics is on (enabled in the project dashboard). Each page loads `/_vercel/insights/script.js`, which Vercel serves on the live domain; on a local server that URL 404s, which is expected and harmless. No npm package is needed for a static site, so `@vercel/analytics` is deliberately not a dependency.
+
 If the Vercel URL ever changes (custom domain, project rename), update `redirect/*.html` and every URL in `make-schema.js`, `site/*.html` (canonical/og/twitter), `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, then re-run `node make-schema.js` and regenerate the QR code.
 
 ## Replace the photos and logo
