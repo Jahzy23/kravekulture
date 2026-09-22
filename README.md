@@ -32,6 +32,8 @@ node make-qr.js https://YOUR-SITE-URL/menu.html
 
 Writes one file, `site/qr/krave-kulture-qr.svg`: the QR code on a painted Krave Kulture card, all lettering converted to vector paths. Print it at any size.
 
+Then run `node make-qr-pdf.js` to render the same card as a print-ready vector PDF at 5 × 7 in (`site/qr/krave-kulture-qr.pdf`). It uses Chromium through `playwright-core`; the global `@playwright/cli` install is enough.
+
 ## Deploy
 
 GitHub Actions deploys the `site/` folder to GitHub Pages on every push to `main` (live at https://jahzy23.github.io/kravekulture/). Any static host works too: upload the contents of `site/`.
