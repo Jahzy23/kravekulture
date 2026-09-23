@@ -72,6 +72,7 @@ mountScrollWorld(document.getElementById('world'), {
       tags: [],
       cta: { primary: { label: 'See the menu', href: 'menu.html' },
              secondary: { label: 'How to pay', href: 'menu.html#pay' } },
+      links: [{ label: 'Terms', href: 'terms.html' }, { label: 'Privacy', href: 'privacy.html' }],
     },
   ],
   // Video chain not rendered yet (stills-only build). When the dive/connector clips exist,

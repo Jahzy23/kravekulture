@@ -9,6 +9,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu.html` menu + how to pay + find the truck (the QR code points here)
   - `menu-data.js` **the only file you edit** to change dishes, prices, payment handles, city, phone
   - `qr.html` print page for the QR card
+  - `terms.html`, `privacy.html` legal pages (see below)
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
@@ -64,6 +65,18 @@ The live site is hosted on **Vercel** (project `kravekulture`, team `305`), git-
 Vercel Web Analytics is on (enabled in the project dashboard). Each page loads `/_vercel/insights/script.js`, which Vercel serves on the live domain; on a local server that URL 404s, which is expected and harmless. No npm package is needed for a static site, so `@vercel/analytics` is deliberately not a dependency.
 
 If the Vercel URL ever changes (custom domain, project rename), update `redirect/*.html` and every URL in `make-schema.js`, `site/*.html` (canonical/og/twitter), `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, then re-run `node make-schema.js` and regenerate the QR code.
+
+## Terms and privacy pages
+
+`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, no forms, no cookies, payments at the truck, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram and Cash App. They are a starting point, not legal advice; have someone qualified read them if the business grows.
+
+Things to keep true:
+
+- The contact on both pages is the Instagram account from `menu-data.js` (`LOCATION.instagram` / `LOCATION.handle`), filled in by `app.js`. If you want an email or phone there, add it to the two pages by hand.
+- Change the "Last updated" line at the top of a page whenever you change its text.
+- The terms name Florida as governing law. Change it if the business moves.
+- If the site ever gains a form, a newsletter, an ordering system, a cookie, or a new third-party script, update the privacy policy first.
+- Both pages are linked from every footer, from the last scene of the home page (`links:` in `site/world/home.js`) and from `sitemap.xml`; they get the strict CSP from `vercel.json` like the other content pages.
 
 ## Replace the photos and logo
 

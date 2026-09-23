@@ -23,7 +23,8 @@
                           // (exactly where the copy peaks) and moves quicker at the
                           // edges. 0 = linear (default). Keep ≤ 0.6; 1 = full pause.
            eyebrow, title, body, tags:[…],
-           cta:{ primary:{label,href}, secondary:{label,href} } }, // last section only
+           cta:{ primary:{label,href}, secondary:{label,href} },   // last section only
+           links:[{label,href}, …] }, // optional small links under the CTA (terms, privacy)
          …
        ],
        connectors: [clipUrl, …],          // length = sections.length - 1 (nulls allowed)
@@ -188,7 +189,9 @@ function mountScrollWorld(container, config) {
       (s.title ? `<h2 class="sw-copy__title" tabindex="-1">${esc(s.title)}</h2>` : '') +
       (s.body ? `<p class="sw-copy__body">${esc(s.body)}</p>` : '') +
       (s.tags && s.tags.length ? `<ul class="sw-copy__tags">${s.tags.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '') +
-      (s.cta ? `<div class="sw-copy__cta">${ctaBtns(s.cta)}</div>` : '');
+      (s.cta ? `<div class="sw-copy__cta">${ctaBtns(s.cta)}</div>` : '') +
+      // Small trailing links (legal pages, credits) — usually on the last section only.
+      (s.links && s.links.length ? `<p class="sw-copy__links">${s.links.map(l => `<a href="${esc(l.href || '#')}">${esc(l.label)}</a>`).join('')}</p>` : '');
     copylayer.appendChild(c); copies.push(c);
 
     const dot = el('button', 'sw-route__dot'); dot.style.setProperty('--sw-accent', s.accent || '');
@@ -453,6 +456,9 @@ function injectCSS() {
   .sw-copy__tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;}
   .sw-copy__tags li{font-size:.82rem;font-weight:600;color:color-mix(in srgb,var(--sw-accent) 70%,#000);padding:7px 14px;border-radius:999px;background:color-mix(in srgb,var(--sw-accent) 14%,#fff);border:1px solid color-mix(in srgb,var(--sw-accent) 30%,transparent);}
   .sw-copy__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;pointer-events:auto;}
+  .sw-copy__links{display:flex;flex-wrap:wrap;gap:6px 18px;margin:18px 0 0;font-size:.8rem;pointer-events:auto;}
+  .sw-copy__links a{color:var(--sw-ink-soft);text-decoration:underline;text-underline-offset:3px;}
+  .sw-copy__links a:hover{color:var(--sw-ink);}
   .sw-btn{text-decoration:none;font-weight:600;font-size:.95rem;padding:13px 24px;border-radius:999px;transition:transform .2s;}
   .sw-btn--primary{color:#fff;background:var(--sw-ink);} .sw-btn--primary:hover{transform:translateY(-2px);}
   .sw-btn--ghost{color:var(--sw-ink);border:1.5px solid color-mix(in srgb,var(--sw-ink) 25%,transparent);} .sw-btn--ghost:hover{transform:translateY(-2px);}

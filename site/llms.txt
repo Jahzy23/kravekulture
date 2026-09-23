@@ -6,5 +6,7 @@ Haitian, Caribbean and soul food truck in Miami, FL. Tagline: "Krave It. Taste I
 - Home (scroll story): https://kravekulture.vercel.app/
 - QR code for print: https://kravekulture.vercel.app/qr.html
 - Instagram (current location, posted daily): https://www.instagram.com/eatkravekulture/
+- Terms & conditions: https://kravekulture.vercel.app/terms.html
+- Privacy policy: https://kravekulture.vercel.app/privacy.html
 
 The truck has no fixed address; it moves around Miami and posts the day's spot on Instagram. Menu prices and availability are on the menu page and change with the market.

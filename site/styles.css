@@ -1056,6 +1056,29 @@ button {
   max-width: var(--measure);
   font-size: 1.1rem;
 }
+/* Legal pages (terms.html, privacy.html) reuse the .qr-page grid for spacing. */
+.legal .label {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.legal h3 {
+  margin: 8px 0 -8px;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.05rem;
+  max-width: var(--measure);
+}
+.legal ul {
+  margin: 0;
+  padding-left: 1.2em;
+  max-width: var(--measure);
+  font-size: 1.1rem;
+}
+.legal li + li {
+  margin-top: 6px;
+}
 .qr-card {
   margin: 0;
   width: min(100%, 420px);
