@@ -270,6 +270,19 @@
     // container (last in DOM order) would win every comparison after the first stall.
     const leaves = sections.filter((s) => !sections.some((o) => o !== s && s.contains(o)));
     const smoothOk = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Keep the active link centred in the rail's horizontal scroller by scrolling THAT
+    // element only. scrollIntoView() also scrolls the window, and because the sticky
+    // rail sits inside html's scroll-padding-top zone Chrome treats the link as off
+    // screen and "corrects" the page ~100px upward on every section change: scrolling
+    // down past a boundary threw you back above it, the spy flipped, and it repeated.
+    const rail = $("#rail-links");
+    const centerInRail = (a) => {
+      if (!rail) return;
+      const r = rail.getBoundingClientRect();
+      const b = a.getBoundingClientRect();
+      const left = Math.max(0, rail.scrollLeft + (b.left - r.left) - (r.width - b.width) / 2);
+      try { rail.scrollTo({ left, behavior: smoothOk ? "smooth" : "auto" }); } catch (e) { rail.scrollLeft = left; }
+    };
     // Anchor rule. A section counts as "current" from the moment it sits where an
     // anchor jump would park it: its scroll-margin box tucked under the scrollport's
     // scroll-padding (the sticky rail). Measuring with the same two CSS values the
@@ -302,7 +315,7 @@
         if (on) {
           if (a.getAttribute("aria-current") !== "true") {
             a.setAttribute("aria-current", "true");
-            if (a.closest("#rail-links")) a.scrollIntoView({ block: "nearest", inline: "center", behavior: smoothOk ? "smooth" : "auto" });
+            if (a.closest("#rail-links")) centerInRail(a);
           }
         } else {
           a.removeAttribute("aria-current");
