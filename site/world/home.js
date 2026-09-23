@@ -2,14 +2,15 @@
 mountScrollWorld(document.getElementById('world'), {
   brand: { name: 'Krave Kulture', href: '#top' },
   cta: { label: 'Menu', href: 'menu.html' },
-  hint: 'Scroll to fly in',
+  // No scroll-cue affordance: the diorama itself signals there's more (design taste pass).
+  hint: false,
   diveScroll: 1.3,
   connScroll: 0.9,
   sections: [
     {
       id: 'market', label: 'Market',
       still: 'world/market.webp',
-      stillSrcset: 'world/market-900.webp 900w, world/market.webp 1800w',
+      stillSrcset: 'world/market-900.webp 900w, world/market-1200.webp 1200w, world/market.webp 1800w',
       accent: '#c4261d',
       scroll: 1.5, linger: 0.3,
       eyebrow: 'From the market',
@@ -20,7 +21,7 @@ mountScrollWorld(document.getElementById('world'), {
     {
       id: 'kitchen', label: 'Kitchen',
       still: 'world/kitchen.webp',
-      stillSrcset: 'world/kitchen-900.webp 900w, world/kitchen.webp 1800w',
+      stillSrcset: 'world/kitchen-900.webp 900w, world/kitchen-1200.webp 1200w, world/kitchen.webp 1800w',
       accent: '#18359c',
       eyebrow: 'In the trailer',
       title: 'Griot fried crisp. Wings sauced hot.',
@@ -30,7 +31,7 @@ mountScrollWorld(document.getElementById('world'), {
     {
       id: 'truck', label: 'The truck',
       still: 'world/truck.webp',
-      stillSrcset: 'world/truck-900.webp 900w, world/truck.webp 1800w',
+      stillSrcset: 'world/truck-900.webp 900w, world/truck-1200.webp 1200w, world/truck.webp 1800w',
       accent: '#111111',
       scroll: 1.5, linger: 0.35,
       eyebrow: 'Find the truck',
@@ -41,7 +42,7 @@ mountScrollWorld(document.getElementById('world'), {
     {
       id: 'plate', label: 'The complete',
       still: 'world/plate.webp',
-      stillSrcset: 'world/plate-900.webp 900w, world/plate.webp 1800w',
+      stillSrcset: 'world/plate-900.webp 900w, world/plate-1200.webp 1200w, world/plate.webp 1800w',
       accent: '#c4261d',
       scroll: 1.6, linger: 0.4,
       eyebrow: 'The complete',
@@ -52,7 +53,7 @@ mountScrollWorld(document.getElementById('world'), {
     {
       id: 'wings', label: 'Wings',
       still: 'world/wings.webp',
-      stillSrcset: 'world/wings-900.webp 900w, world/wings.webp 1800w',
+      stillSrcset: 'world/wings-900.webp 900w, world/wings-1200.webp 1200w, world/wings.webp 1800w',
       accent: '#18359c',
       eyebrow: 'Wings & fries',
       title: 'Four flavors. Pick your heat.',
@@ -62,7 +63,7 @@ mountScrollWorld(document.getElementById('world'), {
     {
       id: 'finale', label: 'Sweet finish',
       still: 'world/finale.webp',
-      stillSrcset: 'world/finale-900.webp 900w, world/finale.webp 1800w',
+      stillSrcset: 'world/finale-900.webp 900w, world/finale-1200.webp 1200w, world/finale.webp 1800w',
       accent: '#111111',
       scroll: 1.6, linger: 0.4,
       eyebrow: 'Sweet finish',
@@ -84,7 +85,7 @@ mountScrollWorld(document.getElementById('world'), {
   if (!mark) return;
   var img = document.createElement('img');
   img.className = 'sw-brand__badge';
-  img.src = 'images/logo-512.webp';
+  img.src = 'images/logo-300.webp';   // drawn at 44px; 300px covers 3x screens, 512 was 54 KB for nothing
   img.alt = '';
   img.width = 44; img.height = 44;
   mark.replaceWith(img);

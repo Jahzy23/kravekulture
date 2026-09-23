@@ -13,6 +13,8 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
 - `make-qr.js` — generates the QR code (one vector SVG card) for any URL
+- `make-qr-pdf.js` — renders that card as a print-ready vector PDF
+- `make-images.js` — renders the social preview images (`site/images/og-*.jpg`) and the 1200px scene stills (`site/world/*-1200.webp`) from the full-size stills
 - `site/qr/` — generated QR files (also served on the live site at `/qr/` and shown on `/qr.html`)
 - `tools/fonts/` — TTF copies of the display fonts used to draw text into the QR card
 - `make-schema.js` — generates the `FoodEstablishment`/`Menu` JSON-LD from `menu-data.js` and writes it into `site/index.html` and `site/menu.html`
@@ -22,11 +24,13 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
 
 Open `site/menu-data.js`. Change names, prices, flavors, or payment handles. Save. Redeploy.
 
-- Replace every `FILL-IN` in `PAYMENTS` with your real Cash App, Zelle and Venmo handles. **The Zelle row currently still reads `FILL-IN phone or email` on the live site** — fix that before printing more QR cards.
-- Delete a payment line you do not take.
+- Replace every `FILL-IN` in `PAYMENTS` with your real Cash App and Zelle handles (add a `venmo` row if you take it). **The Zelle row currently still reads `FILL-IN phone or email` on the live site** — fix that before printing more QR cards.
+- Delete a payment line you do not take. If the list ends up empty the page shows "Ask at the window" instead of a blank board.
 - Set `phone` in `LOCATION` to show a Call button.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
 - After editing prices or dishes, run `node make-schema.js` so the structured data search engines read matches the real menu.
+- The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 completes", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
+- A section with no `items` is skipped (no crash), on the page and in the JSON-LD.
 
 ## Regenerate the QR code
 
@@ -35,9 +39,9 @@ npm install
 node make-qr.js https://YOUR-SITE-URL/menu.html
 ```
 
-Writes one file, `site/qr/krave-kulture-qr.svg`: the QR code on a painted Krave Kulture card, all lettering converted to vector paths. Print it at any size.
+Writes one file, `site/qr/krave-kulture-qr.svg`: the QR code on a painted Krave Kulture card, all lettering converted to vector paths, with the full 4-module quiet zone the QR spec asks for (the ink frame sits outside it). Print it at any size.
 
-Then run `node make-qr-pdf.js` to render the same card as a print-ready vector PDF at 5 × 7 in (`site/qr/krave-kulture-qr.pdf`). It uses Chromium through `playwright-core`; the global `@playwright/cli` install is enough.
+Then run `node make-qr-pdf.js` to render the same card as a print-ready vector PDF at 5 × 7 in (`site/qr/krave-kulture-qr.pdf`). It uses Chromium through `playwright-core`; the global `@playwright/cli` install is enough. `node make-images.js` uses the same Chromium to rebuild the social preview JPEGs and the 1200px stills; run it if you replace anything in `site/world/`.
 
 ## Structured data (SEO)
 
@@ -53,9 +57,9 @@ Update the `<lastmod>` dates in `site/sitemap.xml` at the same time.
 
 ## Deploy
 
-The live site is hosted on **Vercel** (project `kravekulture`, team `305`), git-linked to this repo with root directory `site/` — every push to `main` auto-deploys, no GitHub Actions involved. Security headers (`X-Content-Type-Options`, `X-Frame-Options`, per-page `Content-Security-Policy`) are set in `site/vercel.json`; GitHub Pages does not support custom response headers at all, which is why the site moved off it.
+The live site is hosted on **Vercel** (project `kravekulture`, team `305`), git-linked to this repo with root directory `site/` — every push to `main` auto-deploys, no GitHub Actions involved. Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, per-page `Content-Security-Policy`) and the cache rules for fonts, images, scene stills and QR files are set in `site/vercel.json`; GitHub Pages does not support custom response headers at all, which is why the site moved off it. Two quirks worth knowing: `/index.html` 308-redirects to `/` (one URL for the home page, and it is `/` that carries the CSP header), and a real 404 is served without the `/404.html` header rule, so the 404 page relies on its own `<meta http-equiv="Content-Security-Policy">` — every page carries that meta tag as a fallback anyway.
 
-`jahzy23.github.io/kravekulture` (the old host) is kept alive on purpose: GitHub Actions (`.github/workflows/pages.yml`) now deploys the tiny `redirect/` folder there instead of `site/`, so any already-printed QR code or old bookmark still lands on the real site. Never point that workflow back at `site/`.
+`jahzy23.github.io/kravekulture` (the old host) is kept alive on purpose: GitHub Actions (`.github/workflows/pages.yml`) now deploys the tiny `redirect/` folder there instead of `site/`, so any already-printed QR code or old bookmark still lands on the real site — deep links included, the 404 shim carries the path across. The workflow only runs when `redirect/` or the workflow file itself changes, and its actions are pinned to commit SHAs (the tag is in the trailing comment; bump both together). Never point that workflow back at `site/`.
 
 Vercel Web Analytics is on (enabled in the project dashboard). Each page loads `/_vercel/insights/script.js`, which Vercel serves on the live domain; on a local server that URL 404s, which is expected and harmless. No npm package is needed for a static site, so `@vercel/analytics` is deliberately not a dependency.
 
@@ -63,4 +67,6 @@ If the Vercel URL ever changes (custom domain, project rename), update `redirect
 
 ## Replace the photos and logo
 
-Drop full-resolution photos into `site/images/` with the same file names. The logo in `site/images/` came from the Instagram profile picture at 150px; replace `logo-300.png` and `logo-150.jpg` with the original artwork when you have it.
+Drop full-resolution photos into `site/images/` with the same file names (`griot-plate.jpg`, `wings-plate.jpg` are the two the menu uses; `shortrib-plate.jpg` and `shrimp-greens.jpg` are spares, not wired to anything — set `photo:` on a menu section to use one). The logo files (`logo-150.jpg`, `logo-300.png/.webp`, `logo-512.png/.webp`) are all cut from the 600px Instagram export; the home page badge uses `logo-300.webp`, the menu/QR/404 headers use `logo-512`.
+
+The two display fonts are declared twice on purpose (`site/home.css` for the home page, `site/styles.css` for every other page) so each page loads exactly one stylesheet; keep the two `@font-face` blocks identical.

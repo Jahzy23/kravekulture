@@ -5,7 +5,10 @@
   <meta name="robots" content="noindex">
   <meta http-equiv="refresh" content="0; url=https://kravekulture.vercel.app/">
   <title>Krave Kulture has moved</title>
-  <script>location.replace('https://kravekulture.vercel.app/');</script>
+  <!-- Path-preserving: an old deep link such as /kravekulture/qr/krave-kulture-qr.pdf lands
+       on the same file at the new host (Vercel's own 404 handles anything truly gone).
+       The host stays hard-coded; only the path/query/hash are carried over. -->
+  <script>location.replace('https://kravekulture.vercel.app' + location.pathname.replace(/^\/kravekulture(?=\/|$)/, '') + location.search + location.hash);</script>
 </head>
 <body>
   <p>Krave Kulture moved to <a href="https://kravekulture.vercel.app/">kravekulture.vercel.app</a>.</p>

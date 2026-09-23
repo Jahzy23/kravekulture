@@ -25,12 +25,18 @@
 
   // Screen readers don't see the "Copy" -> "Copied" text swap unless it lands in a
   // live region — the button's aria-label is static, so this is the only announcement.
-  function announceCopy(text) {
+  // The region is created empty at load (see DOMContentLoaded): assistive tech only
+  // watches live regions that already existed when the page settled.
+  function ensureAnnouncer() {
     let live = $("#copy-announcer");
     if (!live) {
       live = el("div", { class: "sr-only", id: "copy-announcer", "aria-live": "polite", role: "status" });
       document.body.appendChild(live);
     }
+    return live;
+  }
+  function announceCopy(text) {
+    const live = ensureAnnouncer();
     live.textContent = "";
     setTimeout(() => { live.textContent = text; }, 30);
   }
@@ -101,7 +107,7 @@
       ]);
 
       const list = el("ul", { class: "price-board" });
-      section.items.forEach((item) => {
+      (section.items || []).forEach((item) => {
         const tag = item.tag ? String(item.tag).toLowerCase() : null;
         const name = el("span", { class: "row-name" }, [
           el("span", { text: item.name }),
@@ -122,12 +128,13 @@
       if (section.photo) {
         bodyKids.push(
           el("figure", { class: "plate" }, [
+            // No width/height attributes on purpose: the photos are portrait JPEGs and
+            // styles.css fixes the box with aspect-ratio + object-fit, so there is no
+            // layout shift and no wrong intrinsic size to lie about.
             el("img", {
               src: section.photo,
               alt: section.photoAlt || section.title,
               loading: "lazy",
-              width: "640",
-              height: "480",
             }),
             el("figcaption", { text: section.title }),
           ])
@@ -147,6 +154,19 @@
   function renderPayments() {
     const host = $("#pay-list");
     if (!host || typeof PAYMENTS === "undefined") return;
+    const note = $("[data-pay-note]");
+    if (!PAYMENTS.length) {
+      host.appendChild(
+        el("li", { class: "pay pay-empty" }, [
+          el("span", { class: "pay-label", text: "Ask at the window for today's payment options." }),
+        ])
+      );
+      if (note) note.remove();
+      return;
+    }
+    // The "Tap Copy" instruction only makes sense when at least one row has a live Copy button.
+    const anyCopyable = PAYMENTS.some((p) => !/FILL-IN/i.test(p.handle) && ["cashapp", "zelle", "venmo"].includes(p.kind));
+    if (note && !anyCopyable) note.textContent = "Order at the window, then pay any of these ways.";
     PAYMENTS.forEach((p) => {
       const isFill = /FILL-IN/i.test(p.handle);
       const handleText = el("span", { class: "pay-handle" });
@@ -177,13 +197,28 @@
               btn.querySelector("span").textContent = "Copy";
             }, 1800);
           } catch (e) {
+            // Clipboard blocked (http, permissions, old WebView): select the handle so a
+            // long-press / Ctrl+C still works, and say so in the live region.
+            try {
+              const range = document.createRange();
+              range.selectNodeContents(handleText);
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+            } catch (_) {}
+            btn.dataset.state = "failed";
             btn.querySelector("span").textContent = "Select it";
+            announceCopy("Copy failed. " + p.label + " handle " + p.handle + " is selected; copy it by hand.");
+            setTimeout(() => {
+              delete btn.dataset.state;
+              btn.querySelector("span").textContent = "Copy";
+            }, 3000);
           }
         });
       }
-      const icon = p.link
-        ? el("a", { class: "pay-icon", href: p.link, target: "_blank", rel: "noopener", "aria-label": "Open " + p.label, html: ICONS[p.kind] || ICONS.cash })
-        : el("span", { class: "pay-icon", html: ICONS[p.kind] || ICONS.cash });
+      // Decorative: the handle text right after it is already the link, so a second
+      // anchor on the icon would be a duplicate tab stop with the same destination.
+      const icon = el("span", { class: "pay-icon", "aria-hidden": "true", html: ICONS[p.kind] || ICONS.cash });
       host.appendChild(
         el("li", { class: "pay" }, [
           icon,
@@ -205,9 +240,14 @@
     const phoneWrap = $("[data-phone-wrap]");
     if (phoneWrap) {
       if (LOCATION.phone) {
-        const a = phoneWrap.querySelector("a");
-        a.href = "tel:" + LOCATION.phone.replace(/[^\d+]/g, "");
-        a.querySelector("span").textContent = LOCATION.phone;
+        // The wrapper is the <a> itself in menu.html; tolerate a wrapping element too.
+        const a = phoneWrap.matches("a") ? phoneWrap : phoneWrap.querySelector("a");
+        if (a) {
+          a.href = "tel:" + LOCATION.phone.replace(/[^\d+]/g, "");
+          const label = a.querySelector("span");
+          if (label) label.textContent = LOCATION.phone;
+          else a.textContent = LOCATION.phone;
+        }
       } else {
         phoneWrap.remove();
       }
@@ -224,22 +264,30 @@
     pairs.forEach((p) => {
       if (!sections.includes(p.el)) sections.push(p.el);
     });
+    // The bar's "Menu" link points at the #menu-sections container, which starts at the
+    // same offsetTop as the first stall. Spy on the leaf sections only and light the
+    // container's link whenever the current leaf sits inside it — otherwise the
+    // container (last in DOM order) would win every comparison after the first stall.
+    const leaves = sections.filter((s) => !sections.some((o) => o !== s && s.contains(o)));
+    const smoothOk = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let ticking = false;
     const update = () => {
       ticking = false;
       const line = window.scrollY + Math.min(window.innerHeight * 0.4, 320);
-      let current = sections[0];
-      sections.forEach((s) => {
-        if (s.offsetTop <= line) current = s;
+      let current = leaves[0];
+      let best = -Infinity;
+      leaves.forEach((s) => {
+        const top = s.offsetTop;
+        if (top <= line && top >= best) { best = top; current = s; }
       });
       const bottomed = window.innerHeight + window.scrollY >= document.body.scrollHeight - 2;
-      if (bottomed) current = sections[sections.length - 1];
+      if (bottomed) current = leaves[leaves.length - 1];
       pairs.forEach(({ a, el }) => {
-        const on = el === current;
+        const on = el === current || (el !== current && el.contains(current));
         if (on) {
           if (a.getAttribute("aria-current") !== "true") {
             a.setAttribute("aria-current", "true");
-            if (a.closest("#rail-links")) a.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+            if (a.closest("#rail-links")) a.scrollIntoView({ block: "nearest", inline: "center", behavior: smoothOk ? "smooth" : "auto" });
           }
         } else {
           a.removeAttribute("aria-current");
@@ -274,11 +322,11 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    renderMenu();
-    renderPayments();
-    renderLocation();
-    scrollSpy();
-    railHint();
-    year();
+    ensureAnnouncer();
+    // Each step runs on its own so one bad menu-data.js entry (say a section with no
+    // items) cannot take the payment list or the Call button down with it.
+    [renderMenu, renderPayments, renderLocation, scrollSpy, railHint, year].forEach((step) => {
+      try { step(); } catch (e) { console.error("[krave] " + step.name + " failed:", e); }
+    });
   });
 })();

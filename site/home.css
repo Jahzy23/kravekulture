@@ -23,7 +23,14 @@
 .sw-root .sw-brand__name { font-size: 1.15rem; letter-spacing: 0.02em; }
 .sw-root .sw-brand__mark { display: none; }
 .sw-root .sw-brand__badge { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; box-shadow: 0 6px 14px -6px rgba(17, 17, 17, 0.6); }
-/* No scroll-cue affordance: the diorama itself signals there's more (Krave Kulture design taste pass). */
-.sw-root .sw-hint { display: none; }
+/* (The scroll cue is switched off in world/home.js with `hint: false`, not hidden here.) */
 ::selection { background: #f2b632; color: #111; }
 :focus-visible { outline: 3px solid #18359c; outline-offset: 3px; }
+/* Programmatic focus lands on a scene title after a dot/nav jump; keep it quiet unless
+   the user is on the keyboard (browsers only match :focus-visible then). */
+.sw-root .sw-copy__title:focus { outline: none; }
+.sw-root .sw-copy__title:focus-visible { outline: 3px solid #18359c; outline-offset: 6px; }
+/* No-JS fallback: the engine never mounts, so this is the whole page. */
+.sw-fallback { max-width: 62ch; margin: 0 auto; padding: clamp(24px, 6vw, 64px) clamp(18px, 5vw, 64px); font-family: var(--sw-font-body); color: var(--sw-ink); font-size: 1.1rem; line-height: 1.45; }
+.sw-fallback h1 { font-family: var(--sw-font-display); font-weight: 400; font-size: clamp(2rem, 8vw, 3.4rem); line-height: 0.98; margin: 0 0 0.5em; }
+.sw-fallback a { color: var(--sw-accent); }

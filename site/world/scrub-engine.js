@@ -11,8 +11,9 @@
        brand: { name: 'Pearl & Co.', href: '#top' },
        diveScroll: 1.3,   // viewport-heights of scroll per dive clip
        connScroll: 0.9,   // ...per connector clip
-       hint: 'scroll to fly in',
+       hint: 'scroll to fly in',   // false = no scroll cue at all
        nav: true,         // show the top section nav
+       navLabel: 'Sections', routeLabel: 'Scenes',   // aria-labels for the two navs
        atmosphere: true,  // subtle gradient + drifting particles behind the clips
        sections: [
          { id, label, still, stillMobile, clip, clipMobile, accent,
@@ -124,7 +125,8 @@ function mountScrollWorld(container, config) {
     const nm = el('h1', 'sw-brand__name'); nm.textContent = config.brand.name || ''; brand.appendChild(nm);
     topbar.appendChild(brand);
   }
-  const nav = el('nav', 'sw-nav'); if (config.nav !== false) topbar.appendChild(nav);
+  const nav = el('nav', 'sw-nav'); nav.setAttribute('aria-label', config.navLabel || 'Sections');
+  if (config.nav !== false) topbar.appendChild(nav);
   if (config.cta && config.cta.label) {
     const c = el('a', 'sw-topcta'); c.href = config.cta.href || '#'; c.textContent = config.cta.label;
     topbar.appendChild(c);
@@ -132,29 +134,49 @@ function mountScrollWorld(container, config) {
 
   const stage = el('div', 'sw-stage');
   const copylayer = el('div', 'sw-copylayer');
-  const route = el('div', 'sw-route');
-  const hint = el('div', 'sw-hint');
-  const hintText = el('span'); hintText.textContent = config.hint || 'scroll'; hint.appendChild(hintText);
-  hint.appendChild(el('i'));
+  // On phones the top nav is hidden (see injectCSS), so the dots are the only section
+  // navigation there: expose them as a landmark of their own.
+  const route = el('nav', 'sw-route'); route.setAttribute('aria-label', config.routeLabel || 'Scenes');
+  // `hint: false` skips the scroll cue entirely (no DOM, no per-frame opacity write).
+  let hint = null;
+  if (config.hint !== false) {
+    hint = el('div', 'sw-hint');
+    const hintText = el('span'); hintText.textContent = config.hint || 'scroll'; hint.appendChild(hintText);
+    hint.appendChild(el('i'));
+  }
   const track = el('div', 'sw-track');
 
-  [sky, scrollbar, topbar, stage, copylayer, route, hint, track].forEach(n => container.appendChild(n));
+  [sky, scrollbar, topbar, stage, copylayer, route, hint, track].forEach(n => { if (n) container.appendChild(n); });
 
   // segment scenes
-  SEGMENTS.forEach(s => {
+  SEGMENTS.forEach((s, i) => {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
-    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
-    const poster = (isMobile() && s.stillM) ? s.stillM : s.still;
-    const posterSrcset = (isMobile() && s.stillM) ? s.stillMSrcset : s.stillSrcset;
-    if (poster) img.src = poster;
+    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async';
+    // Every scene is stacked absolutely inside the fixed stage, so as far as the
+    // browser can tell all of them are "in the viewport" and `loading="lazy"` would
+    // fetch every still up front. Instead the src is assigned by read() with the same
+    // proximity gate the clips use; only the first scene loads immediately (and with
+    // high priority, it is the LCP image).
+    s.poster = (isMobile() && s.stillM) ? s.stillM : s.still;
     // Optional: pass `stillSrcset`/`stillMobileSrcset` per section ("small.webp 900w,
     // big.webp 1800w") to serve a lighter poster at narrow viewports. Omit them and
-    // nothing changes — `img.src` above is the whole picture on its own.
-    if (posterSrcset) { img.srcset = posterSrcset; img.sizes = '100vw'; }
+    // nothing changes — `poster` on its own is the whole picture.
+    s.posterSrcset = (isMobile() && s.stillM) ? s.stillMSrcset : s.stillSrcset;
+    s.stillLoaded = false;
     scene.appendChild(img); stage.appendChild(scene);
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
-    s.loading = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
+    s.loading = false; s.failed = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
+    if (i === 0) loadStill(s, true);
   });
+
+  function loadStill(s, first) {
+    if (s.stillLoaded || !s.poster) return;
+    s.stillLoaded = true;
+    if (first) s.img.setAttribute('fetchpriority', 'high');
+    // srcset/sizes before src so the browser picks a candidate once, not twice.
+    if (s.posterSrcset) { s.img.sizes = '100vw'; s.img.srcset = s.posterSrcset; }
+    s.img.src = s.poster;
+  }
 
   // per-section copy / route / nav
   const copies = [], dots = [];
@@ -163,7 +185,7 @@ function mountScrollWorld(container, config) {
     c.innerHTML =
       `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` +
       (s.eyebrow ? `<span class="sw-copy__eyebrow">${esc(s.eyebrow)}</span>` : '') +
-      (s.title ? `<h2 class="sw-copy__title">${esc(s.title)}</h2>` : '') +
+      (s.title ? `<h2 class="sw-copy__title" tabindex="-1">${esc(s.title)}</h2>` : '') +
       (s.body ? `<p class="sw-copy__body">${esc(s.body)}</p>` : '') +
       (s.tags && s.tags.length ? `<ul class="sw-copy__tags">${s.tags.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '') +
       (s.cta ? `<div class="sw-copy__cta">${ctaBtns(s.cta)}</div>` : '');
@@ -204,15 +226,24 @@ function mountScrollWorld(container, config) {
     read();
   }
 
+  // Index of the section whose copy should receive focus once it is revealed: a dot or
+  // nav click only scrolls, and the hidden copies are `inert`, so without this a
+  // keyboard / screen-reader user would land on nothing after the jump.
+  let pendingFocus = -1;
   function jumpTo(i) {
     const seg = SECTIONS[i]._seg;
+    pendingFocus = i;
     window.scrollTo({ top: seg.start + (seg.end - seg.start) * 0.5, behavior: reduce ? 'auto' : 'smooth' });
+    // Already there (or reduced motion): no scroll event will follow, so read() now.
+    requestAnimationFrame(read);
   }
 
   function loadClip(s) {
     // Under prefers-reduced-motion we never load the clips at all — the stills stay up
     // and simply cross-dissolve as you scroll. No scrubbed video motion, no decode cost.
-    if (reduce || s.loading || !s.clip) return;
+    // A clip that failed once (404, offline) stays failed: read() runs on every scroll
+    // frame and would otherwise re-request it on each one.
+    if (reduce || s.loading || s.failed || !s.clip) return;
     s.loading = true;
     // Serve the lighter mobile encode on phones when one was provided.
     const url = (isMobile() && s.clipM) ? s.clipM : s.clip;
@@ -230,7 +261,7 @@ function mountScrollWorld(container, config) {
         v.addEventListener('seeked', () => { s.el.classList.add('has-clip'); }, { once: true });
         v.addEventListener('loadeddata', () => { try { v.pause(); } catch (e) {} if (userReady) primeVideo(v); });
         s.el.appendChild(v); s.video = v; s.hasClip = true;
-      }).catch(() => { s.loading = false; });
+      }).catch(() => { s.loading = false; s.failed = true; });
   }
 
   function read() {
@@ -241,7 +272,7 @@ function mountScrollWorld(container, config) {
 
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
-      if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
+      if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) { loadStill(s); loadClip(s); }
       const local = clamp((y - s.start) / (s.end - s.start), 0, 1);
       s.target = s.linger ? lingerEase(local, s.linger) : local;
       let outside = 0;
@@ -272,6 +303,11 @@ function mountScrollWorld(container, config) {
       // can still Tab into an invisible scene's CTA links. `inert` (supported in all
       // current engines) also drops it from the tab order and the a11y tree.
       c.toggleAttribute('inert', !shown);
+      if (shown && pendingFocus === i) {
+        pendingFocus = -1;
+        const t = c.querySelector('.sw-copy__title') || c;
+        try { t.focus({ preventScroll: true }); } catch (e) {}
+      }
     }
 
     const cur = SEGMENTS[ci];
@@ -279,12 +315,16 @@ function mountScrollWorld(container, config) {
       : (((y - cur.start) / (cur.end - cur.start)) > 0.5 ? cur.si + 1 : cur.si), 0, N - 1);
     if (near !== activeIndex) {
       activeIndex = near;
-      dots.forEach((d, k) => d.classList.toggle('is-active', k === near));
-      nav.querySelectorAll('.sw-nav__item').forEach((n, k) => n.classList.toggle('is-active', k === near));
+      const mark = (n, on) => {
+        n.classList.toggle('is-active', on);
+        if (on) n.setAttribute('aria-current', 'true'); else n.removeAttribute('aria-current');
+      };
+      dots.forEach((d, k) => mark(d, k === near));
+      nav.querySelectorAll('.sw-nav__item').forEach((n, k) => mark(n, k === near));
       container.style.setProperty('--sw-accent', SECTIONS[near].accent || '');
     }
     scrollbarFill.style.transform = `scaleX(${clamp(y / (totalW * vh))})`;
-    hint.style.opacity = clamp(1 - y / (0.5 * vh));
+    if (hint) hint.style.opacity = clamp(1 - y / (0.5 * vh));
     if (particles) particles.style.transform = `translate3d(0, ${-y * 0.05}px, 0)`;
     ticking = false;
   }

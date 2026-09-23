@@ -25,22 +25,32 @@ function loadMenuData() {
   return { MENU: sandbox.MENU, LOCATION: sandbox.LOCATION };
 }
 
+const items = (section) => section.items || [];
+
 function priceRange(MENU) {
   const prices = [];
-  MENU.forEach((s) => s.items.forEach((i) => { if (typeof i.price === "number") prices.push(i.price); }));
+  MENU.forEach((s) => items(s).forEach((i) => { if (typeof i.price === "number") prices.push(i.price); }));
   if (!prices.length) return undefined;
   return `$${Math.min(...prices)}-$${Math.max(...prices)}`;
 }
 
-function foodEstablishment(MENU, LOCATION, { image, url }) {
+// One business entity, identical on every page (same @id / url / image list), so
+// search engines see one FoodEstablishment rather than two look-alikes.
+function foodEstablishment(MENU, LOCATION) {
+  // LOCATION.city is "Miami, FL". Google's LocalBusiness guidance requires a
+  // PostalAddress; for a truck with no fixed street, city/region/country is the
+  // honest minimum (no invented street, no invented hours).
+  const [locality, region] = String(LOCATION.city).split(",").map((s) => s.trim());
   return {
     "@context": "https://schema.org",
     "@type": "FoodEstablishment",
+    "@id": `${SITE_URL}/#business`,
     name: "Krave Kulture",
-    url,
-    image,
+    url: `${SITE_URL}/`,
+    image: [`${SITE_URL}/images/og-home.jpg`, `${SITE_URL}/world/truck.webp`, `${SITE_URL}/images/logo-512.png`],
     description: "Haitian, Caribbean and soul food truck serving Miami, FL.",
     servesCuisine: ["Haitian", "Caribbean", "Soul food"],
+    address: { "@type": "PostalAddress", addressLocality: locality, addressRegion: region || undefined, addressCountry: "US" },
     areaServed: { "@type": "City", name: LOCATION.city },
     sameAs: [LOCATION.instagram],
     priceRange: priceRange(MENU),
@@ -53,11 +63,11 @@ function menuSchema(MENU) {
     "@context": "https://schema.org",
     "@type": "Menu",
     name: "Krave Kulture Menu",
-    hasMenuSection: MENU.map((section) => ({
+    hasMenuSection: MENU.filter((section) => items(section).length).map((section) => ({
       "@type": "MenuSection",
       name: section.title,
       description: section.note || undefined,
-      hasMenuItem: section.items.map((item) => {
+      hasMenuItem: items(section).map((item) => {
         const menuItem = {
           "@type": "MenuItem",
           name: item.name,
@@ -93,11 +103,6 @@ function inject(file, blocks) {
 
 const { MENU, LOCATION } = loadMenuData();
 
-inject("site/index.html", [
-  foodEstablishment(MENU, LOCATION, { image: `${SITE_URL}/world/truck.webp`, url: `${SITE_URL}/` }),
-]);
+inject("site/index.html", [foodEstablishment(MENU, LOCATION)]);
 
-inject("site/menu.html", [
-  foodEstablishment(MENU, LOCATION, { image: `${SITE_URL}/images/logo-512.png`, url: `${SITE_URL}/menu.html` }),
-  menuSchema(MENU),
-]);
+inject("site/menu.html", [foodEstablishment(MENU, LOCATION), menuSchema(MENU)]);

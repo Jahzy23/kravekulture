@@ -97,10 +97,19 @@ const data = qr.modules.data;
 // Card geometry (1 unit = 1px in the viewBox; prints at any size).
 const W = 1000;
 const H = 1400;
-const qrSize = 700;
-const qrX = (W - qrSize) / 2;
-const qrY = 330;
+const HEAD = 290;            // painted header ends here
+const FOOT = H - 290;        // painted footer starts here
+const qrSize = 630;
 const cell = qrSize / n;
+// ISO 18004 quiet zone: 4 modules of clear white on every side, OUTSIDE of which
+// the ink frame sits (the frame must never eat into the quiet zone). Matters most
+// at vehicle-wrap size, where a phone sees the code from an angle.
+const QUIET = Math.ceil(4 * cell);
+const FRAME = 6;
+const block = qrSize + 2 * QUIET + 2 * FRAME;
+const qrX = (W - qrSize) / 2;
+const qrY = Math.round((HEAD + FOOT) / 2 - block / 2) + FRAME + QUIET;
+const xmlEsc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 let modules = "";
 for (let y = 0; y < n; y++) {
@@ -116,7 +125,7 @@ for (let y = 0; y < n; y++) {
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
   <title>Krave Kulture: scan for menu and how to pay</title>
-  <desc>QR code pointing to ${url}</desc>
+  <desc>QR code pointing to ${xmlEsc(url)}</desc>
   <rect width="${W}" height="${H}" fill="${WHITEWASH}"/>
   <rect x="0" y="0" width="${W}" height="236" fill="${RED}"/>
   <rect x="0" y="230" width="${W}" height="6" fill="${RED_DEEP}"/>
@@ -124,7 +133,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <rect x="0" y="280" width="${W}" height="10" fill="${GOLD}"/>
   ${painted("KRAVE KULTURE", W / 2, 158, 104, WHITE, BLUE, 2)}
   ${textPath(body, "HAITIAN  ·  CARIBBEAN  ·  SOUL FOOD  ·  MIAMI, FL", W / 2, 268, 26, WHITE, 2)}
-  <rect x="${qrX - 26}" y="${qrY - 26}" width="${qrSize + 52}" height="${qrSize + 52}" fill="${WHITE}" stroke="${INK}" stroke-width="6"/>
+  <rect x="${qrX - QUIET - FRAME / 2}" y="${qrY - QUIET - FRAME / 2}" width="${qrSize + 2 * QUIET + FRAME}" height="${qrSize + 2 * QUIET + FRAME}" fill="${WHITE}" stroke="${INK}" stroke-width="${FRAME}"/>
   <path d="${modules}" fill="${INK}" shape-rendering="crispEdges"/>
   <rect x="0" y="${H - 290}" width="${W}" height="290" fill="${INK}"/>
   <rect x="0" y="${H - 290}" width="${W}" height="10" fill="${GOLD}"/>

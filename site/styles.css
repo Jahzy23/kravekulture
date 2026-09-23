@@ -104,6 +104,12 @@ button {
 .board-black :focus-visible {
   outline-color: var(--gold);
 }
+/* Blue on the red signboard is 1.8:1 and on the ink footer 1.8:1 — invisible.
+   White is 5.8:1 on red and 17:1 on ink (WCAG needs 3:1 for a focus ring). */
+.sign :focus-visible,
+.foot :focus-visible {
+  outline-color: var(--white);
+}
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--ink) var(--whitewash-deep);
@@ -133,6 +139,29 @@ button {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+/* The skip link is the only focusable .sr-only element: bring it on screen when a
+   keyboard user tabs onto it, painted like a signboard tag so it reads as part of the site. */
+.sr-only:focus-visible {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  z-index: 100;
+  padding: 12px 16px 10px;
+  background: var(--ink);
+  color: var(--gold);
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-decoration: none;
+  box-shadow: var(--shadow-paint);
+  outline-color: var(--gold);
 }
 .wrap {
   width: min(100% - 2 * var(--gutter), var(--page-max));
@@ -258,7 +287,7 @@ button {
   box-shadow: var(--shadow-paint);
 }
 .sign-tag span {
-  color: var(--red);
+  color: var(--blue); /* 5.7:1 on --gold; --red was 3.2:1, --red-deep 4.4:1 — both under AA */
 }
 .band {
   background: var(--blue);
@@ -269,6 +298,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 0;
+  margin-block: 0; /* it is a <p> now; .wrap only sets margin-inline */
   padding: 10px 0 12px;
   font-family: var(--body);
   font-weight: 700;
@@ -303,16 +333,6 @@ button {
     font-size: 1.05rem;
     padding: 12px 16px 10px;
     white-space: nowrap;
-  }
-  .hero-sign .sign-inner {
-    grid-template-columns: auto 1fr auto;
-  }
-  .hero-sign .sign-badge {
-    width: 190px;
-  }
-  .hero-actions {
-    grid-column: 2 / -1;
-    grid-row: 2;
   }
 }
 
@@ -747,6 +767,9 @@ button {
   padding: 16px 0;
   border-bottom: 2px solid var(--ink);
 }
+.pay-empty {
+  grid-template-columns: 1fr;
+}
 .pay-icon {
   width: 52px;
   height: 52px;
@@ -975,6 +998,10 @@ button {
 .bar a[aria-current="true"] {
   color: var(--gold);
 }
+/* Colour alone (gold vs whitewash, 1.7:1) cannot carry the "you are here" state. */
+.bar a[aria-current="true"] {
+  box-shadow: inset 0 4px 0 var(--gold);
+}
 .bar a:focus-visible {
   outline-offset: -4px;
   outline-color: var(--gold);
@@ -983,121 +1010,6 @@ button {
   .bar {
     display: none;
   }
-}
-
-/* ---------- home page ---------- */
-.hero-sign .sign-inner {
-  grid-template-columns: auto 1fr;
-  padding: clamp(24px, 5vw, 56px) 0 clamp(24px, 5vw, 48px);
-}
-.hero-sign .sign-badge {
-  width: clamp(96px, 26vw, 200px);
-}
-.hero-sign .sign-name {
-  font-size: clamp(2.6rem, 12.5vw, 6rem);
-}
-.hero-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
-}
-.hero-actions .btn {
-  border-color: var(--red-deep);
-  box-shadow: 0 10px 20px -10px rgba(60, 10, 8, 0.8);
-}
-
-.plates {
-  padding: clamp(20px, 4vw, 36px) 0 clamp(24px, 4vw, 40px);
-  border-bottom: var(--rule) solid var(--ink);
-}
-.plates-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-.plates-head h2 {
-  margin: 0;
-  font-size: clamp(1.5rem, 6vw, 2.4rem);
-}
-.plates-track {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: min(78%, 360px);
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 10px;
-  margin-inline: calc(-1 * var(--gutter));
-  padding-inline: var(--gutter);
-  scrollbar-width: none;
-}
-.plates-track::-webkit-scrollbar {
-  display: none;
-}
-.plates-track .plate {
-  scroll-snap-align: start;
-  border: var(--rule) solid var(--ink);
-}
-.plates-track .plate img {
-  aspect-ratio: 1;
-}
-@media (min-width: 900px) {
-  .plates-track {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-columns: auto;
-    overflow: visible;
-    margin-inline: 0;
-    padding-inline: 0;
-  }
-}
-
-.cook {
-  padding: clamp(24px, 5vw, 44px) 0;
-}
-.cook-inner {
-  display: grid;
-  gap: 18px;
-}
-.cook h2 {
-  margin: 0;
-  font-size: clamp(1.6rem, 6.5vw, 2.6rem);
-}
-.cook p {
-  margin: 0;
-  max-width: var(--measure);
-  font-size: 1.15rem;
-}
-.flags {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.flags svg {
-  width: 44px;
-  height: 30px;
-  border: 2px solid var(--ink);
-  display: block;
-}
-.flags .label {
-  margin-left: 4px;
-}
-@media (min-width: 900px) {
-  .cook-inner {
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-  }
-  .cook h2 {
-    grid-column: 1 / -1;
-  }
-}
-
-.spot {
-  border-top: var(--rule) solid var(--ink);
 }
 
 /* ---------- print (menu) ---------- */
