@@ -270,17 +270,32 @@
     // container (last in DOM order) would win every comparison after the first stall.
     const leaves = sections.filter((s) => !sections.some((o) => o !== s && s.contains(o)));
     const smoothOk = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Anchor rule. A section counts as "current" from the moment it sits where an
+    // anchor jump would park it: its scroll-margin box tucked under the scrollport's
+    // scroll-padding (the sticky rail). Measuring with the same two CSS values the
+    // browser uses for `href="#id"` means tapping a rail link always lights that same
+    // link — the old "40% down the viewport" line lit the NEXT section for anything
+    // shorter than ~320px (Sides, Dessert).
+    let pad = 0;
+    let margins = new Map();
+    const measure = () => {
+      pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      margins = new Map(leaves.map((s) => [s, parseFloat(getComputedStyle(s).scrollMarginTop) || 0]));
+    };
+    measure();
     let ticking = false;
     const update = () => {
       ticking = false;
-      const line = window.scrollY + Math.min(window.innerHeight * 0.4, 320);
+      const y = window.scrollY;
+      const line = y + pad + 2; // 2px: sub-pixel rounding after a smooth scroll settles
       let current = leaves[0];
       let best = -Infinity;
       leaves.forEach((s) => {
-        const top = s.offsetTop;
-        if (top <= line && top >= best) { best = top; current = s; }
+        // Live rect, not offsetTop: lazy-loaded plate photos shift everything below them.
+        const snap = s.getBoundingClientRect().top + y - (margins.get(s) || 0);
+        if (snap <= line && snap >= best) { best = snap; current = s; }
       });
-      const bottomed = window.innerHeight + window.scrollY >= document.body.scrollHeight - 2;
+      const bottomed = window.innerHeight + y >= document.documentElement.scrollHeight - 2;
       if (bottomed) current = leaves[leaves.length - 1];
       pairs.forEach(({ a, el }) => {
         const on = el === current || (el !== current && el.contains(current));
@@ -301,7 +316,7 @@
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", () => { measure(); onScroll(); });
     update();
   }
 
