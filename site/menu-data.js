@@ -48,7 +48,7 @@ const MENU = [
     kreyol: "Zèl ak frit",
     board: "blue",
     note: "All wings come with fries. Pick your flavor.",
-    choices: { label: "Flavors", options: ["Honey Hot", "Lemon Pepper", "BBQ", "Buffalo"] },
+    choices: { label: "Flavors", options: ["Honey Hot", "Lemon Pepper", "BBQ", "Buffalo", "Jerk"] },
     photo: "images/wings-plate.jpg",
     photoAlt: "Sauced wings with seasoned fries and street corn",
     items: [
