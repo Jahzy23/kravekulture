@@ -72,7 +72,7 @@ const MENU = [
     items: [
       { name: "Kravelade", desc: "House lemonade.", price: 5 },
       { name: "Passion Fruit", desc: "", price: 5 },
-      { name: "Soda", desc: "", price: 1 },
+      { name: "Soda", desc: "", price: 2 },
       { name: "Water", desc: "", price: 1 },
     ],
   },
