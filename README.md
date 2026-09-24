@@ -64,7 +64,7 @@ The live site is **https://eatkravekulture.com**, hosted on **Vercel** (project 
 | Type | Host | Value | Why |
 | --- | --- | --- | --- |
 | A | `@` | `76.76.21.21` | apex → Vercel |
-| CNAME | `www` | `cname.vercel-dns.com` | www → Vercel (Vercel redirects it to the apex) |
+| A | `www` | `76.76.21.21` | www → Vercel, then redirected to the apex in the Vercel dashboard (`vercel domains inspect` recommends an A record here, not a CNAME) |
 | TXT | `@` | `v=spf1 -all` | the domain sends no email; tells receivers to reject anything claiming to |
 | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s` | same, for DMARC-checking receivers |
 
