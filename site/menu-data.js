@@ -25,7 +25,7 @@ const MENU = [
     photoAlt: "Griot dinner: fried pork, rice, fried plantains, macaroni and pikliz",
     items: [
       { name: "Griot Dinner", desc: "Fried pork.", price: 20 },
-      { name: "Turkey Dinner", desc: "Kodenn.", price: 20 },
+      { name: "Turkey Dinner", desc: "Tasso turkey.", price: 20 },
       { name: "Goat Dinner", desc: "Kabrit.", price: 25 },
       { name: "Shrimp Dinner", desc: "Kribich.", price: 22 },
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
