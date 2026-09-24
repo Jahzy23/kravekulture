@@ -52,7 +52,7 @@ function foodEstablishment(MENU, LOCATION) {
     address: { "@type": "PostalAddress", addressLocality: locality, addressRegion: region || undefined, addressCountry: "US" },
     areaServed: { "@type": "City", name: LOCATION.city },
     telephone: LOCATION.phone ? "+1-" + LOCATION.phone : undefined,
-    sameAs: [LOCATION.instagram],
+    sameAs: [LOCATION.instagram, LOCATION.tiktok].filter(Boolean),
     priceRange: priceRange(MENU),
     menu: `${SITE_URL}/menu.html`,
   };

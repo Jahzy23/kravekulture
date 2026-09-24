@@ -123,6 +123,7 @@
     if (typeof LOCATION === "undefined") return;
     document.querySelectorAll("[data-ig-link]").forEach((a) => (a.href = LOCATION.instagram));
     document.querySelectorAll("[data-ig-handle]").forEach((n) => (n.textContent = LOCATION.handle));
+    document.querySelectorAll("[data-tt-link]").forEach((a) => (LOCATION.tiktok ? (a.href = LOCATION.tiktok) : a.remove()));
     document.querySelectorAll("[data-city]").forEach((n) => (n.textContent = LOCATION.city));
     const txt = $("[data-location-text]");
     if (txt) txt.textContent = LOCATION.text;

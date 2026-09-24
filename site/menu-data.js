@@ -84,6 +84,7 @@ const LOCATION = {
   text: "We move. Today's spot is always on Instagram.",
   instagram: "https://www.instagram.com/eatkravekulture/",
   handle: "@eatkravekulture",
+  tiktok: "https://www.tiktok.com/@eatkravekulture1804", // leave empty to hide the TikTok button
   phone: "786-999-4019", // leave empty to hide the Call us button; the number itself only lives in the tel: link
   city: "Miami, FL",
 };
