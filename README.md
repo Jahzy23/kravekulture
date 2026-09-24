@@ -67,6 +67,7 @@ The live site is **https://eatkravekulture.com**, hosted on **Vercel** (project 
 | A | `www` | `76.76.21.21` | www → Vercel, then redirected to the apex in the Vercel dashboard (`vercel domains inspect` recommends an A record here, not a CNAME) |
 | TXT | `@` | `v=spf1 -all` | the domain sends no email; tells receivers to reject anything claiming to |
 | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s` | same, for DMARC-checking receivers |
+| TXT | `@` | `google-site-verification=…` | proves ownership of the Google Search Console *domain* property; deleting it un-verifies the property |
 
 `kravekulture.vercel.app` (the project's default URL, and what the first batch of QR cards point at) is set to redirect to the custom domain in the Vercel dashboard (Project → Settings → Domains → Edit on the `.vercel.app` entry), so old links keep working. Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, per-page `Content-Security-Policy`) and the cache rules for fonts, images, scene stills and QR files are set in `site/vercel.json`; GitHub Pages does not support custom response headers at all, which is why the site moved off it. Two quirks worth knowing: `/index.html` 308-redirects to `/` (one URL for the home page, and it is `/` that carries the CSP header), and a real 404 is served without the `/404.html` header rule, so the 404 page relies on its own `<meta http-equiv="Content-Security-Policy">` — every page carries that meta tag as a fallback anyway.
 
