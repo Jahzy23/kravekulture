@@ -21,8 +21,8 @@ const MENU = [
     kreyol: "Pla konplè",
     board: "red",
     note: "Every dinner comes with rice, meat, plantain and mac.",
-    photo: "images/griot-plate.jpg",
-    photoAlt: "Griot dinner: fried pork, rice, fried plantains, macaroni and pikliz",
+    photo: "images/dinner-plate.jpg",
+    photoAlt: "Dinner plate: chicken with peppers and onions, rice and beans, baked mac and cheese, and fried plantain",
     items: [
       { name: "Griot Dinner", desc: "Fried pork.", price: 20 },
       { name: "Turkey Dinner", desc: "Tasso turkey.", price: 20 },

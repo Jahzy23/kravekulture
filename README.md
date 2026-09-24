@@ -90,6 +90,6 @@ Things to keep true:
 
 ## Replace the photos and logo
 
-Drop full-resolution photos into `site/images/` with the same file names (`griot-plate.jpg`, `wings-plate.jpg` are the two the menu uses; `shortrib-plate.jpg` and `shrimp-greens.jpg` are spares, not wired to anything — set `photo:` on a menu section to use one). The logo files (`logo-150.jpg`, `logo-300.png/.webp`, `logo-512.png/.webp`) are all cut from the 600px Instagram export; the home page badge uses `logo-300.webp`, the menu/QR/404 headers use `logo-512`.
+Drop full-resolution photos into `site/images/` with the same file names (`dinner-plate.jpg`, `wings-plate.jpg` are the two the menu uses; `shortrib-plate.jpg` and `shrimp-greens.jpg` are spares, not wired to anything — set `photo:` on a menu section to use one). The logo files (`logo-150.jpg`, `logo-300.png/.webp`, `logo-512.png/.webp`) are all cut from the 600px Instagram export; the home page badge uses `logo-300.webp`, the menu/QR/404 headers use `logo-512`.
 
 The two display fonts are declared twice on purpose (`site/home.css` for the home page, `site/styles.css` for every other page) so each page loads exactly one stylesheet; keep the two `@font-face` blocks identical.
