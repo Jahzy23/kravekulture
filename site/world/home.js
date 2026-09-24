@@ -57,7 +57,7 @@ mountScrollWorld(document.getElementById('world'), {
       accent: '#18359c',
       eyebrow: 'Wings & fries',
       title: 'Four flavors. Pick your heat.',
-      body: 'Honey hot, lemon pepper, BBQ, buffalo or jerk. Six, eight or ten pieces, fries included.',
+      body: 'Honey hot, lemon pepper, BBQ, buffalo, jerk or plain. Six, eight or ten pieces, fries included.',
       tags: ['6 / 8 / 10 pc', 'From $12'],
     },
     {
