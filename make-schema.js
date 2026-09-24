@@ -15,7 +15,7 @@ const path = require("path");
 const vm = require("vm");
 
 const ROOT = __dirname;
-const SITE_URL = "https://kravekulture.vercel.app";
+const SITE_URL = "https://eatkravekulture.com";
 
 function loadMenuData() {
   const src = fs.readFileSync(path.join(ROOT, "site/menu-data.js"), "utf8");

@@ -13,6 +13,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
+- `set-domain.js` — moves the site to a new host name: rewrites every absolute URL, then regenerates the JSON-LD and the QR card (`node set-domain.js eatkravekulture.com`)
 - `make-qr.js` — generates the QR code (one vector SVG card) for any URL
 - `make-qr-pdf.js` — renders that card as a print-ready vector PDF
 - `make-images.js` — renders the social preview images (`site/images/og-*.jpg`) and the 1200px scene stills (`site/world/*-1200.webp`) from the full-size stills
@@ -58,13 +59,22 @@ Update the `<lastmod>` dates in `site/sitemap.xml` at the same time.
 
 ## Deploy
 
-The live site is hosted on **Vercel** (project `kravekulture`, team `305`), git-linked to this repo with root directory `site/` — every push to `main` auto-deploys, no GitHub Actions involved. Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, per-page `Content-Security-Policy`) and the cache rules for fonts, images, scene stills and QR files are set in `site/vercel.json`; GitHub Pages does not support custom response headers at all, which is why the site moved off it. Two quirks worth knowing: `/index.html` 308-redirects to `/` (one URL for the home page, and it is `/` that carries the CSP header), and a real 404 is served without the `/404.html` header rule, so the 404 page relies on its own `<meta http-equiv="Content-Security-Policy">` — every page carries that meta tag as a fallback anyway.
+The live site is **https://eatkravekulture.com**, hosted on **Vercel** (project `kravekulture`, team `305`), git-linked to this repo with root directory `site/` — every push to `main` auto-deploys, no GitHub Actions involved. The domain is registered at Porkbun, which also hosts its DNS; the records that make it work are:
+
+| Type | Host | Value | Why |
+| --- | --- | --- | --- |
+| A | `@` | `76.76.21.21` | apex → Vercel |
+| CNAME | `www` | `cname.vercel-dns.com` | www → Vercel (Vercel redirects it to the apex) |
+| TXT | `@` | `v=spf1 -all` | the domain sends no email; tells receivers to reject anything claiming to |
+| TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s` | same, for DMARC-checking receivers |
+
+`kravekulture.vercel.app` (the project's default URL, and what the first batch of QR cards point at) is set to redirect to the custom domain in the Vercel dashboard (Project → Settings → Domains → Edit on the `.vercel.app` entry), so old links keep working. Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, per-page `Content-Security-Policy`) and the cache rules for fonts, images, scene stills and QR files are set in `site/vercel.json`; GitHub Pages does not support custom response headers at all, which is why the site moved off it. Two quirks worth knowing: `/index.html` 308-redirects to `/` (one URL for the home page, and it is `/` that carries the CSP header), and a real 404 is served without the `/404.html` header rule, so the 404 page relies on its own `<meta http-equiv="Content-Security-Policy">` — every page carries that meta tag as a fallback anyway.
 
 `jahzy23.github.io/kravekulture` (the old host) is kept alive on purpose: GitHub Actions (`.github/workflows/pages.yml`) now deploys the tiny `redirect/` folder there instead of `site/`, so any already-printed QR code or old bookmark still lands on the real site — deep links included, the 404 shim carries the path across. The workflow only runs when `redirect/` or the workflow file itself changes, and its actions are pinned to commit SHAs (the tag is in the trailing comment; bump both together). Never point that workflow back at `site/`.
 
 Vercel Web Analytics is on (enabled in the project dashboard). Each page loads `/_vercel/insights/script.js`, which Vercel serves on the live domain; on a local server that URL 404s, which is expected and harmless. No npm package is needed for a static site, so `@vercel/analytics` is deliberately not a dependency.
 
-If the Vercel URL ever changes (custom domain, project rename), update `redirect/*.html` and every URL in `make-schema.js`, `site/*.html` (canonical/og/twitter), `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, then re-run `node make-schema.js` and regenerate the QR code.
+If the host name ever changes again, run `node set-domain.js new-domain.com`: it rewrites every absolute URL (`make-schema.js`, `site/*.html` canonical/og/twitter and legal-page text, `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, `redirect/*.html`) and regenerates the JSON-LD, the QR SVG and the PDF. Then add the domain on Vercel, point DNS at it, set the previous domain to redirect, update this README by hand, and push.
 
 ## Terms and privacy pages
 
