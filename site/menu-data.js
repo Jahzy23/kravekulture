@@ -1,6 +1,6 @@
 /* =====================================================================
-   KRAVE KULTURE — MENU + PAYMENT DATA
-   This is the ONLY file you edit to change the menu or how people pay.
+   KRAVE KULTURE — MENU DATA
+   This is the ONLY file you edit to change the menu, city or phone.
 
    1. MENU_STATUS: "live" shows the menu as real. "draft" adds a
       SAMPLE MENU tape across the top so nobody trusts placeholder prices.
@@ -11,8 +11,6 @@
    3. Each item: { name, desc, price, tag }
         price → number (20) or text ("MKT", "12 / 16"). null hides it.
         tag   → optional: "sold out", "popular", "spicy", "new"
-   4. PAYMENTS: replace every FILL-IN with your real handle.
-      Delete any method you do not take. Order = order on the page.
    ===================================================================== */
 
 const MENU_STATUS = "live"; // "live" | "draft"
@@ -80,25 +78,12 @@ const MENU = [
   },
 ];
 
-/* ---------------------------------------------------------------------
-   PAYMENTS — replace every "FILL-IN" before printing the QR code.
-   Remove any line you do not accept. Order = order shown on the page.
-   kind: "cashapp" | "zelle" | "venmo" | "applepay" | "card" | "cash"
-   --------------------------------------------------------------------- */
-const PAYMENTS = [
-  { kind: "cashapp", label: "Cash App", handle: "$KraveKulture", link: "https://cash.app/$KraveKulture" },
-  { kind: "zelle", label: "Zelle", handle: "FILL-IN phone or email", link: "" },
-  // Uncomment the ones you take:
-  // { kind: "card", label: "Tap to Pay at the window", handle: "Visa · Mastercard · Amex · Apple Pay", link: "" },
-  // { kind: "cash", label: "Cash", handle: "Exact change appreciated", link: "" },
-];
-
 /* Where the truck is. Update per event or point people to Instagram. */
 const LOCATION = {
   headline: "Find the truck",
   text: "We move. Today's spot is always on Instagram.",
   instagram: "https://www.instagram.com/eatkravekulture/",
   handle: "@eatkravekulture",
-  phone: "", // e.g. "305-555-0123" — leave empty to hide the Call button
+  phone: "786-999-4019", // leave empty to hide the Call us button; the number itself only lives in the tel: link
   city: "Miami, FL",
 };

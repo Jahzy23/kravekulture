@@ -4,10 +4,9 @@
  *
  * Usage: node make-schema.js
  *
- * Only reads real data already in menu-data.js: no invented address, phone,
- * hours, reviews or payment methods. The truck has no fixed address, so this
- * uses areaServed instead of a street address, and sameAs points at Instagram
- * instead of a phone number.
+ * Only reads real data already in menu-data.js: no invented address, hours or
+ * reviews. The truck has no fixed address, so this uses areaServed instead of a
+ * street address; telephone comes from LOCATION.phone when it is set.
  */
 "use strict";
 const fs = require("fs");
@@ -21,7 +20,7 @@ function loadMenuData() {
   const src = fs.readFileSync(path.join(ROOT, "site/menu-data.js"), "utf8");
   const sandbox = {};
   vm.createContext(sandbox);
-  vm.runInContext(src + "\nthis.MENU=MENU;this.PAYMENTS=PAYMENTS;this.LOCATION=LOCATION;this.MENU_STATUS=MENU_STATUS;", sandbox);
+  vm.runInContext(src + "\nthis.MENU=MENU;this.LOCATION=LOCATION;this.MENU_STATUS=MENU_STATUS;", sandbox);
   return { MENU: sandbox.MENU, LOCATION: sandbox.LOCATION };
 }
 
@@ -52,6 +51,7 @@ function foodEstablishment(MENU, LOCATION) {
     servesCuisine: ["Haitian", "Caribbean", "Soul food"],
     address: { "@type": "PostalAddress", addressLocality: locality, addressRegion: region || undefined, addressCountry: "US" },
     areaServed: { "@type": "City", name: LOCATION.city },
+    telephone: LOCATION.phone ? "+1-" + LOCATION.phone : undefined,
     sameAs: [LOCATION.instagram],
     priceRange: priceRange(MENU),
     menu: `${SITE_URL}/menu.html`,

@@ -1,4 +1,4 @@
-/* Krave Kulture — renders menu, payments and location from menu-data.js */
+/* Krave Kulture — renders menu and location from menu-data.js */
 (function () {
   "use strict";
 
@@ -23,40 +23,7 @@
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-  // Screen readers don't see the "Copy" -> "Copied" text swap unless it lands in a
-  // live region — the button's aria-label is static, so this is the only announcement.
-  // The region is created empty at load (see DOMContentLoaded): assistive tech only
-  // watches live regions that already existed when the page settled.
-  function ensureAnnouncer() {
-    let live = $("#copy-announcer");
-    if (!live) {
-      live = el("div", { class: "sr-only", id: "copy-announcer", "aria-live": "polite", role: "status" });
-      document.body.appendChild(live);
-    }
-    return live;
-  }
-  function announceCopy(text) {
-    const live = ensureAnnouncer();
-    live.textContent = "";
-    setTimeout(() => { live.textContent = text; }, 30);
-  }
 
-  const ICONS = {
-    cashapp:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M15 9.2c-.8-.7-1.9-1.1-3-1.1-1.8 0-3 .9-3 2.1 0 2.8 6 1.4 6 4.3 0 1.3-1.3 2.2-3.1 2.2-1.3 0-2.5-.4-3.4-1.2"/><path d="M12 6.5V8m0 8v1.5"/></svg>',
-    zelle:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 8h8l-8 8h8"/><path d="M12 6v2m0 8v2"/></svg>',
-    venmo:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7.5 8l2.6 9h3.2c1.4-2.2 2.4-4.6 2.4-6.6 0-.9-.2-1.7-.6-2.4"/></svg>',
-    applepay:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/></svg>',
-    card:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/><path d="M15.5 14.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0z"/></svg>',
-    cash:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="1.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></svg>',
-    copy:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg>',
-  };
 
   function priceNode(price) {
     if (price === null || price === undefined || price === "") return null;
@@ -151,84 +118,6 @@
     if (tape) tape.dataset.on = typeof MENU_STATUS !== "undefined" && MENU_STATUS === "draft" ? "true" : "false";
   }
 
-  function renderPayments() {
-    const host = $("#pay-list");
-    if (!host || typeof PAYMENTS === "undefined") return;
-    const note = $("[data-pay-note]");
-    if (!PAYMENTS.length) {
-      host.appendChild(
-        el("li", { class: "pay pay-empty" }, [
-          el("span", { class: "pay-label", text: "Ask at the window for today's payment options." }),
-        ])
-      );
-      if (note) note.remove();
-      return;
-    }
-    // The "Tap Copy" instruction only makes sense when at least one row has a live Copy button.
-    const anyCopyable = PAYMENTS.some((p) => !/FILL-IN/i.test(p.handle) && ["cashapp", "zelle", "venmo"].includes(p.kind));
-    if (note && !anyCopyable) note.textContent = "Order at the window, then pay any of these ways.";
-    PAYMENTS.forEach((p) => {
-      const isFill = /FILL-IN/i.test(p.handle);
-      const handleText = el("span", { class: "pay-handle" });
-      if (isFill) {
-        handleText.appendChild(el("mark", { class: "pay-fill", text: p.handle }));
-      } else if (p.link) {
-        handleText.appendChild(el("a", { href: p.link, target: "_blank", rel: "noopener", text: p.handle }));
-      } else {
-        handleText.textContent = p.handle;
-      }
-      const copyable = !isFill && ["cashapp", "zelle", "venmo"].includes(p.kind);
-      const btn = el("button", {
-        class: "pay-copy",
-        type: "button",
-        "aria-label": "Copy " + p.label + " " + p.handle,
-        disabled: copyable ? null : "disabled",
-        html: ICONS.copy + "<span>Copy</span>",
-      });
-      if (copyable) {
-        btn.addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(p.handle);
-            btn.dataset.state = "copied";
-            btn.querySelector("span").textContent = "Copied";
-            announceCopy("Copied " + p.label + " " + p.handle);
-            setTimeout(() => {
-              delete btn.dataset.state;
-              btn.querySelector("span").textContent = "Copy";
-            }, 1800);
-          } catch (e) {
-            // Clipboard blocked (http, permissions, old WebView): select the handle so a
-            // long-press / Ctrl+C still works, and say so in the live region.
-            try {
-              const range = document.createRange();
-              range.selectNodeContents(handleText);
-              const sel = window.getSelection();
-              sel.removeAllRanges();
-              sel.addRange(range);
-            } catch (_) {}
-            btn.dataset.state = "failed";
-            btn.querySelector("span").textContent = "Select it";
-            announceCopy("Copy failed. " + p.label + " handle " + p.handle + " is selected; copy it by hand.");
-            setTimeout(() => {
-              delete btn.dataset.state;
-              btn.querySelector("span").textContent = "Copy";
-            }, 3000);
-          }
-        });
-      }
-      // Decorative: the handle text right after it is already the link, so a second
-      // anchor on the icon would be a duplicate tab stop with the same destination.
-      const icon = el("span", { class: "pay-icon", "aria-hidden": "true", html: ICONS[p.kind] || ICONS.cash });
-      host.appendChild(
-        el("li", { class: "pay" }, [
-          icon,
-          el("span", { class: "pay-label", text: p.label }),
-          copyable || isFill ? btn : el("span"),
-          handleText,
-        ])
-      );
-    });
-  }
 
   function renderLocation() {
     if (typeof LOCATION === "undefined") return;
@@ -244,9 +133,7 @@
         const a = phoneWrap.matches("a") ? phoneWrap : phoneWrap.querySelector("a");
         if (a) {
           a.href = "tel:" + LOCATION.phone.replace(/[^\d+]/g, "");
-          const label = a.querySelector("span");
-          if (label) label.textContent = LOCATION.phone;
-          else a.textContent = LOCATION.phone;
+          a.setAttribute("aria-label", "Call us at " + LOCATION.phone);
         }
       } else {
         phoneWrap.remove();
@@ -350,10 +237,9 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    ensureAnnouncer();
     // Each step runs on its own so one bad menu-data.js entry (say a section with no
-    // items) cannot take the payment list or the Call button down with it.
-    [renderMenu, renderPayments, renderLocation, scrollSpy, railHint, year].forEach((step) => {
+    // items) cannot take the Call button or the scroll spy down with it.
+    [renderMenu, renderLocation, scrollSpy, railHint, year].forEach((step) => {
       try { step(); } catch (e) { console.error("[krave] " + step.name + " failed:", e); }
     });
   });

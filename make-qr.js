@@ -124,7 +124,7 @@ for (let y = 0; y < n; y++) {
 
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
-  <title>Krave Kulture: scan for menu and how to pay</title>
+  <title>Krave Kulture: scan for the menu and today's spot</title>
   <desc>QR code pointing to ${xmlEsc(url)}</desc>
   <rect width="${W}" height="${H}" fill="${WHITEWASH}"/>
   <rect x="0" y="0" width="${W}" height="236" fill="${RED}"/>
@@ -138,7 +138,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <rect x="0" y="${H - 290}" width="${W}" height="290" fill="${INK}"/>
   <rect x="0" y="${H - 290}" width="${W}" height="10" fill="${GOLD}"/>
   ${painted("SCAN FOR MENU", W / 2, H - 160, 80, GOLD, RED_DEEP, 2)}
-  ${painted("+ HOW TO PAY", W / 2, H - 70, 80, WHITE, BLUE, 2)}
+  ${painted("+ TODAY'S SPOT", W / 2, H - 70, 80, WHITE, BLUE, 2)}
 </svg>
 `;
 

@@ -6,8 +6,8 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
 
 - `site/` — the website. Deploy this folder as-is.
   - `index.html` home page
-  - `menu.html` menu + how to pay + find the truck (the QR code points here)
-  - `menu-data.js` **the only file you edit** to change dishes, prices, payment handles, city, phone
+  - `menu.html` menu + find the truck (the QR code points here)
+  - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
   - `terms.html`, `privacy.html` legal pages (see below)
   - `styles.css`, `app.js`, `fonts/`, `images/`
@@ -22,15 +22,14 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
 - `make-schema.js` — generates the `FoodEstablishment`/`Menu` JSON-LD from `menu-data.js` and writes it into `site/index.html` and `site/menu.html`
 - `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, `site/404.html` — discovery files; edit `sitemap.xml`'s `<lastmod>` when you change the menu
 
-## Edit the menu or payments
+## Edit the menu
 
-Open `site/menu-data.js`. Change names, prices, flavors, or payment handles. Save. Redeploy.
+Open `site/menu-data.js`. Change names, prices, flavors, city or phone. Save. Redeploy.
 
-- Replace every `FILL-IN` in `PAYMENTS` with your real Cash App and Zelle handles (add a `venmo` row if you take it). **The Zelle row currently still reads `FILL-IN phone or email` on the live site** — fix that before printing more QR cards.
-- Delete a payment line you do not take. If the list ends up empty the page shows "Ask at the window" instead of a blank board.
-- Set `phone` in `LOCATION` to show a Call button.
+- `phone` in `LOCATION` (currently `786-999-4019`) powers the **Call us** button under Find the Truck and the `telephone` field in the JSON-LD. The number is never printed on the page, only in the `tel:` link. Leave it empty to hide the button.
+- There is no payment section on the site any more (removed September 23, 2026); the terms page just says to ask at the window.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
-- After editing prices or dishes, run `node make-schema.js` so the structured data search engines read matches the real menu.
+- After editing prices, dishes or the phone number, run `node make-schema.js` so the structured data search engines read matches the real data.
 - The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 completes", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
 - A section with no `items` is skipped (no crash), on the page and in the JSON-LD.
 
@@ -41,7 +40,7 @@ npm install
 node make-qr.js https://YOUR-SITE-URL/menu.html
 ```
 
-Writes one file, `site/qr/krave-kulture-qr.svg`: the QR code on a painted Krave Kulture card, all lettering converted to vector paths, with the full 4-module quiet zone the QR spec asks for (the ink frame sits outside it). Print it at any size.
+Writes one file, `site/qr/krave-kulture-qr.svg`: the QR code on a painted Krave Kulture card (lettering: "Scan for menu + today's spot"), all lettering converted to vector paths, with the full 4-module quiet zone the QR spec asks for (the ink frame sits outside it). Print it at any size.
 
 Then run `node make-qr-pdf.js` to render the same card as a print-ready vector PDF at 5 × 7 in (`site/qr/krave-kulture-qr.pdf`). It uses Chromium through `playwright-core`; the global `@playwright/cli` install is enough. `node make-images.js` uses the same Chromium to rebuild the social preview JPEGs and the 1200px stills; run it if you replace anything in `site/world/`.
 
@@ -79,11 +78,11 @@ If the host name ever changes again, run `node set-domain.js new-domain.com`: it
 
 ## Terms and privacy pages
 
-`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, no forms, no cookies, payments at the truck, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram and Cash App. They are a starting point, not legal advice; have someone qualified read them if the business grows.
+`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, no forms, no cookies, payments at the truck, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram. They are a starting point, not legal advice; have someone qualified read them if the business grows.
 
 Things to keep true:
 
-- The contact on both pages is the Instagram account from `menu-data.js` (`LOCATION.instagram` / `LOCATION.handle`), filled in by `app.js`. If you want an email or phone there, add it to the two pages by hand.
+- The contact on both pages is the Instagram account from `menu-data.js` (`LOCATION.instagram` / `LOCATION.handle`), filled in by `app.js`. If you want the phone number or an email there too, add it to the two pages by hand.
 - Change the "Last updated" line at the top of a page whenever you change its text.
 - The terms name Florida as governing law. Change it if the business moves.
 - If the site ever gains a form, a newsletter, an ordering system, a cookie, or a new third-party script, update the privacy policy first.

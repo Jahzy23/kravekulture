@@ -71,7 +71,7 @@ mountScrollWorld(document.getElementById('world'), {
       body: 'Krave it. Taste it. Live the Kulture.',
       tags: [],
       cta: { primary: { label: 'See the menu', href: 'menu.html' },
-             secondary: { label: 'How to pay', href: 'menu.html#pay' } },
+             secondary: { label: 'Find the truck', href: 'menu.html#find' } },
       links: [{ label: 'Terms', href: 'terms.html' }, { label: 'Privacy', href: 'privacy.html' }],
     },
   ],
