@@ -10,6 +10,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
   - `terms.html`, `privacy.html` legal pages (see below)
+  - `glass.html` an alternate dark "liquid glass" take on the home page (unlinked, `noindex`); generated, edit by hand if you keep it. Loads Google Fonts and a stock background video from open-design.ai, so it has its own meta CSP
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
