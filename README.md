@@ -10,9 +10,9 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
   - `terms.html`, `privacy.html` legal pages (see below)
-  - `glass.html` an alternate dark "liquid glass" take on the home page (unlinked, `noindex`); generated, edit by hand if you keep it. Loads Google Fonts and a stock background video from open-design.ai, so it has its own meta CSP
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
+- `drafts/` — not deployed. `glass.html` is an alternate dark "liquid glass" take on the home page, parked here on October 2, 2026 because it loads Google Fonts and a stock video from open-design.ai, which the privacy policy says the site never does. To ship it, self-host those files first, then move it back into `site/`.
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
 - `set-domain.js` — moves the site to a new host name: rewrites every absolute URL, then regenerates the JSON-LD and the QR card (`node set-domain.js eatkravekulture.com`)
 - `make-qr.js` — generates the QR code (one vector SVG card) for any URL
@@ -29,9 +29,10 @@ Open `site/menu-data.js`. Change names, prices, flavors, city or phone. Save. Re
 
 - `phone` in `LOCATION` (currently `786-999-4019`) powers the **Call us** button under Find the Truck and the `telephone` field in the JSON-LD. The number is never printed on the page, only in the `tel:` link. Leave it empty to hide the button.
 - There is no payment section on the site any more (removed September 23, 2026); the terms page just says to ask at the window.
+- `SPOT` in `menu-data.js` pins one dated stop (an event, the grand opening) to the menu page: a gold strip under the section rail and a card with a Directions button in Find the Truck. It hides itself the day after its `date` (Miami time). Empty `date` shows nothing. No `make-schema.js` run needed.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
 - After editing prices, dishes or the phone number, run `node make-schema.js` so the structured data search engines read matches the real data.
-- The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 completes", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
+- The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 dinners", "Six flavors", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
 - A section with no `items` is skipped (no crash), on the page and in the JSON-LD.
 
 ## Regenerate the QR code
