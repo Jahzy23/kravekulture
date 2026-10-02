@@ -88,3 +88,22 @@ const LOCATION = {
   phone: "786-999-4019", // leave empty to hide the Call us button; the number itself only lives in the tel: link
   city: "Miami, FL",
 };
+
+/* Where the truck will be on one specific day (an event, the grand opening).
+   Fill in date + place and it shows at the top of the menu page and in Find the Truck.
+   It hides itself the day after `date`, so a stale spot never lingers.
+   Leave `date` empty to show nothing.
+     date    → "YYYY-MM-DD" (Miami date)
+     label   → optional headline, e.g. "Grand opening"
+     place   → optional name of the spot; leave empty to show the address instead
+     address → street address; powers the Directions button
+     hours   → e.g. "11am to 7pm"
+     note    → optional one-liner                                              */
+const SPOT = {
+  date: "2026-10-03",
+  label: "Grand opening",
+  place: "",
+  address: "22339 SW 112th Ave, Miami, FL 33170",
+  hours: "",
+  note: "",
+};

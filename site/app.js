@@ -142,6 +142,62 @@
     }
   }
 
+  // Today's date in Miami as "YYYY-MM-DD", whatever the visitor's own time zone.
+  function miamiToday() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
+    }).formatToParts(new Date());
+    const get = (t) => parts.find((p) => p.type === t).value;
+    return get("year") + "-" + get("month") + "-" + get("day");
+  }
+
+  function renderSpot() {
+    if (typeof SPOT === "undefined" || !SPOT.date || !(SPOT.place || SPOT.address)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(SPOT.date)) return;
+    const today = miamiToday();
+    if (SPOT.date < today) return; // past spots hide themselves
+
+    // Noon UTC keeps the weekday right in every time zone.
+    const when = SPOT.date === today
+      ? "Today"
+      : new Date(SPOT.date + "T12:00:00Z").toLocaleDateString("en-US", {
+          weekday: "short", month: "short", day: "numeric", timeZone: "UTC",
+        });
+    const head = [SPOT.label, when].filter(Boolean).join(" · ");
+    const where = SPOT.place || SPOT.address;
+    const maps = SPOT.address
+      ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SPOT.address)
+      : "";
+
+    const strip = $("#spot-strip");
+    if (strip) {
+      strip.appendChild(el("span", { class: "wrap spot-strip-inner" }, [
+        el("strong", { text: head }),
+        el("span", { text: [where, SPOT.hours].filter(Boolean).join(" · ") }),
+      ]));
+      strip.setAttribute("aria-label", head + ": " + [where, SPOT.hours].filter(Boolean).join(", ") + ". Details in Find the Truck.");
+      strip.hidden = false;
+    }
+
+    const card = $("#spot-card");
+    if (card) {
+      card.appendChild(el("p", { class: "spot-when", text: head }));
+      card.appendChild(el("p", { class: "spot-place", text: where }));
+      if (SPOT.place && SPOT.address) card.appendChild(el("p", { class: "spot-line", text: SPOT.address }));
+      if (SPOT.hours) card.appendChild(el("p", { class: "spot-line", text: SPOT.hours }));
+      if (SPOT.note) card.appendChild(el("p", { class: "spot-line", text: SPOT.note }));
+      if (maps) {
+        card.appendChild(el("a", {
+          class: "btn btn-red", href: maps, target: "_blank", rel: "noopener",
+          text: "Directions",
+        }));
+      }
+      card.hidden = false;
+      const txt = $("[data-location-text]");
+      if (txt) txt.textContent = "After that, we move. The next spot is always on Instagram.";
+    }
+  }
+
   function scrollSpy() {
     const links = Array.from(document.querySelectorAll("#rail-links a, .bar a[href^='#']"));
     if (!links.length) return;
@@ -240,7 +296,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Each step runs on its own so one bad menu-data.js entry (say a section with no
     // items) cannot take the Call button or the scroll spy down with it.
-    [renderMenu, renderLocation, scrollSpy, railHint, year].forEach((step) => {
+    [renderMenu, renderLocation, renderSpot, scrollSpy, railHint, year].forEach((step) => {
       try { step(); } catch (e) { console.error("[krave] " + step.name + " failed:", e); }
     });
   });

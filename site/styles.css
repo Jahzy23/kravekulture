@@ -765,6 +765,73 @@ button {
   gap: 12px;
 }
 
+/* ---------- spot (one dated stop, from SPOT in menu-data.js) ---------- */
+.spot-strip {
+  display: block;
+  background: var(--gold);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: var(--rule) solid var(--ink);
+}
+.spot-strip[hidden],
+.spot-card[hidden] {
+  display: none;
+}
+.spot-strip-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 12px;
+  padding: 10px 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.spot-strip strong {
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.spot-strip:hover .spot-strip-inner span,
+.spot-strip:focus-visible .spot-strip-inner span {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+.spot-card {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 18px 20px;
+  background: var(--white);
+  border: var(--rule) solid var(--ink);
+  box-shadow: var(--shadow-paint);
+  max-width: 34rem;
+}
+.find .spot-card p {
+  margin: 0;
+}
+.find .spot-when {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+  color: var(--red);
+}
+.find .spot-place {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.find .spot-line {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+.spot-card .btn {
+  margin-top: 10px;
+}
+
 /* ---------- faq ---------- */
 .faq-body {
   max-width: 820px;
