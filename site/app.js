@@ -119,6 +119,26 @@
   }
 
 
+  // "This week" spot from menu-data.js. Only rendered while spotIsFresh() says so; the
+  // placeholder stays hidden (and is removed) otherwise, so the page reads exactly as before.
+  function renderSpot() {
+    const host = $("[data-spot]");
+    if (!host) return;
+    if (typeof SPOT === "undefined" || typeof spotIsFresh !== "function" || !spotIsFresh(SPOT)) { host.remove(); return; }
+    $("[data-spot-where]", host).textContent = SPOT.where;
+    const when = $("[data-spot-when]", host);
+    if (SPOT.when) when.textContent = SPOT.when; else { when.remove(); $("[data-spot-sep]", host)?.remove(); }
+    const map = $("[data-spot-map]", host);
+    if (/^https:\/\//.test(SPOT.mapUrl || "")) {
+      map.href = SPOT.mapUrl;
+      map.setAttribute("aria-label", "Map to " + SPOT.where + " (opens in a new tab)");
+      map.hidden = false;
+    } else map.remove();
+    host.hidden = false;
+    const txt = $("[data-location-text]");
+    if (txt) txt.textContent = "Day-of changes are posted on Instagram.";
+  }
+
   function renderLocation() {
     if (typeof LOCATION === "undefined") return;
     document.querySelectorAll("[data-ig-link]").forEach((a) => (a.href = LOCATION.instagram));
@@ -240,7 +260,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Each step runs on its own so one bad menu-data.js entry (say a section with no
     // items) cannot take the Call button or the scroll spy down with it.
-    [renderMenu, renderLocation, scrollSpy, railHint, year].forEach((step) => {
+    [renderMenu, renderLocation, renderSpot, scrollSpy, railHint, year].forEach((step) => {
       try { step(); } catch (e) { console.error("[krave] " + step.name + " failed:", e); }
     });
   });

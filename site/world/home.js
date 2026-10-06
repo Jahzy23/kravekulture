@@ -1,4 +1,6 @@
 /* Krave Kulture — homepage scroll-world config. Edit scene copy/order here. */
+// This week's spot comes from menu-data.js (SPOT) under the same 7-day rule as the menu page.
+var spot = (typeof SPOT !== 'undefined' && typeof spotIsFresh === 'function' && spotIsFresh(SPOT)) ? SPOT : null;
 mountScrollWorld(document.getElementById('world'), {
   brand: { name: 'Krave Kulture', href: '#top' },
   cta: { label: 'Menu', href: 'menu.html' },
@@ -36,7 +38,9 @@ mountScrollWorld(document.getElementById('world'), {
       scroll: 1.5, linger: 0.35,
       eyebrow: 'Find the truck',
       title: 'Same truck. New spot every week.',
-      body: 'We move around Miami. Today’s location is always on Instagram.',
+      body: spot
+        ? 'This week: ' + spot.where + '. ' + (spot.when ? spot.when + '. ' : '') + 'Day-of changes are posted on Instagram.'
+        : 'We move around Miami. Today’s location is always on Instagram.',
       tags: ['Miami, FL', '@eatkravekulture'],
     },
     {

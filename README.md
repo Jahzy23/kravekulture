@@ -25,8 +25,9 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
 
 ## Edit the menu
 
-Open `site/menu-data.js`. Change names, prices, flavors, city or phone. Save. Redeploy.
+Open `site/menu-data.js`. Change names, prices, flavors, this week's spot, city or phone. Save. Redeploy.
 
+- Set `SPOT` to this week's spot: `where`, `when`, and today's date in `updated`, exactly `YYYY-MM-DD` (`2026-10-06`; any other format hides it). It shows under Find the Truck on the menu page and in the truck scene on the home page for 7 days after that date, whatever `when` says, then hides itself and both pages go back to pointing at Instagram. If the plan changes or the spot ends early, change or clear `where` and redeploy. Paste a Google Maps share link (`https://...`) into `mapUrl` to get a Map link.
 - `phone` in `LOCATION` (currently `786-999-4019`) powers the **Call us** button under Find the Truck and the `telephone` field in the JSON-LD. The number is never printed on the page, only in the `tel:` link. Leave it empty to hide the button.
 - There is no payment section on the site any more (removed September 23, 2026); the terms page just says to ask at the window.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
@@ -76,6 +77,10 @@ The live site is **https://eatkravekulture.com**, hosted on **Vercel** (project 
 Vercel Web Analytics is on (enabled in the project dashboard). Each page loads `/_vercel/insights/script.js`, which Vercel serves on the live domain; on a local server that URL 404s, which is expected and harmless. No npm package is needed for a static site, so `@vercel/analytics` is deliberately not a dependency.
 
 If the host name ever changes again, run `node set-domain.js new-domain.com`: it rewrites every absolute URL (`make-schema.js`, `site/*.html` canonical/og/twitter and legal-page text, `site/sitemap.xml`, `site/robots.txt`, `site/llms.txt`, `redirect/*.html`) and regenerates the JSON-LD, the QR SVG and the PDF. Then add the domain on Vercel, point DNS at it, set the previous domain to redirect, update this README by hand, and push.
+
+## Google Business Profile
+
+`GOOGLE-BUSINESS-PROFILE.md` lists exactly what to type into a Google Business Profile (service-area listing, no address), using only facts already on the site. Creating and verifying the listing has to be done by you, signed in to your own Google account.
 
 ## Terms and privacy pages
 

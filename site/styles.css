@@ -759,6 +759,54 @@ button {
   max-width: var(--measure);
   font-size: 1.1rem;
 }
+.spot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 14px 0 13px;
+  border-top: 3px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  max-width: var(--measure);
+}
+.spot[hidden] {
+  display: none;
+}
+.spot-label {
+  display: inline-block;
+  font-family: var(--display);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--gold);
+  color: var(--ink);
+  padding: 6px 9px 4px;
+  transform: rotate(-2deg);
+}
+.spot-where {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+.spot-when {
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.spot-map {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 8px;
+  margin: -6px -8px;
+  font-family: var(--display);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration-color: var(--blue);
+}
 .find-actions {
   display: flex;
   flex-wrap: wrap;
