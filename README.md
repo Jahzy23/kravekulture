@@ -10,13 +10,13 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
   - `terms.html`, `privacy.html` legal pages (see below)
-  - `glass.html` an alternate dark "liquid glass" take on the home page (unlinked, `noindex`); generated, edit by hand if you keep it. Loads Google Fonts and a stock background video from open-design.ai, so it has its own meta CSP
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
 - `set-domain.js` — moves the site to a new host name: rewrites every absolute URL, then regenerates the JSON-LD and the QR card (`node set-domain.js eatkravekulture.com`)
 - `make-qr.js` — generates the QR code (one vector SVG card) for any URL
 - `make-qr-pdf.js` — renders that card as a print-ready vector PDF
+- `make-stills.js` — composites the two real plate photos (`images/dinner-plate.jpg`, `images/wings-plate.jpg`) into the home page's plate and wings scene stills (`site/world/plate.webp`, `wings.webp` + 900 rungs); run `node make-images.js` after it
 - `make-images.js` — renders the social preview images (`site/images/og-*.jpg`) and the 1200px scene stills (`site/world/*-1200.webp`) from the full-size stills
 - `site/qr/` — generated QR files (also served on the live site at `/qr/` and shown on `/qr.html`)
 - `tools/fonts/` — TTF copies of the display fonts used to draw text into the QR card
@@ -31,7 +31,7 @@ Open `site/menu-data.js`. Change names, prices, flavors, city or phone. Save. Re
 - There is no payment section on the site any more (removed September 23, 2026); the terms page just says to ask at the window.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
 - After editing prices, dishes or the phone number, run `node make-schema.js` so the structured data search engines read matches the real data.
-- The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 completes", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
+- The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 dinners", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
 - A section with no `items` is skipped (no crash), on the page and in the JSON-LD.
 
 ## Regenerate the QR code
@@ -91,6 +91,6 @@ Things to keep true:
 
 ## Replace the photos and logo
 
-Drop full-resolution photos into `site/images/` with the same file names (`dinner-plate.jpg`, `wings-plate.jpg` are the two the menu uses; `shortrib-plate.jpg` and `shrimp-greens.jpg` are spares, not wired to anything — set `photo:` on a menu section to use one). The logo files (`logo-150.jpg`, `logo-300.png/.webp`, `logo-512.png/.webp`) are all cut from the 600px Instagram export; the home page badge uses `logo-300.webp`, the menu/QR/404 headers use `logo-512`.
+Drop full-resolution photos into `site/images/` with the same file names (`dinner-plate.jpg`, `wings-plate.jpg` are the two the menu page uses, and they also feed the home page's plate and wings scene stills and the menu social card: after replacing either, run `node make-stills.js` then `node make-images.js`, and bump the `?v=` on those two scenes' `still`/`stillSrcset` in `site/world/home.js` so browsers that cached the old still for 7 days fetch the new one; `shortrib-plate.jpg` and `shrimp-greens.jpg` are spares, not wired to anything — set `photo:` on a menu section to use one). The logo files (`logo-150.jpg`, `logo-300.png/.webp`, `logo-512.png/.webp`) are all cut from the 600px Instagram export; the home page badge uses `logo-300.webp`, the menu/QR/404 headers use `logo-512`.
 
 The two display fonts are declared twice on purpose (`site/home.css` for the home page, `site/styles.css` for every other page) so each page loads exactly one stylesheet; keep the two `@font-face` blocks identical.

@@ -34,7 +34,7 @@ Haitian and Caribbean soul food plus American comfort plates from one mobile tra
 ## Capabilities and Constraints
 
 - Static site only; no ordering, no cart, no backend.
-- Menu (confirmed by the owner 2026-09-22): Plates (complete = rice, meat, plantain, mac): Griot 20, Turkey 20, Goat 25, Shrimp 22, Chicken 20, Boulet 20, Rib 20. Sides: Mac 6, Rice 5. Wings with fries: 6 pc 12, 8 pc 14, 10 pc 16; flavors Honey Hot, Lemon Pepper, BBQ, Buffalo. Dessert: Banana Pudding 6. Drinks: Soda 1, Water 1, Kravelade 5, Passion Fruit 5. Source of truth in site/menu-data.js.
+- Menu (confirmed by the owner 2026-09-22, updated 2026-09-23): Plates are called dinners (dinner = rice, meat, plantain, mac): Griot 20, Turkey (tasso) 20, Goat 25, Shrimp 22, Chicken 20, Boulet 20, Rib 20. Sides: Mac 6, Rice 5. Wings with fries: 6 pc 12, 8 pc 14, 10 pc 16; flavors Honey Hot, Lemon Pepper, BBQ, Buffalo, Jerk, Plain. Dessert: Banana Pudding 6. Drinks: Soda 2, Water 1, Kravelade 5, Passion Fruit 5. Source of truth in site/menu-data.js; it supersedes this line.
 - Payment methods: user deferred ("ill do this later"). Ship a payment section with labeled placeholder slots (handle, phone) that the user fills in.
 - QR code target: Vercel URL until a domain exists. Regenerate script included.
 - Must read well on a phone in bright outdoor light.

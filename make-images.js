@@ -26,21 +26,25 @@ const SITE = path.join(ROOT, "site");
 // Inline as data: URLs — a setContent() page is about:blank and may not read file://.
 const fileUrl = (rel) => "data:image/webp;base64," + fs.readFileSync(path.join(SITE, rel)).toString("base64");
 
+// `css` overrides the default cover crop. The plate still keeps its print right of centre so
+// the home page copy sits on bare wall; the social card instead frames the print itself
+// (still scaled to 1700x1133 so the tilted frame clears the card edges; print centre (1054,510) moved to the card centre (600,315)).
 const OG = [
   { src: "world/truck.webp", out: "images/og-home.jpg" },
-  { src: "world/plate.webp", out: "images/og-menu.jpg" },
+  { src: "world/plate.webp", out: "images/og-menu.jpg", css: "position:absolute;left:-454px;top:-195px;width:1700px;height:1133px;object-fit:fill" },
 ];
-const SCENES = ["market", "kitchen", "truck", "plate", "wings", "finale"];
+// plate and wings get their 1200 rung from make-stills.js (encoded from the lossless render, not from the lossy 1800 WebP).
+const SCENES = ["market", "kitchen", "truck", "finale"];
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  for (const { src, out } of OG) {
+  for (const { src, out, css } of OG) {
     await page.setViewportSize({ width: 1200, height: 630 });
     await page.setContent(`<!doctype html><html><head><style>
-      html,body{margin:0;background:#f6f4ee}
-      img{display:block;width:1200px;height:630px;object-fit:cover;object-position:center 46%}
+      html,body{margin:0;background:#f6f4ee;overflow:hidden}
+      img{display:block;width:1200px;height:630px;object-fit:cover;object-position:center 46%;${css || ""}}
     </style></head><body><img src="${fileUrl(src)}"></body></html>`, { waitUntil: "load" });
     await page.evaluate(() => document.querySelector("img").decode());
     await page.screenshot({ path: path.join(SITE, out), type: "jpeg", quality: 82, fullPage: false });
