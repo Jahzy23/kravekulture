@@ -154,7 +154,7 @@
         const a = phoneWrap.matches("a") ? phoneWrap : phoneWrap.querySelector("a");
         if (a) {
           a.href = "tel:" + LOCATION.phone.replace(/[^\d+]/g, "");
-          a.setAttribute("aria-label", "Call us at " + LOCATION.phone);
+          a.setAttribute("aria-label", "Call ahead and skip the line —  " + LOCATION.phone);
         }
       } else {
         phoneWrap.remove();
