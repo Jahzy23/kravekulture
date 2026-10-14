@@ -136,7 +136,7 @@
     } else map.remove();
     host.hidden = false;
     const txt = $("[data-location-text]");
-    if (txt) txt.textContent = "Day-of changes are posted on Instagram.";a.setAttribute("aria-label", "Call ahead and skip the line — " + LOCATION.phone);
+    if (txt) txt.textContent = "Day-of changes are posted on Instagram.";
   }
 
   function renderLocation() {
