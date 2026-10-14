@@ -16,8 +16,14 @@
    ===================================================================== */
 
 const MENU_STATUS = "live"; // "live" | "draft"
+// ---------------------------------------------------------------------
+//   ],
+// },
 
 const MENU = [
+// ---------------------------------------------------------------------
+//   ],
+// },
   {
     title: "Plates",
     kreyol: "Pla konplè",
@@ -33,6 +39,13 @@ const MENU = [
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
       { name: "Boulet Dinner", desc: "Haitian meatballs.", price: 20 },
       { name: "Rib Dinner", desc: "Tender ribs.", price: 27 },
+// ---------------------------------------------------------------------
+//   ],
+// },
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+//   ],
+// },
     ],
   },
   {
@@ -100,7 +113,7 @@ const LOCATION = {
   instagram: "https://www.instagram.com/eatkravekulture/",
   handle: "@eatkravekulture",
   tiktok: "https://www.tiktok.com/@eatkravekulture1804", // leave empty to hide the TikTok button
-  phone: "786-999-4019", // leave empty to hide the Call us button; the number itself only lives in the tel: link
+  phone: "786-999-4019", // leave empty to hide the call-ahead button; the number itself only lives in the tel: link
   city: "Miami, FL",
 };
 
