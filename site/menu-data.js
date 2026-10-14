@@ -27,12 +27,24 @@ const MENU = [
     photoAlt: "Dinner plate: chicken with peppers and onions, rice and beans, baked mac and cheese, and fried plantain",
     items: [
       { name: "Griot Dinner", desc: "Fried pork.", price: 20 },
-      { name: "Turkey Dinner", desc: "Tasso turkey.", price: 20 },
-      { name: "Goat Dinner", desc: "Kabrit.", price: 25 },
+      { name: "Turkey Dinner", desc: "Tasso turkey.", price: 22 },
+      { name: "Goat Dinner", desc: "Kabrit.", price: 28 },
       { name: "Shrimp Dinner", desc: "", price: 22 },
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
       { name: "Boulet Dinner", desc: "Haitian meatballs.", price: 20 },
-      { name: "Rib Dinner", desc: "", price: 20 },
+      { name: "Rib Dinner", desc: "", price: 27 },
+    ],
+  },
+  {
+    title: "Meat & Plantain",
+    kreyol: "Vyann ak bannann",
+    board: "gold",
+    note: "Meat with fried plantain.",
+    items: [
+      { name: "Griot & Plantain", desc: "Fried pork with plantain.", price: 16 },
+      { name: "Turkey & Plantain", desc: "Tasso turkey with plantain.", price: 18 },
+      { name: "Boulet & Plantain", desc: "Haitian meatballs with plantain.", price: 16 },
+      { name: "Goat & Plantain", desc: "Kabrit with plantain.", price: 24 },
     ],
   },
   {
@@ -41,7 +53,7 @@ const MENU = [
     board: "gold",
     note: "",
     items: [
-      { name: "Side of Mac", desc: "", price: 6 },
+      { name: "Side of Mac", desc: "", price: 7 },
       { name: "Side of Rice", desc: "", price: 5 },
     ],
   },
