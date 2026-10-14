@@ -54,7 +54,7 @@ const MENU = [
     note: "",
     items: [
       { name: "Side of Mac", desc: "", price: 7 },
-      { name: "Side of Rice", desc: "", price: 5 },
+      { name: "Side of Rice", desc: "", price: 6 },
     ],
   },
   {
