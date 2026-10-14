@@ -29,10 +29,10 @@ const MENU = [
       { name: "Griot Dinner", desc: "Fried pork.", price: 20 },
       { name: "Turkey Dinner", desc: "Tasso turkey.", price: 22 },
       { name: "Goat Dinner", desc: "Kabrit.", price: 28 },
-      { name: "Shrimp Dinner", desc: "", price: 22 },
+      { name: "Shrimp Dinner", desc: "Seasoned shrimp.", price: 22 },
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
       { name: "Boulet Dinner", desc: "Haitian meatballs.", price: 20 },
-      { name: "Rib Dinner", desc: "", price: 27 },
+      { name: "Rib Dinner", desc: "Tender ribs.", price: 27 },
     ],
   },
   {
@@ -53,8 +53,8 @@ const MENU = [
     board: "gold",
     note: "",
     items: [
-      { name: "Side of Mac", desc: "", price: 7 },
-      { name: "Side of Rice", desc: "", price: 6 },
+      { name: "Side of Mac", desc: "Baked mac and cheese.", price: 7 },
+      { name: "Side of Rice", desc: "Rice and beans.", price: 6 },
     ],
   },
   {
@@ -76,7 +76,7 @@ const MENU = [
     kreyol: "Desè",
     board: "black",
     note: "",
-    items: [{ name: "Banana Pudding", desc: "", price: 6 }],
+    items: [{ name: "Banana Pudding", desc: "Creamy banana pudding.", price: 6 }],
   },
   {
     title: "Drinks",
@@ -85,9 +85,9 @@ const MENU = [
     note: "",
     items: [
       { name: "Kravelade", desc: "House lemonade.", price: 5 },
-      { name: "Passion Fruit", desc: "", price: 5 },
-      { name: "Soda", desc: "", price: 2 },
-      { name: "Water", desc: "", price: 1 },
+      { name: "Passion Fruit", desc: "Passion fruit drink.", price: 5 },
+      { name: "Soda", desc: "Ice-cold soda.", price: 2 },
+      { name: "Water", desc: "Cold water.", price: 1 },
     ],
   },
 ];
