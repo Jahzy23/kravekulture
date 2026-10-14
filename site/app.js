@@ -136,7 +136,7 @@
     } else map.remove();
     host.hidden = false;
     const txt = $("[data-location-text]");
-    if (txt) txt.textContent = "Day-of changes are posted on Instagram.";
+    if (txt) txt.textContent = "Day-of changes are posted on Instagram.";a.setAttribute("aria-label", "Call ahead and skip the line — " + LOCATION.phone);
   }
 
   function renderLocation() {
@@ -154,7 +154,7 @@
         const a = phoneWrap.matches("a") ? phoneWrap : phoneWrap.querySelector("a");
         if (a) {
           a.href = "tel:" + LOCATION.phone.replace(/[^\d+]/g, "");
-          a.setAttribute("aria-label", "Call ahead and skip the line —  " + LOCATION.phone);
+          a.setAttribute("aria-label", "Call ahead and skip the line — " + LOCATION.phone);
         }
       } else {
         phoneWrap.remove();
