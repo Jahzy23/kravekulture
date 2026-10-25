@@ -35,7 +35,6 @@ const MENU = [
       { name: "Griot Dinner", desc: "Fried pork. The plate we're known for.", price: 20, tag: "popular" },
       { name: "Turkey Dinner", desc: "Tasso turkey.", price: 22 },
       { name: "Goat Dinner", desc: "Kabrit.", price: 28, tag: "spicy" },
-      { name: "Shrimp Dinner", desc: "Seasoned shrimp.", price: 22 },
       { name: "Jumbo Shrimp Dinner", desc: "Jumbo seasoned shrimp.", price: 24 },
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
       { name: "Boulet Dinner", desc: "Haitian meatballs.", price: 20 },
