@@ -39,6 +39,7 @@ const MENU = [
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
       { name: "Boulet Dinner", desc: "Haitian meatballs.", price: 20 },
       { name: "Rib Dinner", desc: "Tender ribs.", price: 27 },
+      { name: "Honey Hot Griot Dinner", desc: "Fried pork tossed in honey hot.", price: 20, tag: "spicy" },
 // ---------------------------------------------------------------------
 //   ],
 // },
@@ -58,6 +59,7 @@ const MENU = [
       { name: "Turkey & Plantain", desc: "Tasso turkey with plantain.", price: 18 },
       { name: "Boulet & Plantain", desc: "Haitian meatballs with plantain.", price: 16 },
       { name: "Goat & Plantain", desc: "Kabrit with plantain.", price: 24 },
+      { name: "Honey Hot Griot & Plantain", desc: "Fried pork tossed in honey hot, with plantain.", price: 16, tag: "spicy" },
     ],
   },
   {
@@ -71,10 +73,10 @@ const MENU = [
     ],
   },
   {
-    title: "Wings & Fries",
-    kreyol: "Zèl ak frit",
+    title: "Wings, Shrimp & Fries",
+    kreyol: "Zèl, kribich ak frit",
     board: "blue",
-    note: "All wings come with fries. Pick your flavor.",
+    note: "Wings and shrimp come with fries. Pick your wing flavor.",
     choices: { label: "Flavors", options: ["Honey Hot", "Lemon Pepper", "BBQ", "Buffalo", "Jerk", "Plain"] },
     photo: "images/wings-plate.jpg",
     photoAlt: "Sauced wings with seasoned fries and street corn",
@@ -82,6 +84,8 @@ const MENU = [
       { name: "6 Pieces", desc: "With fries.", price: 12 },
       { name: "8 Pieces", desc: "With fries.", price: 14 },
       { name: "10 Pieces", desc: "With fries.", price: 16 },
+      { name: "6 Pc Jumbo Shrimp", desc: "Jumbo shrimp with fries.", price: 15 },
+      { name: "10 Pc Jumbo Shrimp", desc: "Jumbo shrimp with fries.", price: 18 },
     ],
   },
   {
