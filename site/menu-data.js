@@ -73,10 +73,10 @@ const MENU = [
     ],
   },
   {
-    title: "Wings, Shrimp & Fries",
-    kreyol: "Zèl, kribich ak frit",
+    title: "Wings & Fries",
+    kreyol: "Zèl ak frit",
     board: "blue",
-    note: "Wings and shrimp come with fries. Pick your wing flavor.",
+    note: "All wings come with fries. Pick your flavor.",
     choices: { label: "Flavors", options: ["Honey Hot", "Lemon Pepper", "BBQ", "Buffalo", "Jerk", "Plain"] },
     photo: "images/wings-plate.jpg",
     photoAlt: "Sauced wings with seasoned fries and street corn",
@@ -84,6 +84,14 @@ const MENU = [
       { name: "6 Pieces", desc: "With fries.", price: 12 },
       { name: "8 Pieces", desc: "With fries.", price: 14 },
       { name: "10 Pieces", desc: "With fries.", price: 16 },
+    ],
+  },
+  {
+    title: "Shrimp & Fries",
+    kreyol: "Kribich ak frit",
+    board: "blue",
+    note: "Jumbo shrimp with fries.",
+    items: [
       { name: "6 Pc Jumbo Shrimp", desc: "Jumbo shrimp with fries.", price: 15 },
       { name: "10 Pc Jumbo Shrimp", desc: "Jumbo shrimp with fries.", price: 18 },
     ],
