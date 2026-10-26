@@ -38,7 +38,6 @@ const MENU = [
       { name: "Jumbo Shrimp Dinner", desc: "Jumbo seasoned shrimp.", price: 24 },
       { name: "Chicken Dinner", desc: "Poul.", price: 20 },
       { name: "Boulet Dinner", desc: "Haitian meatballs.", price: 20 },
-      { name: "Rib Dinner", desc: "Tender ribs.", price: 27 },
       { name: "Fried Rib Dinner", desc: "Fried tender ribs.", price: 27 },
       { name: "Honey Hot Griot Dinner", desc: "Fried pork tossed in honey hot.", price: 20, tag: "spicy" },
 // ---------------------------------------------------------------------
