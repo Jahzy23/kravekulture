@@ -350,9 +350,11 @@
     $("[data-order-form]").addEventListener("submit", submit);
     $("[data-new-order]").addEventListener("click", newOrder);
 
-    // Came back to the page after ordering (within 24 hours)? Show that order again.
+    // Opening the order page always starts a fresh order. Only a reload of the
+    // confirmation itself (within 24 hours) shows that order again.
+    const nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
     const last = store.local("kk_last_order");
-    if (last && last.number && Date.now() - Date.parse(last.createdAt) < 24 * 3600e3) showConfirm(last);
+    if (nav && nav.type === "reload" && last && last.number && Date.now() - Date.parse(last.createdAt) < 24 * 3600e3) showConfirm(last);
     checkOpen();
   });
 })();
