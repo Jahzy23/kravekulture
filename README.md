@@ -5,7 +5,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step. Online 
 ## Folders
 
 - `site/` — the website. Deploy this folder as-is.
-  - `index.html` home page
+  - `index.html` old scroll-scene home page, **switched off since October 27, 2026**: `/` and `/index.html` redirect to `menu.html` (see `redirects` in `vercel.json`); delete those two redirects to bring it back
   - `menu.html` menu + find the truck (the QR code points here)
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
