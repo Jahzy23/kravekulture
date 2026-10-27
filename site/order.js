@@ -257,13 +257,50 @@
     $("[data-confirm-when]").textContent = isNaN(placed) ? "" : "Placed " + placed.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" }) + " for " + order.name + ".";
     $("#order-flow").hidden = true;
     $("[data-cart-bar]").hidden = true;
+    setConfirmStatus(order.status);
     const box = $("#confirm");
     box.hidden = false;
     window.scrollTo(0, 0);
     box.focus({ preventScroll: true });
+    watchStatus(order);
+  }
+
+  const STATUS_TEXT = { new: "Received. We're on it.", done: "Done. Thanks for ordering!" };
+  function setConfirmStatus(status) {
+    const n = $("[data-confirm-status]");
+    n.dataset.state = status === "done" ? "done" : "new";
+    n.textContent = STATUS_TEXT[n.dataset.state];
+  }
+
+  // Keep the status on the confirmation screen fresh (every 30s while the page is open,
+  // until the truck marks the order done).
+  let statusTimer = null;
+  function watchStatus(order) {
+    clearInterval(statusTimer);
+    if (!order.phone || order.status === "done") return;
+    const check = async () => {
+      if (document.visibilityState !== "visible" || $("#confirm").hidden) return;
+      try {
+        const res = await fetch("/api/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ number: order.number, name: order.name, last4: String(order.phone).replace(/\D/g, "").slice(-4) }),
+        });
+        const data = await res.json();
+        const found = data && data.orders && data.orders[0];
+        if (!found) return;
+        setConfirmStatus(found.status);
+        order.status = found.status;
+        store.local("kk_last_order", order);
+        if (found.status === "done") clearInterval(statusTimer);
+      } catch (e) { /* try again next tick */ }
+    };
+    check();
+    statusTimer = setInterval(check, 30000);
   }
 
   function newOrder() {
+    clearInterval(statusTimer);
     store.local("kk_last_order", null);
     $("#confirm").hidden = true;
     $("#order-flow").hidden = false;
@@ -306,9 +343,9 @@
     $("[data-order-form]").addEventListener("submit", submit);
     $("[data-new-order]").addEventListener("click", newOrder);
 
-    // Came back to the page after ordering (within 12 hours)? Show that order again.
+    // Came back to the page after ordering (within 24 hours)? Show that order again.
     const last = store.local("kk_last_order");
-    if (last && last.number && Date.now() - Date.parse(last.createdAt) < 12 * 3600e3) showConfirm(last);
+    if (last && last.number && Date.now() - Date.parse(last.createdAt) < 24 * 3600e3) showConfirm(last);
     checkOpen();
   });
 })();

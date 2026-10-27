@@ -48,6 +48,10 @@
         <button type="button" role="tab" data-tab="done" aria-selected="false">Done <b data-count="done">0</b></button>
         <button type="button" role="tab" data-tab="all" aria-selected="false">All <b data-count="all">0</b></button>
       </div>
+      <div class="admin-search">
+        <label class="sr-only" for="a-search">Search orders by name, phone or order number</label>
+        <input id="a-search" type="search" data-search placeholder="Search name, phone or #" autocomplete="off" enterkeyhint="search">
+      </div>
       <p class="admin-note" data-updated aria-live="polite"></p>
       <ol class="tickets" data-tickets></ol>
       <p class="admin-empty" data-empty hidden>No orders here.</p>

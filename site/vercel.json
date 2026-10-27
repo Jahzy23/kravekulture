@@ -58,7 +58,7 @@
       ]
     },
     {
-      "source": "/order.html",
+      "source": "/(order|track)\\.html",
       "headers": [
         {
           "key": "Content-Security-Policy",
