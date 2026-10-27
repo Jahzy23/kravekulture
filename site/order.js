@@ -264,7 +264,7 @@
     setConfirmStatus(order.status);
     const mailed = $("[data-confirm-emailed]");
     mailed.hidden = !order.emailed;
-    mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + ". Check spam if you don't see it." : "";
+    mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + ". Don't see it in a minute? Check your spam and trash folders." : "";
     const box = $("#confirm");
     box.hidden = false;
     window.scrollTo(0, 0);
