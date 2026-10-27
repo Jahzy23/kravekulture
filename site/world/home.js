@@ -10,17 +10,6 @@ mountScrollWorld(document.getElementById('world'), {
   connScroll: 0.9,
   sections: [
     {
-      id: 'market', label: 'Market',
-      still: 'world/market.webp',
-      stillSrcset: 'world/market-900.webp 900w, world/market-1200.webp 1200w, world/market.webp 1800w',
-      accent: '#c4261d',
-      scroll: 1.5, linger: 0.3,
-      eyebrow: 'From the market',
-      title: 'It starts in Little Haiti.',
-      body: 'Plantains, scotch bonnets, cabbage for the pikliz. Picked fresh and cooked the way home does it.',
-      tags: ['Haitian', 'Caribbean', 'Soul food'],
-    },
-    {
       id: 'kitchen', label: 'Kitchen',
       still: 'world/kitchen.webp',
       stillSrcset: 'world/kitchen-900.webp 900w, world/kitchen-1200.webp 1200w, world/kitchen.webp 1800w',
