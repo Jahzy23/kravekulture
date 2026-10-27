@@ -50,8 +50,8 @@ mountScrollWorld(document.getElementById('world'), {
       accent: '#c4261d',
       scroll: 1.6, linger: 0.4,
       eyebrow: 'The dinner',
-      title: 'Rice. Meat. Plantain. Mac.',
-      body: 'Every dinner comes with rice, meat, plantain and mac. Griot, goat, turkey, shrimp, chicken, boulet or rib.',
+      title: 'Rice. Meat. Plantain.',
+      body: 'Every dinner comes with rice, meat and plantain. Griot, goat, turkey, shrimp, chicken, boulet or rib.',
       tags: ['7 dinners', 'From $20'],
     },
     {
