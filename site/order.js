@@ -208,6 +208,8 @@
     if (name.length < 2) { form.name.focus(); return showError("Please add your name so we can call it out at the window."); }
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10 || digits.length > 11) { form.phone.focus(); return showError("Please add a phone number we can reach you on (10 digits)."); }
+    const email = form.email.value.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) { form.email.focus(); return showError("That email address doesn't look right. Fix it, or leave it empty."); }
 
     sending = true;
     const btn = $("[data-submit]");
@@ -220,6 +222,7 @@
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           name, phone,
+          email: form.email.value.trim(),
           notes: form.notes.value.trim(),
           website: form.website.value,
           items: cart.map((l) => ({ name: l.name, flavor: l.flavor, qty: l.qty })),
@@ -233,6 +236,7 @@
       }
       cart = [];
       store.set("kk_cart", cart);
+      data.order.emailed = Boolean(data.emailed);
       store.local("kk_last_order", data.order);
       showConfirm(data.order);
     } catch (err) {
@@ -258,6 +262,9 @@
     $("#order-flow").hidden = true;
     $("[data-cart-bar]").hidden = true;
     setConfirmStatus(order.status);
+    const mailed = $("[data-confirm-emailed]");
+    mailed.hidden = !order.emailed;
+    mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + ". Check spam if you don't see it." : "";
     const box = $("#confirm");
     box.hidden = false;
     window.scrollTo(0, 0);

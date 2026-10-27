@@ -52,6 +52,7 @@
       <p class="confirm-number display">#<span data-confirm-number></span></p>
       <p class="confirm-status" data-confirm-status data-state="new">Received. We're on it.</p>
       <p class="confirm-lead">Show this number at the window. <strong>Pay at the truck</strong> when you pick up: <strong data-confirm-total></strong>.</p>
+      <p class="confirm-emailed" data-confirm-emailed hidden></p>
       <p class="confirm-save"><b>Take a screenshot of this screen.</b> This page also remembers your order on this phone, and if you lose the number you can <a href="track.html">find your order</a> with your name and the last 4 digits of your phone.</p>
       <ul class="confirm-items" data-confirm-items></ul>
       <p class="confirm-small" data-confirm-when></p>
@@ -105,6 +106,11 @@
               <label for="o-phone">Phone number</label>
               <input id="o-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" required>
               <small>Only used if we need to reach you about this order.</small>
+            </div>
+            <div class="field">
+              <label for="o-email">Email <span>(optional)</span></label>
+              <input id="o-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="120">
+              <small>We'll email you your order number so you don't lose it.</small>
             </div>
             <div class="field">
               <label for="o-notes">Notes <span>(optional)</span></label>

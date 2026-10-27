@@ -37,10 +37,12 @@ function buildOrder(body) {
   if (!body || typeof body !== "object") return { error: "Something went wrong. Please try again." };
   const name = clean(body.name, 60);
   const phone = clean(body.phone, 20);
+  const email = clean(body.email, 120).toLowerCase();
   const notes = clean(body.notes, 300);
   const digits = phone.replace(/\D/g, "");
   if (name.length < 2) return { error: "Please add your name so we can call it out at the window." };
   if (digits.length < 10 || digits.length > 11) return { error: "Please add a phone number we can reach you on (10 digits)." };
+  if (email && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email)) return { error: "That email address doesn't look right. Fix it, or leave it empty." };
   if (!Array.isArray(body.items) || !body.items.length) return { error: "Your order is empty." };
   if (body.items.length > MAX_LINES) return { error: "That's a big order! Please call the truck for catering." };
 
@@ -65,7 +67,7 @@ function buildOrder(body) {
 
   const items = Array.from(lines.values()).map((l) => ({ ...l, lineTotal: l.price * l.qty }));
   const total = items.reduce((sum, l) => sum + l.lineTotal, 0);
-  return { order: { name, phone, notes, items, total } };
+  return { order: { name, phone, email: email || undefined, notes, items, total } };
 }
 
 async function isOrderingOn() {

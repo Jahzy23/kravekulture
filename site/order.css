@@ -638,3 +638,14 @@
   display: grid;
   gap: 12px;
 }
+.confirm-emailed {
+  font-weight: 700;
+}
+.confirm-emailed[hidden] {
+  display: none;
+}
+.ticket-email {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}

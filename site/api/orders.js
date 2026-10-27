@@ -6,6 +6,7 @@
 const { send, readJson, clientIp, sameOrigin } = require("./_lib/http");
 const { configured } = require("./_lib/store");
 const { buildOrder, isOrderingOn, underLimit, saveOrder } = require("./_lib/orders");
+const { sendConfirmation } = require("./_lib/email");
 
 module.exports = async function handler(req, res) {
   try {
@@ -35,7 +36,9 @@ module.exports = async function handler(req, res) {
     }
 
     const saved = await saveOrder(order);
-    return send(res, 201, { ok: true, order: saved });
+    // The order is saved either way; the email is a bonus.
+    const emailed = await sendConfirmation(saved);
+    return send(res, 201, { ok: true, order: saved, emailed });
   } catch (e) {
     console.error("[orders]", e);
     return send(res, 503, { error: "Online ordering is having trouble. Please order at the window." });
