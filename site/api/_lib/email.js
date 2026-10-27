@@ -3,7 +3,7 @@
    throws: if email is not set up or Resend is down, the order still goes through. */
 "use strict";
 
-const { LOCATION, SPOT, spotIsFresh } = require("../../menu-data.js");
+const { MENU, LOCATION, SPOT, spotIsFresh } = require("../../menu-data.js");
 
 const KEY = process.env.RESEND_API_KEY || "";
 const FROM = process.env.EMAIL_FROM || "Krave Kulture <orders@eatkravekulture.com>";
@@ -13,6 +13,20 @@ const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&":
 const money = (n) => "$" + (Number.isInteger(n) ? n : Number(n).toFixed(2));
 const lineLabel = (l) => l.qty + " × " + l.name + (l.flavor ? " (" + l.flavor + ")" : "");
 
+// Email-sized crops of the menu photos live in images/email/. The email shows the
+// photo for the first thing ordered that has one (wings orders get the wings plate),
+// and the dinner plate otherwise.
+const PHOTOS = { "images/dinner-plate.jpg": "dinner.jpg", "images/wings-plate.jpg": "wings.jpg" };
+const PHOTO_ALT = { "dinner.jpg": "A Krave Kulture dinner plate", "wings.jpg": "Krave Kulture wings with fries and corn" };
+
+function photoFor(order) {
+  for (const l of order.items || []) {
+    const section = (MENU || []).find((s) => (s.items || []).some((i) => i.name === l.name));
+    if (section && PHOTOS[section.photo]) return PHOTOS[section.photo];
+  }
+  return "dinner.jpg";
+}
+
 function emailConfigured() {
   return Boolean(KEY);
 }
@@ -20,6 +34,7 @@ function emailConfigured() {
 function build(order) {
   const spot = spotIsFresh(SPOT) ? SPOT.where + (SPOT.when ? ", " + SPOT.when : "") : "";
   const phone = LOCATION.phone || "";
+  const photo = photoFor(order);
   const text = [
     "Thanks, " + order.name + "! Your Krave Kulture order is in.",
     "",
@@ -45,8 +60,11 @@ function build(order) {
   const html =
     '<!doctype html><html><body style="margin:0;background:#fdfbf5;font-family:Arial,Helvetica,sans-serif;color:#111">' +
     '<div style="max-width:520px;margin:0 auto;padding:24px 16px">' +
-    '<div style="background:#d92b1f;color:#fff;padding:18px 20px;font-size:22px;font-weight:900;letter-spacing:.5px;text-transform:uppercase">Krave Kulture</div>' +
-    '<div style="background:#fff;border:3px solid #111;border-top:0;padding:22px 20px">' +
+    '<div style="background:#d92b1f;padding:16px 20px;text-align:center">' +
+    '<img src="' + SITE + '/images/email/logo.png" width="80" height="80" alt="Krave Kulture" style="display:block;margin:0 auto;border:0;width:80px;height:80px">' +
+    "</div>" +
+    '<img src="' + SITE + "/images/email/" + photo + '" width="520" alt="' + PHOTO_ALT[photo] + '" style="display:block;width:100%;max-width:520px;height:auto;border:3px solid #111;border-top:0;border-bottom:0;box-sizing:border-box">' +
+    '<div style="background:#fff;border:3px solid #111;padding:22px 20px">' +
     '<p style="margin:0 0 6px;font-size:16px">Thanks, ' + esc(order.name) + "! Your order is in.</p>" +
     '<p style="margin:14px 0 2px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#55534e">Order number</p>' +
     '<p style="margin:0 0 12px;font-size:56px;line-height:1;font-weight:900;color:#d92b1f">#' + esc(order.number) + "</p>" +
