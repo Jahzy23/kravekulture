@@ -74,12 +74,12 @@
     {
       "@type": "MenuSection",
       "name": "Plates",
-      "description": "Every dinner comes with rice, meat and plantain.",
+      "description": "Every dinner comes with rice, meat and plantain. Mac is $7 on the side. House-made pikliz on the side — ask for extra scotch bonnet if you're brave.",
       "hasMenuItem": [
         {
           "@type": "MenuItem",
           "name": "Griot Dinner",
-          "description": "Fried pork.",
+          "description": "Fried pork. The plate we're known for.",
           "offers": {
             "@type": "Offer",
             "price": "20",
@@ -92,7 +92,7 @@
           "description": "Tasso turkey.",
           "offers": {
             "@type": "Offer",
-            "price": "20",
+            "price": "22",
             "priceCurrency": "USD"
           }
         },
@@ -102,13 +102,14 @@
           "description": "Kabrit.",
           "offers": {
             "@type": "Offer",
-            "price": "25",
+            "price": "28",
             "priceCurrency": "USD"
           }
         },
         {
           "@type": "MenuItem",
           "name": "Jumbo Shrimp Dinner",
+          "description": "Jumbo seasoned shrimp.",
           "offers": {
             "@type": "Offer",
             "price": "24",
@@ -138,6 +139,7 @@
         {
           "@type": "MenuItem",
           "name": "Fried Rib Dinner",
+          "description": "Fried tender ribs.",
           "offers": {
             "@type": "Offer",
             "price": "27",
@@ -147,9 +149,67 @@
         {
           "@type": "MenuItem",
           "name": "Honey Hot Griot Dinner",
+          "description": "Fried pork tossed in honey hot.",
           "offers": {
             "@type": "Offer",
             "price": "20",
+            "priceCurrency": "USD"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "MenuSection",
+      "name": "Meat & Plantain",
+      "description": "Meat with fried plantain.",
+      "hasMenuItem": [
+        {
+          "@type": "MenuItem",
+          "name": "Griot & Plantain",
+          "description": "Fried pork with plantain.",
+          "offers": {
+            "@type": "Offer",
+            "price": "16",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "MenuItem",
+          "name": "Turkey & Plantain",
+          "description": "Tasso turkey with plantain.",
+          "offers": {
+            "@type": "Offer",
+            "price": "18",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "MenuItem",
+          "name": "Boulet & Plantain",
+          "description": "Haitian meatballs with plantain.",
+          "offers": {
+            "@type": "Offer",
+            "price": "16",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "MenuItem",
+          "name": "Goat & Plantain",
+          "description": "Kabrit with plantain.",
+          "offers": {
+            "@type": "Offer",
+            "price": "24",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "MenuItem",
+          "name": "Honey Hot Griot & Plantain",
+          "description": "Fried pork tossed in honey hot, with plantain.",
+          "offers": {
+            "@type": "Offer",
+            "price": "16",
             "priceCurrency": "USD"
           }
         }
@@ -162,18 +222,20 @@
         {
           "@type": "MenuItem",
           "name": "Side of Mac",
+          "description": "Baked mac and cheese.",
           "offers": {
             "@type": "Offer",
-            "price": "6",
+            "price": "7",
             "priceCurrency": "USD"
           }
         },
         {
           "@type": "MenuItem",
           "name": "Side of Rice",
+          "description": "Rice and beans.",
           "offers": {
             "@type": "Offer",
-            "price": "5",
+            "price": "6",
             "priceCurrency": "USD"
           }
         }
@@ -250,6 +312,7 @@
         {
           "@type": "MenuItem",
           "name": "Banana Pudding",
+          "description": "Creamy banana pudding.",
           "offers": {
             "@type": "Offer",
             "price": "6",
@@ -275,6 +338,7 @@
         {
           "@type": "MenuItem",
           "name": "Passion Fruit",
+          "description": "Passion fruit drink.",
           "offers": {
             "@type": "Offer",
             "price": "5",
@@ -284,6 +348,7 @@
         {
           "@type": "MenuItem",
           "name": "Soda",
+          "description": "Ice-cold soda.",
           "offers": {
             "@type": "Offer",
             "price": "2",
@@ -293,6 +358,7 @@
         {
           "@type": "MenuItem",
           "name": "Water",
+          "description": "Cold water.",
           "offers": {
             "@type": "Offer",
             "price": "1",
@@ -374,6 +440,10 @@
   </div>
 
   <main id="menu">
+    <div class="wrap order-cta" data-order-cta hidden>
+      <p><b>Skip the line.</b> Order ahead for pickup, pay at the truck.</p>
+      <a class="btn btn-red" href="order.html">Order ahead</a>
+    </div>
     <div id="menu-sections">
       <noscript>
         <div class="wrap noscript-note">
@@ -480,6 +550,10 @@
     <a href="#find">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
       Find us
+    </a>
+    <a href="order.html" data-order-cta hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+      Order
     </a>
   </nav>
 

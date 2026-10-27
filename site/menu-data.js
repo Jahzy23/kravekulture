@@ -154,3 +154,9 @@ function spotIsFresh(spot, now) {
   const age = (now || Date.now()) - t;
   return Number.isFinite(t) && age >= -864e5 && age <= SPOT_FRESH_DAYS * 864e5;
 }
+
+// Lets the order API (site/api/) read the same menu and prices the page shows.
+// Browsers skip this line.
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { MENU, MENU_STATUS, LOCATION, SPOT, spotIsFresh };
+}

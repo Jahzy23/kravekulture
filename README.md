@@ -1,6 +1,6 @@
 # Krave Kulture — site, menu and QR code
 
-Static site for the Krave Kulture food truck (Miami, FL). No build step.
+Static site for the Krave Kulture food truck (Miami, FL). No build step. Online pickup ordering runs on two small Vercel functions in `site/api/` with an Upstash Redis store.
 
 ## Folders
 
@@ -9,6 +9,9 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step.
   - `menu.html` menu + find the truck (the QR code points here)
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
+  - `order.html` + `order.js` order ahead for pickup, pay at the truck (see "Online ordering" below)
+  - `admin.html` + `admin.js` password-protected order board; `order.css` styles both
+  - `api/` Vercel serverless functions behind ordering (`orders.js`, `admin.js`, helpers in `api/_lib/`)
   - `terms.html`, `privacy.html` legal pages (see below)
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
@@ -29,11 +32,28 @@ Open `site/menu-data.js`. Change names, prices, flavors, this week's spot, city 
 
 - Set `SPOT` to this week's spot: `where`, `when`, and today's date in `updated`, exactly `YYYY-MM-DD` (`2026-10-06`; any other format hides it). It shows under Find the Truck on the menu page and in the truck scene on the home page for 7 days after that date, whatever `when` says, then hides itself and both pages go back to pointing at Instagram. If the plan changes or the spot ends early, change or clear `where` and redeploy. Paste a Google Maps share link (`https://...`) into `mapUrl` to get a Map link.
 - `phone` in `LOCATION` (currently `786-999-4019`) powers the **Call us** button under Find the Truck and the `telephone` field in the JSON-LD. The number is never printed on the page, only in the `tel:` link. Leave it empty to hide the button.
-- There is no payment section on the site any more (removed September 23, 2026); the terms page just says to ask at the window.
+- There is no payment section on the site (removed September 23, 2026); online orders are paid at the truck.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
 - After editing prices, dishes or the phone number, run `node make-schema.js` so the structured data search engines read matches the real data.
 - The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 dinners", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
 - A section with no `items` is skipped (no crash), on the page and in the JSON-LD.
+
+## Online ordering
+
+Customers order on `order.html` for **pickup only** and **pay at the truck**; nothing is charged online. Each order gets a random 4-digit order number shown on screen. Orders land on `admin.html`, where you sign in with the admin password, see open orders (oldest first, refreshed every 15 seconds with a beep for new ones), tap **Mark complete**, and flip the **Taking orders** switch. The switch starts **off**: while it is off the order page says online ordering is closed, and the "Order ahead" links on the menu page stay hidden.
+
+Prices and items come from `menu-data.js`, the same file as the menu, and the server re-prices every order from it, so editing the menu updates ordering too. An item is orderable when its `price` is a number and its `tag` is not `"sold out"`; a section with `choices` (wings) makes the customer pick one. Orders are kept 60 days, then deleted automatically.
+
+One-time setup in Vercel (project `kravekulture`):
+
+1. **Storage → Create Database → Upstash (Redis)**, free plan, connect it to the `kravekulture` project for all environments. This adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+2. **Settings → Environment Variables → add `ADMIN_PASSWORD`** (at least 8 characters, Production + Preview). Changing it later signs every device out.
+3. **Redeploy** (Deployments → latest → Redeploy) so the functions pick up the variables.
+4. Open `https://eatkravekulture.com/admin.html`, sign in, turn on **Taking orders**.
+
+Until steps 1 and 2 are done, the order page simply says online ordering isn't open, and the rest of the site works as before. Abuse limits: 8 orders per 15 minutes per IP, 20 of any one item, 10 admin password tries per 15 minutes per IP, plus a hidden honeypot field.
+
+To test locally without Vercel, point `KV_REST_API_URL`/`KV_REST_API_TOKEN` at an Upstash database (or any Upstash-REST-compatible mock) and run the functions with `vercel dev`.
 
 ## Regenerate the QR code
 
@@ -84,14 +104,14 @@ If the host name ever changes again, run `node set-domain.js new-domain.com`: it
 
 ## Terms and privacy pages
 
-`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, no forms, no cookies, payments at the truck, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram. They are a starting point, not legal advice; have someone qualified read them if the business grows.
+`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, one optional pickup order form (name, phone, notes, kept 60 days), no visitor cookies, payments at the truck, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram. They are a starting point, not legal advice; have someone qualified read them if the business grows.
 
 Things to keep true:
 
 - The contact on both pages is the Instagram account from `menu-data.js` (`LOCATION.instagram` / `LOCATION.handle`), filled in by `app.js`. If you want the phone number or an email there too, add it to the two pages by hand.
 - Change the "Last updated" line at the top of a page whenever you change its text.
 - The terms name Florida as governing law. Change it if the business moves.
-- If the site ever gains a form, a newsletter, an ordering system, a cookie, or a new third-party script, update the privacy policy first.
+- If the site ever gains another form, a newsletter, a cookie, a new third-party script, or ordering starts collecting more than name, phone and notes, update the privacy policy first.
 - Both pages are linked from every footer, from the last scene of the home page (`links:` in `site/world/home.js`) and from `sitemap.xml`; they get the strict CSP from `vercel.json` like the other content pages.
 
 ## Replace the photos and logo
