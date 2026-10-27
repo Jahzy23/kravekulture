@@ -91,6 +91,7 @@
         el("p", { class: "ticket-who" }, [
           el("b", { text: o.name }),
           tel ? el("a", { href: "tel:" + tel, text: o.phone }) : null,
+          o.email ? el("span", { class: "ticket-email", text: o.email }) : null,
         ]),
         el("ul", { class: "ticket-items" }, (o.items || []).map((l) =>
           el("li", {}, [
