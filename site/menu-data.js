@@ -28,7 +28,7 @@ const MENU = [
     title: "Plates",
     kreyol: "Pla konplè",
     board: "red",
-    note: "Every dinner comes with rice, meat, plantain and mac. House-made pikliz on the side — ask for extra scotch bonnet if you're brave.",
+    note: "Every dinner comes with rice, meat and plantain. Mac is $7 on the side. House-made pikliz on the side — ask for extra scotch bonnet if you're brave.",
     photo: "images/dinner-plate.jpg",
     photoAlt: "Dinner plate: chicken with peppers and onions, rice and beans, baked mac and cheese, and fried plantain",
     items: [

@@ -19,7 +19,7 @@ Create the listing at https://business.google.com with the Google account you wa
 
 ## Description (750 characters max; this is 463)
 
-Krave Kulture is a Haitian, Caribbean and soul food truck in Miami. Every dinner comes with rice, meat, plantain and mac: griot (fried pork), tasso turkey, goat, shrimp, chicken, boulet (Haitian meatballs) or rib, from $20. Wings and fries in six flavors (honey hot, lemon pepper, BBQ, buffalo, jerk or plain) from $12. Banana pudding, Kravelade house lemonade, passion fruit. The truck moves around the city; today's spot is posted on Instagram @eatkravekulture.
+Krave Kulture is a Haitian, Caribbean and soul food truck in Miami. Every dinner comes with rice, meat and plantain: griot (fried pork), tasso turkey, goat, shrimp, chicken, boulet (Haitian meatballs) or rib, from $20. Wings and fries in six flavors (honey hot, lemon pepper, BBQ, buffalo, jerk or plain) from $12. Banana pudding, Kravelade house lemonade, passion fruit. The truck moves around the city; today's spot is posted on Instagram @eatkravekulture.
 
 ## Attributes (tick only what is true)
 
