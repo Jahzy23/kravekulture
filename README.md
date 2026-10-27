@@ -10,8 +10,9 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step. Online 
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
   - `order.html` + `order.js` order ahead for pickup, pay at the truck (see "Online ordering" below)
+  - `track.html` + `track.js` customers find a lost order by name + last 4 digits of their phone
   - `admin.html` + `admin.js` password-protected order board; `order.css` styles both
-  - `api/` Vercel serverless functions behind ordering (`orders.js`, `admin.js`, helpers in `api/_lib/`)
+  - `api/` Vercel serverless functions behind ordering (`orders.js`, `track.js`, `admin.js`, helpers in `api/_lib/`)
   - `terms.html`, `privacy.html` legal pages (see below)
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
@@ -41,6 +42,8 @@ Open `site/menu-data.js`. Change names, prices, flavors, this week's spot, city 
 ## Online ordering
 
 Customers order on `order.html` for **pickup only** and **pay at the truck**; nothing is charged online. Each order gets a random 4-digit order number shown on screen. Orders land on `admin.html`, where you sign in with the admin password, see open orders (oldest first, refreshed every 15 seconds with a beep for new ones), tap **Mark complete**, and flip the **Taking orders** switch. The switch starts **off**: while it is off the order page says online ordering is closed, and the "Order ahead" links on the menu page stay hidden.
+
+After ordering, the confirmation screen shows the order number and a live status (Received → Done, checked every 30 seconds), tells the customer to screenshot it, and is remembered on that phone for 24 hours. Anyone who loses the number can get it back on `track.html` with their name (first name is enough) and the last 4 digits of the phone they ordered with; it shows orders from the last 36 hours. On `admin.html` the search box finds orders by name, phone digits or order number across all tabs.
 
 Prices and items come from `menu-data.js`, the same file as the menu, and the server re-prices every order from it, so editing the menu updates ordering too. An item is orderable when its `price` is a number and its `tag` is not `"sold out"`; a section with `choices` (wings) makes the customer pick one. Orders are kept 60 days, then deleted automatically.
 

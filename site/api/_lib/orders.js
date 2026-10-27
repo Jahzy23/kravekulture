@@ -114,6 +114,35 @@ async function listOrders(limit) {
   return orders;
 }
 
+// Customer lookup: orders from the last LOOKUP_HOURS placed under this name (first name
+// is enough) with a phone ending in last4. Returns only what the customer already knows.
+const LOOKUP_HOURS = 36;
+const normName = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+
+function nameMatches(stored, typed) {
+  const a = normName(stored);
+  const b = normName(typed);
+  if (!a || !b) return false;
+  return a === b || a.split(" ")[0] === b.split(" ")[0];
+}
+
+async function findOrders(name, last4, number) {
+  const since = Date.now() - LOOKUP_HOURS * 3600e3;
+  return (await listOrders(300))
+    .filter((o) => Date.parse(o.createdAt) >= since)
+    .filter((o) => !number || o.number === number)
+    .filter((o) => String(o.phone || "").replace(/\D/g, "").endsWith(last4) && nameMatches(o.name, name))
+    .map((o) => ({
+      number: o.number,
+      status: o.status,
+      createdAt: o.createdAt,
+      completedAt: o.completedAt || null,
+      name: o.name,
+      items: o.items,
+      total: o.total,
+    }));
+}
+
 async function setStatus(number, status) {
   if (!/^\d{4,5}$/.test(String(number))) return null;
   const key = "order:" + number;
@@ -127,4 +156,4 @@ async function setStatus(number, status) {
   return order;
 }
 
-module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, underLimit, saveOrder, listOrders, setStatus };
+module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, underLimit, saveOrder, listOrders, findOrders, setStatus };

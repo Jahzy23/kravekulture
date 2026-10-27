@@ -67,8 +67,19 @@
     const list = $("[data-tickets]");
     list.textContent = "";
     // Open orders oldest first (the next one to cook is on top); others newest first.
-    const shown = orders.filter((o) => tab === "all" || (tab === "done" ? o.status === "done" : o.status !== "done"));
-    if (tab === "new") shown.reverse();
+    // Search: any word of the name, the order number, or phone digits. While searching,
+    // look across every tab so an order marked done by mistake still turns up.
+    const q = $("[data-search]").value.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, "");
+    const matches = (o) => {
+      if (!q) return true;
+      const words = String(o.name || "").toLowerCase();
+      if (words.includes(q.replace(/^#/, ""))) return true;
+      if (qDigits && (String(o.number).startsWith(qDigits) || String(o.phone || "").replace(/\D/g, "").includes(qDigits))) return true;
+      return false;
+    };
+    const shown = orders.filter((o) => (q ? true : tab === "all" || (tab === "done" ? o.status === "done" : o.status !== "done")) && matches(o));
+    if (tab === "new" && !q) shown.reverse();
     shown.forEach((o) => {
       const done = o.status === "done";
       const tel = String(o.phone || "").replace(/[^\d+]/g, "");
@@ -96,6 +107,7 @@
       ]));
     });
     $("[data-empty]").hidden = shown.length > 0;
+    $("[data-empty]").textContent = q ? "No orders match \u201c" + q + "\u201d." : "No orders here.";
   }
 
   function beep() {
@@ -196,6 +208,8 @@
       document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
       render();
     }));
+
+    $("[data-search]").addEventListener("input", render);
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && !$("[data-board]").hidden) load();
