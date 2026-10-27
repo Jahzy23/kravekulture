@@ -253,6 +253,16 @@
     update();
   }
 
+  // "Order ahead" links stay hidden unless the truck is taking online orders right now.
+  function orderCta() {
+    const ctas = document.querySelectorAll("[data-order-cta]");
+    if (!ctas.length || !window.fetch) return;
+    fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && d.open) ctas.forEach((n) => (n.hidden = false)); })
+      .catch(() => {});
+  }
+
   function year() {
     document.querySelectorAll("[data-year]").forEach((n) => (n.textContent = new Date().getFullYear()));
   }
@@ -260,7 +270,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Each step runs on its own so one bad menu-data.js entry (say a section with no
     // items) cannot take the Call button or the scroll spy down with it.
-    [renderMenu, renderLocation, renderSpot, scrollSpy, railHint, year].forEach((step) => {
+    [renderMenu, renderLocation, renderSpot, scrollSpy, railHint, orderCta, year].forEach((step) => {
       try { step(); } catch (e) { console.error("[krave] " + step.name + " failed:", e); }
     });
   });

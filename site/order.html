@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Order Ahead - Krave Kulture</title>
+  <meta name="description" content="Order Krave Kulture ahead for pickup at the truck in Miami, FL. Pay at the window when you pick up.">
+  <meta name="theme-color" content="#c4261d">
+  <meta property="og:title" content="Krave Kulture - Order Ahead">
+  <meta property="og:description" content="Order ahead for pickup at the Krave Kulture truck. Pay at the window.">
+  <meta property="og:image" content="https://eatkravekulture.com/images/og-menu.jpg">
+  <meta property="og:url" content="https://eatkravekulture.com/order.html">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://eatkravekulture.com/order.html">
+  <link rel="icon" href="images/logo-150.jpg">
+  <link rel="apple-touch-icon" href="images/logo-300.png">
+  <link rel="preload" href="fonts/bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/big-shoulders-text.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="order.css">
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body class="order-page">
+  <a class="sr-only" href="#order-menu">Skip to the menu</a>
+
+  <div class="awning" aria-hidden="true"></div>
+
+  <header class="sign">
+    <div class="wrap sign-inner">
+      <a class="sign-badge" href="index.html" aria-label="Krave Kulture home">
+        <picture>
+          <source srcset="images/logo-512.webp" type="image/webp">
+          <img src="images/logo-512.png" width="512" height="512" alt="Krave Kulture badge">
+        </picture>
+      </a>
+      <h1 class="painted sign-name">Order Ahead</h1>
+      <p class="sign-tag">Pickup only. <span>Pay at the truck.</span></p>
+    </div>
+  </header>
+
+  <div class="band">
+    <p class="wrap band-inner">
+      <span>Order online</span><span>Pick up at the window</span><span>Pay at the truck</span>
+    </p>
+  </div>
+
+  <main id="order">
+    <!-- Shown after an order goes through. -->
+    <section class="wrap confirm" id="confirm" hidden aria-live="polite" tabindex="-1">
+      <p class="label">Order placed</p>
+      <p class="confirm-number display">#<span data-confirm-number></span></p>
+      <p class="confirm-lead">Show this number at the window. <strong>Pay at the truck</strong> when you pick up: <strong data-confirm-total></strong>.</p>
+      <ul class="confirm-items" data-confirm-items></ul>
+      <p class="confirm-small" data-confirm-when></p>
+      <p class="confirm-small">Need to change something? <a data-phone-link href="tel:">Call the truck</a>.</p>
+      <div class="find-actions">
+        <button type="button" class="btn" data-new-order>Start a new order</button>
+        <a class="btn btn-white" href="menu.html#find">Find the truck</a>
+      </div>
+    </section>
+
+    <div id="order-flow">
+      <div class="wrap order-intro">
+        <p class="order-status" data-order-status role="status">Checking if we're taking orders…</p>
+        <p class="spot" data-spot hidden>
+          <strong class="spot-label">Pick up at</strong>
+          <span class="spot-where" data-spot-where></span><span class="sr-only" data-spot-sep>, </span>
+          <span class="spot-when" data-spot-when></span>
+        </p>
+        <p class="order-how">Add what you want, tell us your name and number, and we start cooking. You pay at the window when you pick up.</p>
+      </div>
+
+      <div id="order-menu">
+        <noscript>
+          <div class="wrap noscript-note">
+            <p>Ordering needs JavaScript. Order at the window, or see the <a href="menu.html">menu</a>.</p>
+          </div>
+        </noscript>
+      </div>
+
+      <section class="stall" id="checkout" aria-labelledby="checkout-title">
+        <div class="board board-black">
+          <div class="wrap">
+            <div class="board-head">
+              <h2 class="display board-title" id="checkout-title">Your Order</h2>
+              <span class="board-kreyol">Kòmand ou</span>
+            </div>
+          </div>
+        </div>
+        <div class="wrap checkout">
+          <p class="cart-empty" data-cart-empty>Nothing yet. Tap <b>Add</b> on anything above.</p>
+          <ul class="cart" data-cart></ul>
+          <p class="cart-total" data-cart-total hidden><span>Total, pay at the truck</span> <b data-cart-total-value></b></p>
+
+          <form class="order-form" data-order-form novalidate>
+            <div class="field">
+              <label for="o-name">Your name</label>
+              <input id="o-name" name="name" type="text" autocomplete="given-name" maxlength="60" required>
+            </div>
+            <div class="field">
+              <label for="o-phone">Phone number</label>
+              <input id="o-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" required>
+              <small>Only used if we need to reach you about this order.</small>
+            </div>
+            <div class="field">
+              <label for="o-notes">Notes <span>(optional)</span></label>
+              <textarea id="o-notes" name="notes" rows="2" maxlength="300" placeholder="Extra pikliz, no onions…"></textarea>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="o-website">Leave this empty</label>
+              <input id="o-website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+            <p class="form-error" data-form-error role="alert" hidden></p>
+            <button class="btn btn-red btn-wide" type="submit" data-submit>Place order · pay at the truck</button>
+            <p class="form-small">By ordering you agree to our <a href="terms.html">terms</a>. We keep your name and number for 60 days, see our <a href="privacy.html">privacy policy</a>.</p>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <picture>
+        <source srcset="images/logo-512.webp" type="image/webp">
+        <img src="images/logo-300.png" width="68" height="68" alt="">
+      </picture>
+      <p class="foot-tag">Krave it. Taste it. Live the Kulture.</p>
+      <p class="foot-small">&copy; <span data-year>2026</span> Krave Kulture &middot; <span data-city>Miami, FL</span> &middot; <a href="menu.html">Menu</a> &middot; <a href="index.html">Home</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a></p>
+    </div>
+  </footer>
+
+  <a class="cart-bar" href="#checkout" data-cart-bar hidden>
+    <span data-cart-bar-count></span>
+    <b>View order · <span data-cart-bar-total></span></b>
+  </a>
+
+  <script src="menu-data.js"></script>
+  <script src="order.js"></script>
+</body>
+</html>

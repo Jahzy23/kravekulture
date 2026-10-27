@@ -807,6 +807,22 @@ button {
   text-transform: uppercase;
   text-decoration-color: var(--blue);
 }
+/* "Order ahead" strip at the top of the menu (shown only while online ordering is on) */
+.order-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 18px 0;
+}
+.order-cta[hidden] {
+  display: none;
+}
+.order-cta p {
+  margin: 0;
+  font-size: 1.15rem;
+}
 .find-actions {
   display: flex;
   flex-wrap: wrap;
@@ -928,7 +944,8 @@ button {
   bottom: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   background: var(--ink);
   border-top: 4px solid var(--gold);
   padding-bottom: env(safe-area-inset-bottom);
@@ -951,6 +968,9 @@ button {
 }
 .bar a + a {
   border-left: 2px solid #2a2a2a;
+}
+.bar a[hidden] {
+  display: none;
 }
 .bar a:hover,
 .bar a[aria-current="true"] {

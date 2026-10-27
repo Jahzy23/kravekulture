@@ -1,0 +1,552 @@
+/* ============================================================
+   KRAVE KULTURE — order ahead (order.html) + order board (admin.html)
+   Builds on styles.css: same boards, rows, buttons and type.
+   ============================================================ */
+
+/* ---------- order page ---------- */
+.order-page {
+  padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom));
+}
+.order-intro {
+  display: grid;
+  gap: 14px;
+  padding: clamp(18px, 4vw, 32px) 0;
+}
+.order-intro p {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: 1.1rem;
+}
+.order-status {
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: clamp(1rem, 4vw, 1.25rem) !important;
+  line-height: 1.2;
+  padding: 14px 16px 12px;
+  border: var(--rule) solid var(--ink);
+  background: var(--whitewash-deep);
+}
+[data-ordering="open"] .order-status {
+  background: var(--gold);
+}
+[data-ordering="closed"] .order-status {
+  background: var(--ink);
+  color: var(--gold);
+}
+
+.order-row {
+  grid-template-areas:
+    "name price"
+    "desc desc"
+    "act act";
+}
+.row-act {
+  grid-area: act;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.add,
+.qty button {
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  border: var(--rule) solid var(--ink);
+  background: var(--gold);
+  color: var(--ink);
+  cursor: pointer;
+}
+.add {
+  min-height: 44px;
+  padding: 0 18px;
+}
+.add:disabled,
+.flavor:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.add.added {
+  animation: pop 260ms var(--ease-out);
+}
+@keyframes pop {
+  50% { transform: scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .add.added { animation: none; }
+}
+.add-off {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.flavor {
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 700;
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+  color: var(--ink);
+  max-width: 100%;
+}
+.flavor.need {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+.in-cart {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  color: var(--blue);
+}
+
+/* checkout */
+.checkout {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 4vw, 32px) 0 clamp(28px, 5vw, 44px);
+  max-width: 720px;
+}
+.checkout p {
+  margin: 0;
+}
+.cart-empty {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+.cart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--rule) solid var(--ink);
+}
+.cart:empty {
+  display: none;
+}
+.cart-line {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 2px solid var(--ink);
+}
+.cart-name {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+.qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.qty button {
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.qty button:disabled {
+  opacity: 0.4;
+}
+.qty b {
+  min-width: 2ch;
+  text-align: center;
+  font-family: var(--display);
+}
+.cart-price {
+  font-family: var(--display);
+  min-width: 4ch;
+  text-align: right;
+}
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cart-total b {
+  font-family: var(--display);
+  font-size: 1.6rem;
+}
+.cart-total[hidden] {
+  display: none;
+}
+
+.order-form {
+  display: grid;
+  gap: 16px;
+}
+.field {
+  display: grid;
+  gap: 6px;
+}
+.field label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
+.field label span {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+.field input,
+.field textarea {
+  font: inherit;
+  font-size: 1.1rem;
+  padding: 12px 12px 10px;
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+  color: var(--ink);
+  border-radius: 0;
+  width: 100%;
+}
+.field small,
+.form-small {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.form-error {
+  margin: 0;
+  padding: 12px 14px 10px;
+  background: var(--red-tint);
+  border-left: 6px solid var(--red);
+  font-weight: 700;
+}
+.form-error[hidden] {
+  display: none;
+}
+.btn-wide {
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* sticky "View order" bar on phones */
+.cart-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  height: calc(var(--bar-h) + env(safe-area-inset-bottom));
+  padding: 0 var(--gutter) env(safe-area-inset-bottom);
+  background: var(--ink);
+  color: var(--whitewash);
+  border-top: 4px solid var(--gold);
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cart-bar b {
+  font-family: var(--display);
+  font-weight: 400;
+  color: var(--gold);
+}
+.cart-bar[hidden] {
+  display: none;
+}
+@media (min-width: 900px) {
+  .order-page {
+    padding-bottom: 0;
+  }
+  .cart-bar {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    height: auto;
+    padding: 14px 18px;
+    border: var(--rule) solid var(--gold);
+    box-shadow: var(--shadow-paint);
+  }
+}
+
+/* confirmation */
+.confirm {
+  display: grid;
+  gap: 16px;
+  padding: clamp(24px, 5vw, 48px) 0 clamp(40px, 6vw, 72px);
+  max-width: 720px;
+  outline: none;
+}
+.confirm[hidden],
+#order-flow[hidden] {
+  display: none;
+}
+.confirm p {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.confirm-number {
+  font-size: clamp(4rem, 22vw, 8rem) !important;
+  line-height: 0.9;
+  color: var(--red);
+}
+.confirm-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--rule) solid var(--ink);
+}
+.confirm-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 2px solid var(--ink);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.confirm-small {
+  color: var(--ink-soft);
+  font-size: 1rem !important;
+}
+
+/* ---------- order board (admin) ---------- */
+.admin-page {
+  padding-bottom: 40px;
+}
+.admin-head {
+  background: var(--ink);
+  color: var(--whitewash);
+  border-bottom: 6px solid var(--gold);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.admin-head-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  padding: 14px 0;
+}
+.admin-head h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--gold);
+}
+.admin-tools {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.admin-tools[hidden] {
+  display: none;
+}
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.switch-track {
+  width: 52px;
+  height: 30px;
+  border-radius: 15px;
+  background: #55534e;
+  position: relative;
+  transition: background 160ms var(--ease-out);
+}
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--whitewash);
+  transition: transform 160ms var(--ease-out);
+}
+.switch input:checked + .switch-track {
+  background: #1f9d4a;
+}
+.switch input:checked + .switch-track::after {
+  transform: translateX(22px);
+}
+.switch input:focus-visible + .switch-track {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.link-btn {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.admin-main {
+  padding-top: 20px;
+  display: grid;
+  gap: 16px;
+}
+.admin-main [hidden] {
+  display: none;
+}
+.admin-login {
+  display: grid;
+  gap: 16px;
+  max-width: 420px;
+  margin-top: 20px;
+}
+.admin-login h2 {
+  margin: 0;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tabs button {
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  padding: 10px 14px 8px;
+  border: var(--rule) solid var(--ink);
+  background: var(--whitewash);
+  color: var(--ink);
+  cursor: pointer;
+}
+.tabs button[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--gold);
+}
+.tabs b {
+  font-weight: 400;
+  margin-left: 4px;
+}
+.admin-note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.admin-empty {
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+}
+.tickets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  align-items: start;
+}
+.ticket {
+  background: var(--white);
+  border: var(--rule) solid var(--ink);
+  border-top: 10px solid var(--red);
+  padding: 14px 16px 16px;
+  display: grid;
+  gap: 10px;
+  box-shadow: var(--shadow-paint);
+}
+.ticket.is-done {
+  border-top-color: #1f9d4a;
+  opacity: 0.7;
+}
+.ticket p {
+  margin: 0;
+}
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.ticket-number {
+  font-size: 2.2rem;
+}
+.ticket-time {
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+.ticket-who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 1.15rem;
+}
+.ticket-who b {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.ticket-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 2px solid var(--ink);
+}
+.ticket-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--whitewash-deep);
+  font-size: 1.1rem;
+}
+.ticket-notes {
+  background: var(--gold);
+  padding: 8px 10px 6px;
+  font-weight: 700;
+}
+.ticket-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ticket-total b {
+  font-family: var(--display);
+  font-size: 1.3rem;
+}
+.ticket .btn {
+  cursor: pointer;
+  padding: 12px 16px 10px;
+}
