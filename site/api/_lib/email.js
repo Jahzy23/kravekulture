@@ -87,12 +87,58 @@ function build(order) {
 
 async function sendConfirmation(order) {
   if (!KEY || !order.email) return false;
-  const { subject, text, html } = build(order);
+  return deliver(order.email, build(order));
+}
+
+// The heads-up to the truck: a short ticket so the phone's lock screen shows what to cook.
+function buildAlert(order) {
+  const paid = order.paid;
+  const amount = paid ? "PAID " + money(paid.amount) : "Pay at truck " + money(order.total);
+  const items = order.items.map(lineLabel);
+  const text = [
+    "New order #" + order.number + " for " + order.name + " (" + amount + ")",
+    "",
+    ...items,
+    order.notes ? "\nNote: " + order.notes : "",
+    "",
+    "Phone: " + order.phone,
+    "Order board: " + SITE + "/admin.html",
+  ].filter((l) => l !== "").join("\n");
+  const html =
+    '<!doctype html><html><body style="margin:0;font-family:Arial,Helvetica,sans-serif;color:#111">' +
+    '<div style="max-width:520px;margin:0 auto;padding:16px">' +
+    '<p style="margin:0;font-size:40px;font-weight:900;color:#d92b1f">#' + esc(order.number) + "</p>" +
+    '<p style="margin:4px 0 12px;font-size:18px"><b>' + esc(order.name) + "</b> · " + esc(amount) + "</p>" +
+    '<ul style="margin:0 0 12px;padding-left:20px;font-size:17px">' + items.map((i) => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
+    (order.notes ? '<p style="margin:0 0 12px;background:#ffc72c;padding:8px 10px;font-weight:700">Note: ' + esc(order.notes) + "</p>" : "") +
+    '<p style="margin:0 0 12px">Phone: <a href="tel:' + esc(String(order.phone).replace(/[^\d+]/g, "")) + '">' + esc(order.phone) + "</a></p>" +
+    '<p style="margin:0"><a href="' + SITE + '/admin.html" style="color:#1f47cc;font-weight:700">Open the order board</a></p>' +
+    "</div></body></html>";
+  return { subject: "New order #" + order.number + ": " + order.name + " · " + items.join(", "), text, html };
+}
+
+// Never throws. Test orders from the sandbox preview don't alert.
+async function sendAlert(order, to) {
+  if (!KEY || !to || order.test) return false;
+  return deliver(to, buildAlert(order));
+}
+
+async function sendAlertTest(to) {
+  if (!KEY || !to) return false;
+  return deliver(to, {
+    subject: "Krave Kulture order alerts are on",
+    text: "You'll get an email like this for every new online order. Turn it off on the order board: " + SITE + "/admin.html",
+    html: '<p style="font-family:Arial,Helvetica,sans-serif;font-size:16px">You\'ll get an email like this for every new online order.</p>' +
+      '<p style="font-family:Arial,Helvetica,sans-serif;font-size:16px">Turn it off on the <a href="' + SITE + '/admin.html">order board</a>.</p>',
+  });
+}
+
+async function deliver(to, { subject, text, html }) {
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: "Bearer " + KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [order.email], subject, text, html }),
+      body: JSON.stringify({ from: FROM, to: [to], subject, text, html }),
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) {
@@ -106,4 +152,4 @@ async function sendConfirmation(order) {
   }
 }
 
-module.exports = { emailConfigured, sendConfirmation, build };
+module.exports = { emailConfigured, sendConfirmation, sendAlert, sendAlertTest, build, buildAlert };

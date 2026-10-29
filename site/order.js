@@ -44,6 +44,7 @@
   let cart = store.get("kk_cart") || [];
 
   const orderable = new Map(); // name → { price, flavors }
+  let soldOutNow = new Set(); // marked sold out on the order board today
 
   function renderMenu() {
     const host = $("#order-menu");
@@ -69,14 +70,15 @@
         const add = canOrder
           ? el("button", { type: "button", class: "add", "data-add": item.name, "aria-label": "Add " + item.name + " to your order" }, ["Add"])
           : el("span", { class: "add-off", text: soldOut ? "Sold out" : "Ask at window" });
-        const li = el("li", { class: "row order-row", "data-tag": item.tag ? String(item.tag).toLowerCase() : null }, [
+        const out = canOrder ? el("span", { class: "add-off", "data-out": item.name, text: "Sold out", hidden: "" }) : null;
+        const li = el("li", { class: "row order-row", "data-tag": item.tag ? String(item.tag).toLowerCase() : null, "data-item": canOrder ? item.name : null }, [
           el("span", { class: "row-name" }, [
             el("span", { text: item.name }),
             item.tag ? el("span", { class: "sticker", "data-kind": String(item.tag).toLowerCase(), text: item.tag }) : null,
           ]),
           typeof item.price === "number" ? el("span", { class: "row-price" }, [el("small", { text: "$" }), String(item.price)]) : null,
           item.desc ? el("p", { class: "row-desc", text: item.desc }) : null,
-          el("div", { class: "row-act" }, [select, add, el("span", { class: "in-cart", "data-in-cart": item.name, "aria-live": "polite" })]),
+          el("div", { class: "row-act" }, [select, add, out, el("span", { class: "in-cart", "data-in-cart": item.name, "aria-live": "polite" })]),
         ]);
         list.appendChild(li);
       });
@@ -98,6 +100,7 @@
       const btn = e.target.closest("[data-add]");
       if (!btn || !open) return;
       const name = btn.getAttribute("data-add");
+      if (soldOutNow.has(name)) return;
       const info = orderable.get(name);
       let flavor = null;
       if (info.flavors) {
@@ -120,11 +123,40 @@
     });
   }
 
+  // Items switched off on the order board: strike them through, swap Add for "Sold out",
+  // and take them out of the cart. Returns the names that had to leave the cart.
+  function applySoldOut(names) {
+    soldOutNow = new Set(names || []);
+    document.querySelectorAll("[data-item]").forEach((li) => {
+      const name = li.getAttribute("data-item");
+      const out = soldOutNow.has(name);
+      if (li.dataset.orig === undefined) li.dataset.orig = li.dataset.tag || "";
+      if (out || li.dataset.orig) li.dataset.tag = out ? "sold out" : li.dataset.orig;
+      else delete li.dataset.tag;
+      const own = li.querySelector(".sticker:not([data-out-sticker])");
+      if (own) own.hidden = out;
+      const flag = li.querySelector("[data-out-sticker]");
+      if (out && !flag) li.querySelector(".row-name").appendChild(el("span", { class: "sticker", "data-kind": "sold out", "data-out-sticker": "", text: "sold out" }));
+      if (!out && flag) flag.remove();
+      li.querySelector("[data-add]").hidden = out;
+      li.querySelector("[data-out]").hidden = !out;
+      const select = li.querySelector("select.flavor");
+      if (select) select.hidden = out;
+    });
+    const gone = Array.from(new Set(cart.filter((l) => soldOutNow.has(l.name)).map((l) => l.name)));
+    if (gone.length) {
+      syncCart();
+      store.set("kk_cart", cart);
+      renderCart();
+    }
+    return gone;
+  }
+
   // Drop anything the menu no longer sells (or re-prices it) after a menu edit.
   function syncCart() {
     cart = cart.filter((l) => {
       const info = orderable.get(l.name);
-      if (!info) return false;
+      if (!info || soldOutNow.has(l.name)) return false;
       if (info.flavors && !info.flavors.includes(l.flavor)) return false;
       l.price = info.price;
       return l.qty > 0;
@@ -286,12 +318,16 @@
     try {
       const res = await fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" });
       const data = await res.json();
+      const gone = applySoldOut(data && data.soldOut);
       setOpen(Boolean(data && data.open));
+      if (gone.length) showError(soldOutMessage(gone));
       if (data && data.open && data.square) setupSquare(data.square);
     } catch (e) {
       setOpen(false, "Online ordering isn't available right now. Order at the window.");
     }
   }
+
+  const soldOutMessage = (names) => "Sorry, " + names.join(" and ") + (names.length > 1 ? " just sold out and were" : " just sold out and was") + " taken off your order.";
 
   function showError(msg) {
     const box = $("[data-form-error]");
@@ -356,6 +392,10 @@
       payKey = null;
       if (!res.ok || !data.ok) {
         if (data && data.open === false) setOpen(false);
+        if (data && data.soldOut) {
+          const gone = applySoldOut(data.soldOut);
+          if (gone.length) return showError(soldOutMessage(gone) + " Check your order and send it again.");
+        }
         showError((data && data.error) || "Something went wrong. Please try again, or order at the window.");
         return;
       }

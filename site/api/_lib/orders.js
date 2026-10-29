@@ -2,7 +2,9 @@
    Redis layout:
      order:<number>     JSON of one order, expires after KEEP_DAYS
      orders             sorted set of order numbers, scored by time placed
-     settings:ordering  "on" | "off" (missing = off) — the admin "Taking orders" switch */
+     settings:ordering  "on" | "off" (missing = off) — the admin "Taking orders" switch
+     settings:soldout   set of item names marked sold out on the order board
+     settings:alertemail  where to email each new order (empty = no alert emails) */
 "use strict";
 
 const crypto = require("crypto");
@@ -13,27 +15,67 @@ const KEEP_DAYS = 60;
 const MAX_QTY = 20; // per line
 const MAX_LINES = 25;
 
-// Everything that can be ordered: items with a number price that are not sold out.
-function catalog() {
+// Everything that can be ordered: items with a number price that are not sold out,
+// either in menu-data.js or (when soldOut is given) on the order board.
+function catalog(soldOut) {
   const items = new Map();
   MENU.forEach((section) => {
     const flavors = section.choices && section.choices.options && section.choices.options.length
       ? section.choices.options.slice()
       : null;
     (section.items || []).forEach((item) => {
-      const soldOut = String(item.tag || "").toLowerCase() === "sold out";
-      if (typeof item.price !== "number" || soldOut) return;
+      const taggedOut = String(item.tag || "").toLowerCase() === "sold out";
+      if (typeof item.price !== "number" || taggedOut || (soldOut && soldOut.includes(item.name))) return;
       items.set(item.name, { name: item.name, section: section.title, price: item.price, flavors });
     });
   });
   return items;
 }
 
+// Items marked sold out on the order board, limited to names still on the menu so a
+// renamed or removed item never lingers.
+async function getSoldOut() {
+  const names = (await cmd("SMEMBERS", "settings:soldout")) || [];
+  const menu = catalog();
+  return names.filter((n) => menu.has(n));
+}
+
+async function setSoldOut(name, out) {
+  if (!catalog().has(name)) return null;
+  await cmd(out ? "SADD" : "SREM", "settings:soldout", name);
+  return getSoldOut();
+}
+
+async function clearSoldOut() {
+  await cmd("DEL", "settings:soldout");
+  return [];
+}
+
+// The ordering switch, the sold-out list and the alert address in one round trip.
+// alertEmail is private: never send it to customers.
+async function orderingState() {
+  const [on, names, alertEmail] = await pipe([["GET", "settings:ordering"], ["SMEMBERS", "settings:soldout"], ["GET", "settings:alertemail"]]);
+  const menu = catalog();
+  return { open: on === "on", soldOut: (names || []).filter((n) => menu.has(n)), alertEmail: alertEmail || "" };
+}
+
+async function getAlertEmail() {
+  return (await cmd("GET", "settings:alertemail")) || "";
+}
+
+async function setAlertEmail(email) {
+  const addr = String(email || "").trim().toLowerCase().slice(0, 120);
+  if (addr && !/^[^\s@,;]+@[^\s@,;]+\.[a-z]{2,}$/.test(addr)) return null;
+  if (addr) await cmd("SET", "settings:alertemail", addr);
+  else await cmd("DEL", "settings:alertemail");
+  return addr;
+}
+
 const clean = (v, max) => String(v == null ? "" : v).replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
 
 // Turns what the browser sent into a priced order, or returns { error }.
 // Prices always come from menu-data.js, never from the browser.
-function buildOrder(body) {
+function buildOrder(body, soldOut) {
   if (!body || typeof body !== "object") return { error: "Something went wrong. Please try again." };
   const name = clean(body.name, 60);
   const phone = clean(body.phone, 20);
@@ -49,6 +91,9 @@ function buildOrder(body) {
   const menu = catalog();
   const lines = new Map();
   for (const raw of body.items) {
+    if (raw && soldOut && soldOut.includes(raw.name)) {
+      return { error: "Sorry, the " + raw.name + " just sold out. Take it off your order to keep going.", soldOut };
+    }
     const item = menu.get(raw && raw.name);
     if (!item) return { error: "Something on your order is no longer on the menu. Please refresh the page." };
     const qty = Number(raw.qty);
@@ -166,4 +211,4 @@ async function setStatus(number, status) {
   return order;
 }
 
-module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus };
+module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus };

@@ -1,6 +1,7 @@
 /* /api/orders
-   GET  → { open, square }   whether the truck is taking online orders right now, and
-                             (when Square is set up) what the page needs to show the card field
+   GET  → { open, soldOut, square }   whether the truck is taking online orders right now,
+                             what's sold out today, and (when Square is set up) what the
+                             page needs to show the card field
    POST → places a pickup order and returns its order number. With pay: "card" the card
           is charged through Square first, and the order is saved only once Square
           confirms the payment. Otherwise it's pay at the truck. */
@@ -8,8 +9,8 @@
 
 const { send, readJson, clientIp, sameOrigin } = require("./_lib/http");
 const { configured, cmd } = require("./_lib/store");
-const { buildOrder, isOrderingOn, underLimit, saveOrder, getOrder } = require("./_lib/orders");
-const { sendConfirmation } = require("./_lib/email");
+const { buildOrder, orderingState, underLimit, saveOrder, getOrder } = require("./_lib/orders");
+const { sendConfirmation, sendAlert } = require("./_lib/email");
 const square = require("./_lib/square");
 const { reviewToken } = require("./_lib/reviews");
 
@@ -20,9 +21,12 @@ const withReview = (order) => ({ ...order, reviewToken: reviewToken(order) });
 
 module.exports = async function handler(req, res) {
   try {
-    if (!configured()) return send(res, 200, { open: false });
+    if (!configured()) return send(res, 200, { open: false, soldOut: [] });
 
-    if (req.method === "GET") return send(res, 200, { open: await isOrderingOn(), square: square.publicConfig() });
+    if (req.method === "GET") {
+      const { open, soldOut } = await orderingState();
+      return send(res, 200, { open, soldOut, square: square.publicConfig() });
+    }
 
     if (req.method !== "POST") {
       res.setHeader("Allow", "GET, POST");
@@ -34,11 +38,12 @@ module.exports = async function handler(req, res) {
     // Hidden field only bots fill in: pretend it worked, save nothing.
     if (body && body.website) return send(res, 200, { ok: true, order: { number: "0000", items: [], total: 0 } });
 
-    if (!(await isOrderingOn())) {
+    const state = await orderingState();
+    if (!state.open) {
       return send(res, 409, { error: "We're not taking online orders right now. Check Instagram for today's spot and hours.", open: false });
     }
-    const { order, error } = buildOrder(body);
-    if (error) return send(res, 400, { error });
+    const { order, error, soldOut } = buildOrder(body, state.soldOut);
+    if (error) return send(res, soldOut ? 409 : 400, { error, soldOut });
 
     const byCard = body.pay === "card";
     if (byCard && !square.squareConfigured()) return send(res, 400, { error: "Paying online isn't available right now. Pick pay at the truck." });
@@ -51,18 +56,18 @@ module.exports = async function handler(req, res) {
 
     if (!byCard) {
       const saved = await saveOrder(order);
-      // The order is saved either way; the email is a bonus.
-      const emailed = await sendConfirmation(saved);
+      // The order is saved either way; the emails are a bonus.
+      const [emailed] = await Promise.all([sendConfirmation(saved), sendAlert(saved, state.alertEmail)]);
       return send(res, 201, { ok: true, order: withReview(saved), emailed });
     }
-    return await payAndSave(res, body, order);
+    return await payAndSave(res, body, order, state.alertEmail);
   } catch (e) {
     console.error("[orders]", e);
     return send(res, 503, { error: "Online ordering is having trouble. Please order at the window." });
   }
 };
 
-async function payAndSave(res, body, order) {
+async function payAndSave(res, body, order, alertEmail) {
   const token = typeof body.token === "string" ? body.token : "";
   const key = typeof body.payKey === "string" ? body.payKey : "";
   if (!token || token.length > 500) return send(res, 400, { error: "Please enter your card details." });
@@ -109,6 +114,6 @@ async function payAndSave(res, body, order) {
     return send(res, 503, { error: "We couldn't save your order, so we refunded your card right away. Please order at the window." });
   }
   await cmd("SET", lock, saved.number, "EX", 86400);
-  const emailed = await sendConfirmation(saved);
+  const [emailed] = await Promise.all([sendConfirmation(saved), sendAlert(saved, alertEmail)]);
   return send(res, 201, { ok: true, order: withReview(saved), emailed });
 }

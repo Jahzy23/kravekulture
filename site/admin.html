@@ -19,6 +19,7 @@
     <div class="wrap admin-head-inner">
       <h1 class="display">Orders</h1>
       <div class="admin-tools" data-tools hidden>
+        <button type="button" class="btn alerts-btn" data-alerts-on hidden>Turn on alerts</button>
         <label class="switch">
           <input type="checkbox" data-ordering>
           <span class="switch-track" aria-hidden="true"></span>
@@ -42,18 +43,56 @@
 
     <p class="form-error" data-setup-error role="alert" hidden></p>
 
+    <div class="order-alert" data-alert role="alert" hidden>
+      <p><span class="display" data-alert-title>New order!</span> <span data-alert-text></span></p>
+      <button type="button" class="btn btn-white" data-alert-ack>Got it</button>
+    </div>
+
     <section data-board hidden>
       <div class="tabs" role="tablist" aria-label="Which orders">
         <button type="button" role="tab" data-tab="new" aria-selected="true">Open <b data-count="new">0</b></button>
         <button type="button" role="tab" data-tab="done" aria-selected="false">Done <b data-count="done">0</b></button>
         <button type="button" role="tab" data-tab="all" aria-selected="false">All <b data-count="all">0</b></button>
+        <button type="button" role="tab" data-tab="stock" aria-selected="false">Sold out <b data-count="stock">0</b></button>
+        <button type="button" role="tab" data-tab="alerts" aria-selected="false">Alerts</button>
       </div>
-      <div class="admin-search">
+
+      <div class="stock-panel" data-panel="stock" hidden>
+        <p class="admin-note">Flip an item off when you run out. It shows as sold out on the menu and the order page right away, and nobody can order it. Flip it back on when you have more.</p>
+        <button type="button" class="btn btn-white" data-stock-clear hidden>Everything's back in stock</button>
+        <div class="stock" data-stock></div>
+      </div>
+
+      <div class="alerts-panel" data-panel="alerts" hidden>
+        <div class="alerts-block">
+          <h2 class="display">On this device</h2>
+          <p class="admin-note">Keep this page open at the truck. When an order comes in it chimes until you tap Got it, pops up a notification, and keeps the screen awake. Your phone won't ring with the screen locked or the browser closed, so turn on the email alert too.</p>
+          <ul class="alerts-status" data-alert-status></ul>
+          <div class="alerts-actions">
+            <button type="button" class="btn btn-red" data-alerts-enable>Turn on alerts</button>
+            <button type="button" class="btn btn-white" data-alerts-test>Test the chime</button>
+            <button type="button" class="link-btn" data-alerts-mute>Mute this device</button>
+          </div>
+        </div>
+        <form class="alerts-block" data-alert-email-form>
+          <h2 class="display">Email me each order</h2>
+          <p class="admin-note" data-alert-email-note>Get an email for every new order, so your phone buzzes even when this page isn't open. Use the email on your phone, and turn on notifications for it in your mail app. Leave it empty to stop.</p>
+          <div class="field">
+            <label for="a-alert-email">Send order alerts to</label>
+            <input id="a-alert-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+          </div>
+          <p class="form-error" data-alert-email-error role="alert" hidden></p>
+          <p class="admin-note" data-alert-email-saved aria-live="polite"></p>
+          <button class="btn btn-red" type="submit">Save</button>
+        </form>
+      </div>
+
+      <div class="admin-search" data-orders-only>
         <label class="sr-only" for="a-search">Search orders by name, phone or order number</label>
         <input id="a-search" type="search" data-search placeholder="Search name, phone or #" autocomplete="off" enterkeyhint="search">
       </div>
       <p class="admin-note" data-updated aria-live="polite"></p>
-      <ol class="tickets" data-tickets></ol>
+      <ol class="tickets" data-tickets data-orders-only></ol>
       <p class="admin-empty" data-empty hidden>No orders here.</p>
     </section>
 
