@@ -224,6 +224,9 @@
       if (loading) loading.remove();
       await c.attach("#card-container");
       card = c;
+      $("[data-pay-tag]").textContent = "Pay online or at the truck.";
+      $("[data-pay-band]").textContent = "Pay online or at the truck";
+      $("[data-pay-how]").textContent = "Add what you want, tell us your name and number, and we start cooking. Pay online now, or at the window when you pick up.";
     } catch (e) {
       console.error("[krave] Square card form failed:", e);
       squareOn = false;
