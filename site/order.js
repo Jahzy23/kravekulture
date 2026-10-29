@@ -36,6 +36,9 @@
   let sending = false;
   // Square card field, set up once /api/orders says payments are on.
   let card = null;
+  // Apple Pay / Google Pay, when the device and Square support them.
+  let paymentRequest = null;
+  const wallets = {};
   let payKey = null; // one per checkout attempt; reused only to retry after a dropped connection
   // cart: [{ name, flavor, qty, price }]
   let cart = store.get("kk_cart") || [];
@@ -184,6 +187,10 @@
     $("[data-cart-total-value]").textContent = byCard ? cents(chargeTotal()) : money(cartTotal());
     $("[data-pay-card]").hidden = !byCard;
     if (!sending) $("[data-submit]").textContent = byCard ? "Pay " + cents(chargeTotal()) + " · place order" : "Place order · pay at the truck";
+    // Keep the Apple Pay / Google Pay sheet showing the same total we charge.
+    if (paymentRequest && cart.length) {
+      try { paymentRequest.update({ total: { amount: chargeTotal().toFixed(2), label: "Krave Kulture" } }); } catch (e) { /* sheet not open */ }
+    }
   }
 
   const SQUARE_STYLE = {
@@ -224,6 +231,7 @@
       if (loading) loading.remove();
       await c.attach("#card-container");
       card = c;
+      setupWallets(payments);
       $("[data-pay-tag]").textContent = "Pay online or at the truck.";
       $("[data-pay-band]").textContent = "Pay online or at the truck";
       $("[data-pay-how]").textContent = "Add what you want, tell us your name and number, and we start cooking. Pay online now, or at the window when you pick up.";
@@ -234,6 +242,33 @@
       $("[data-pay-card]").hidden = true;
     }
     renderPayTotals();
+  }
+
+  // Wallet buttons sit above the card box. Each one quietly stays hidden if this
+  // device, browser or the Square account doesn't support it (Apple Pay also needs
+  // the domain verified in Square).
+  async function setupWallets(payments) {
+    try {
+      paymentRequest = payments.paymentRequest({
+        countryCode: "US",
+        currencyCode: "USD",
+        total: { amount: (chargeTotal() || 1).toFixed(2), label: "Krave Kulture" },
+      });
+    } catch (e) {
+      console.error("[krave] payment request failed:", e);
+      return;
+    }
+    try {
+      wallets.apple = await payments.applePay(paymentRequest);
+      $("[data-apple-pay]").hidden = false;
+    } catch (e) { /* not Safari with Apple Pay, or domain not verified yet */ }
+    try {
+      const g = await payments.googlePay(paymentRequest);
+      await g.attach("#google-pay-button", { buttonColor: "black", buttonSizeMode: "fill", buttonType: "long" });
+      wallets.google = g;
+      $("[data-google-pay]").hidden = false;
+    } catch (e) { /* Google Pay not available here */ }
+    $("[data-wallets]").hidden = !(wallets.apple || wallets.google);
   }
 
   function setOpen(isOpen, message) {
@@ -264,10 +299,12 @@
     box.hidden = !msg;
   }
 
-  async function submit(e) {
+  // `wallet` is Apple Pay or Google Pay when one of their buttons was tapped. Apple
+  // requires tokenize() to start right away in the tap, so nothing before it awaits.
+  async function submit(e, wallet) {
     e.preventDefault();
     if (sending) return;
-    const form = e.target;
+    const form = $("[data-order-form]");
     showError("");
     if (!open) return showError("We're not taking online orders right now.");
     if (!cart.length) return showError("Your order is empty. Tap Add on something above.");
@@ -279,8 +316,9 @@
     const email = form.email.value.trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) { form.email.focus(); return showError("That email address doesn't look right. Fix it, or leave it empty."); }
 
-    const byCard = payingByCard();
+    const byCard = Boolean(wallet) || payingByCard();
     if (byCard && !card) return showError("The card form is still loading. Give it a second and tap Pay again.");
+    const method = wallet || card;
     let token = null;
     sending = true;
     const btn = $("[data-submit]");
@@ -288,8 +326,10 @@
     btn.textContent = byCard ? "Paying…" : "Sending…";
     try {
       if (byCard) {
-        const result = await card.tokenize();
+        const result = await method.tokenize();
         if (result.status !== "OK") {
+          // Closing the Apple Pay / Google Pay sheet is not an error.
+          if (wallet) return;
           const msg = result.errors && result.errors[0] && result.errors[0].message;
           showError(msg ? "Check your card: " + msg : "Please check your card details.");
           return;
@@ -447,6 +487,8 @@
       if (b) addToCart(b.getAttribute("data-name"), b.getAttribute("data-flavor") || null, Number(b.getAttribute("data-step")));
     });
     $("[data-order-form]").addEventListener("submit", submit);
+    $("[data-apple-pay]").addEventListener("click", (e) => wallets.apple && submit(e, wallets.apple));
+    $("#google-pay-button").addEventListener("click", (e) => wallets.google && submit(e, wallets.google));
     $("[data-order-form]").addEventListener("change", (e) => {
       if (e.target.name === "pay" || e.target.name === "tip") renderPayTotals();
     });
