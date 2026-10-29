@@ -69,7 +69,7 @@
       ]
     },
     {
-      "source": "/track.html",
+      "source": "/(track|catering)\\.html",
       "headers": [
         {
           "key": "Content-Security-Policy",

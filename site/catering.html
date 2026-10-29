@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Catering - Krave Kulture</title>
+  <meta name="description" content="Book the Krave Kulture food truck for your party, wedding, church or work event in Miami, FL. Haitian, Caribbean and soul food. Send a catering request.">
+  <meta name="theme-color" content="#c4261d">
+  <meta property="og:title" content="Krave Kulture - Catering &amp; Events">
+  <meta property="og:description" content="Book the Krave Kulture truck for your next party or event in Miami.">
+  <meta property="og:image" content="https://eatkravekulture.com/images/og-menu.jpg">
+  <meta property="og:url" content="https://eatkravekulture.com/catering.html">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://eatkravekulture.com/catering.html">
+  <link rel="icon" href="images/logo-150.jpg">
+  <link rel="apple-touch-icon" href="images/logo-300.png">
+  <link rel="preload" href="fonts/bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/big-shoulders-text.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="order.css">
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+  <div class="awning" aria-hidden="true"></div>
+
+  <header class="sign">
+    <div class="wrap sign-inner">
+      <a class="sign-badge" href="menu.html" aria-label="Krave Kulture menu">
+        <picture>
+          <source srcset="images/logo-512.webp" type="image/webp">
+          <img src="images/logo-512.png" width="512" height="512" alt="Krave Kulture badge">
+        </picture>
+      </a>
+      <h1 class="painted sign-name">Catering</h1>
+      <p class="sign-tag">Bring the truck <span>to your event.</span></p>
+    </div>
+  </header>
+
+  <main class="wrap track">
+    <section class="track-card catering-done" data-catering-done hidden tabindex="-1" aria-live="polite">
+      <p class="label">Request sent</p>
+      <p class="catering-done-title display">Thank you!</p>
+      <p>We got your request and will reach out soon to talk menu and pricing. Need us sooner? <a data-phone-link href="tel:">Call the truck</a>.</p>
+      <div class="find-actions">
+        <a class="btn btn-red" href="menu.html">See the menu</a>
+      </div>
+    </section>
+
+    <form class="order-form" data-catering-form novalidate>
+      <p class="track-how">Parties, weddings, church events, work lunches and block parties. Tell us about your event and we'll get back to you with menu options and pricing.</p>
+
+      <div class="field">
+        <label for="c-name">Your name</label>
+        <input id="c-name" name="name" type="text" autocomplete="name" maxlength="80" required>
+      </div>
+      <div class="field">
+        <label for="c-phone">Phone</label>
+        <input id="c-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" required>
+      </div>
+      <div class="field">
+        <label for="c-email">Email <span>(optional)</span></label>
+        <input id="c-email" name="email" type="email" autocomplete="email" maxlength="120">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="c-date">Event date</label>
+          <input id="c-date" name="date" type="date" required>
+        </div>
+        <div class="field">
+          <label for="c-time">Time <span>(optional)</span></label>
+          <input id="c-time" name="time" type="text" maxlength="40" placeholder="e.g. 2pm to 6pm">
+        </div>
+      </div>
+      <div class="field">
+        <label for="c-location">Where</label>
+        <input id="c-location" name="location" type="text" autocomplete="street-address" maxlength="160" placeholder="Address or area" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="c-guests">Guests</label>
+          <input id="c-guests" name="guests" type="number" inputmode="numeric" min="1" max="5000" step="1" placeholder="About how many" required>
+        </div>
+        <div class="field">
+          <label for="c-type">Type of event <span>(optional)</span></label>
+          <select id="c-type" name="type">
+            <option value="">Pick one</option>
+            <option>Birthday</option>
+            <option>Wedding</option>
+            <option>Graduation</option>
+            <option>Corporate</option>
+            <option>Church</option>
+            <option>Block party</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="c-notes">Anything else? <span>(optional)</span></label>
+        <textarea id="c-notes" name="notes" rows="4" maxlength="1000" placeholder="Dishes you want, budget, setup, parking for the truck…"></textarea>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="c-website">Website</label>
+        <input id="c-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <p class="form-error" data-catering-error role="alert" hidden></p>
+      <button class="btn btn-red btn-wide" type="submit">Send request</button>
+      <p class="form-small">Sending a request doesn't book anything yet. We'll confirm the details with you first.</p>
+    </form>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <picture>
+        <source srcset="images/logo-512.webp" type="image/webp">
+        <img src="images/logo-300.png" width="68" height="68" alt="">
+      </picture>
+      <p class="foot-tag">Krave it. Taste it. Live the Kulture.</p>
+      <p class="foot-small">&copy; <span data-year>2026</span> Krave Kulture &middot; <a href="menu.html">Menu</a> &middot; <a href="order.html">Order</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a></p>
+    </div>
+  </footer>
+
+  <script src="menu-data.js"></script>
+  <script src="catering.js"></script>
+</body>
+</html>
