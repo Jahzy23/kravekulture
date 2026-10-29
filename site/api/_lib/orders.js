@@ -142,7 +142,15 @@ async function findOrders(name, last4, number) {
       name: o.name,
       items: o.items,
       total: o.total,
+      tip: o.tip || 0,
+      paid: Boolean(o.paid),
     }));
+}
+
+async function getOrder(number) {
+  if (!/^\d{4,5}$/.test(String(number))) return null;
+  const raw = await cmd("GET", "order:" + number);
+  return raw ? JSON.parse(raw) : null;
 }
 
 async function setStatus(number, status) {
@@ -158,4 +166,4 @@ async function setStatus(number, status) {
   return order;
 }
 
-module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, underLimit, saveOrder, listOrders, findOrders, setStatus };
+module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus };

@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://web.squarecdn.com https://sandbox.web.squarecdn.com; style-src 'self' 'unsafe-inline' https://web.squarecdn.com https://sandbox.web.squarecdn.com; img-src 'self' data:; font-src 'self' https://square-fonts-production-f.squarecdn.com https://d1g145x70srn7h.cloudfront.net; media-src 'self' blob:; frame-src https://web.squarecdn.com https://sandbox.web.squarecdn.com; connect-src 'self' https://web.squarecdn.com https://sandbox.web.squarecdn.com https://pci-connect.squareup.com https://pci-connect.squareupsandbox.com https://o160250.ingest.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Order Ahead - Krave Kulture</title>
-  <meta name="description" content="Order Krave Kulture ahead for pickup at the truck in Miami, FL. Pay at the window when you pick up.">
+  <meta name="description" content="Order Krave Kulture ahead for pickup at the truck in Miami, FL. Pay online or at the window when you pick up.">
   <meta name="theme-color" content="#c4261d">
   <meta property="og:title" content="Krave Kulture - Order Ahead">
   <meta property="og:description" content="Order ahead for pickup at the Krave Kulture truck. Pay at the window.">
@@ -51,7 +51,8 @@
       <p class="label">Order placed</p>
       <p class="confirm-number display">#<span data-confirm-number></span></p>
       <p class="confirm-status" data-confirm-status data-state="new">Received. We're on it.</p>
-      <p class="confirm-lead">Show this number at the window. <strong>Pay at the truck</strong> when you pick up: <strong data-confirm-total></strong>.</p>
+      <p class="confirm-lead" data-confirm-lead>Show this number at the window. <strong>Pay at the truck</strong> when you pick up: <strong data-confirm-total></strong>.</p>
+      <p class="confirm-lead" data-confirm-paid hidden><strong class="paid-stamp">Paid</strong> <span data-confirm-paid-text></span> Show this number at the window and grab your food.</p>
       <p class="confirm-emailed" data-confirm-emailed hidden></p>
       <p class="confirm-save"><b>Take a screenshot of this screen.</b> If you lose the number you can <a href="track.html">find your order</a> with your name and the last 4 digits of your phone.</p>
       <ul class="confirm-items" data-confirm-items></ul>
@@ -95,7 +96,7 @@
         <div class="wrap checkout">
           <p class="cart-empty" data-cart-empty>Nothing yet. Tap <b>Add</b> on anything above.</p>
           <ul class="cart" data-cart></ul>
-          <p class="cart-total" data-cart-total hidden><span>Total, pay at the truck</span> <b data-cart-total-value></b></p>
+          <p class="cart-total" data-cart-total hidden><span data-cart-total-label>Total, pay at the truck</span> <b data-cart-total-value></b></p>
 
           <form class="order-form" data-order-form novalidate>
             <div class="field">
@@ -119,6 +120,31 @@
             <div class="hp" aria-hidden="true">
               <label for="o-website">Leave this empty</label>
               <input id="o-website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+            <!-- Shown only when Square is set up (see api/_lib/square.js). -->
+            <fieldset class="pay-pick" data-pay-pick hidden>
+              <legend class="label">How do you want to pay?</legend>
+              <div class="pick-row">
+                <label class="pick"><input type="radio" name="pay" value="card" checked><span>Pay now with card</span></label>
+                <label class="pick"><input type="radio" name="pay" value="truck"><span>Pay at the truck</span></label>
+              </div>
+            </fieldset>
+            <div class="pay-card" data-pay-card hidden>
+              <div class="field">
+                <span class="field-label" id="card-label">Card</span>
+                <div class="card-slot" id="card-container" aria-labelledby="card-label"><p class="card-loading" data-card-loading>Loading the secure card form…</p></div>
+                <small class="secure">Your card goes straight to Square, our payment processor. Krave Kulture never sees the card number.</small>
+              </div>
+              <fieldset class="tip-pick">
+                <legend class="label">Tip the crew <span>(optional)</span></legend>
+                <div class="pick-row" data-tips>
+                  <label class="pick"><input type="radio" name="tip" value="0" checked><span>No tip</span></label>
+                  <label class="pick"><input type="radio" name="tip" value="10"><span>10%</span></label>
+                  <label class="pick"><input type="radio" name="tip" value="15"><span>15%</span></label>
+                  <label class="pick"><input type="radio" name="tip" value="20"><span>20%</span></label>
+                </div>
+              </fieldset>
+              <p class="test-note" data-test-note hidden><b>Test mode.</b> No real money moves. Use card 4111 1111 1111 1111, any future date, CVV 111, any ZIP.</p>
             </div>
             <p class="form-error" data-form-error role="alert" hidden></p>
             <button class="btn btn-red btn-wide" type="submit" data-submit>Place order · pay at the truck</button>
