@@ -83,7 +83,7 @@
             ? el("span", { class: "leader", "aria-hidden": "true" })
             : null,
         ]);
-        const li = el("li", { class: "row", "data-tag": tag }, [
+        const li = el("li", { class: "row", "data-tag": tag, "data-item": item.name }, [
           name,
           priceNode(item.price),
           item.desc ? el("p", { class: "row-desc", text: item.desc }) : null,
@@ -259,8 +259,23 @@
     if (!ctas.length || !window.fetch) return;
     fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d && d.open) ctas.forEach((n) => (n.hidden = false)); })
+      .then((d) => {
+        if (d && d.open) ctas.forEach((n) => (n.hidden = false));
+        if (d && Array.isArray(d.soldOut)) markSoldOut(d.soldOut);
+      })
       .catch(() => {});
+  }
+
+  // Items switched off on the order board today read "sold out" on the menu too.
+  function markSoldOut(names) {
+    document.querySelectorAll("[data-item]").forEach((li) => {
+      if (!names.includes(li.getAttribute("data-item"))) return;
+      li.dataset.tag = "sold out";
+      const own = li.querySelector(".sticker");
+      if (own) own.remove();
+      const name = li.querySelector(".row-name");
+      name.insertBefore(el("span", { class: "sticker", "data-kind": "sold out", text: "sold out" }), name.children[1] || null);
+    });
   }
 
   function year() {

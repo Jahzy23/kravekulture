@@ -1,15 +1,21 @@
 /* /api/admin — the order board behind admin.html. Everything but "login" needs the
    admin cookie.
-   GET  → { orders, open }
+   GET  → { orders, open, soldOut, items, alertEmail, emailReady }
    POST { action: "login", password } | { action: "logout" }
         { action: "complete" | "reopen", number }
-        { action: "ordering", open: true | false } */
+        { action: "ordering", open: true | false }
+        { action: "soldout", name, out: true | false } | { action: "soldout-clear" }
+        { action: "alertemail", email }   ("" turns alert emails off) */
 "use strict";
 
 const { send, readJson, clientIp, sameOrigin } = require("./_lib/http");
 const { configured } = require("./_lib/store");
 const auth = require("./_lib/auth");
-const { isOrderingOn, setOrdering, underLimit, listOrders, setStatus } = require("./_lib/orders");
+const { catalog, orderingState, setOrdering, setSoldOut, clearSoldOut, setAlertEmail, underLimit, listOrders, setStatus } = require("./_lib/orders");
+const { emailConfigured, sendAlertTest } = require("./_lib/email");
+
+// Everything the board can mark sold out, in menu order.
+const menuItems = () => Array.from(catalog().values()).map((i) => ({ name: i.name, section: i.section }));
 
 module.exports = async function handler(req, res) {
   try {
@@ -18,8 +24,8 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       if (!auth.isSignedIn(req)) return send(res, 401, { error: "Please sign in." });
-      const [orders, open] = await Promise.all([listOrders(), isOrderingOn()]);
-      return send(res, 200, { orders, open });
+      const [orders, state] = await Promise.all([listOrders(), orderingState()]);
+      return send(res, 200, { orders, ...state, items: menuItems(), emailReady: emailConfigured() });
     }
 
     if (req.method !== "POST") {
@@ -54,6 +60,23 @@ module.exports = async function handler(req, res) {
 
     if (body.action === "ordering") {
       return send(res, 200, { ok: true, open: await setOrdering(Boolean(body.open)) });
+    }
+
+    if (body.action === "soldout") {
+      const soldOut = await setSoldOut(String(body.name || ""), Boolean(body.out));
+      if (!soldOut) return send(res, 404, { error: "That item isn't on the menu anymore. Refresh the page." });
+      return send(res, 200, { ok: true, soldOut });
+    }
+
+    if (body.action === "soldout-clear") {
+      return send(res, 200, { ok: true, soldOut: await clearSoldOut() });
+    }
+
+    if (body.action === "alertemail") {
+      const email = await setAlertEmail(body.email);
+      if (email === null) return send(res, 400, { error: "That email address doesn't look right." });
+      const tested = email ? await sendAlertTest(email) : false;
+      return send(res, 200, { ok: true, alertEmail: email, tested });
     }
 
     return send(res, 400, { error: "Unknown action." });
