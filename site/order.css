@@ -638,6 +638,18 @@
   display: grid;
   gap: 12px;
 }
+.confirm-review {
+  padding: 12px 14px 10px;
+  border-left: 6px solid var(--red);
+  background: var(--red-tint);
+  font-size: 1.05rem !important;
+}
+.confirm-review[hidden] {
+  display: none;
+}
+.confirm-review a {
+  font-weight: 700;
+}
 .confirm-emailed {
   font-weight: 700;
 }

@@ -3,7 +3,7 @@
    throws: if email is not set up or Resend is down, the order still goes through. */
 "use strict";
 
-const { LOCATION, SPOT, spotIsFresh } = require("../../menu-data.js");
+const { LOCATION, SPOT, spotIsFresh, REVIEWS } = require("../../menu-data.js");
 
 const KEY = process.env.RESEND_API_KEY || "";
 const FROM = process.env.EMAIL_FROM || "Krave Kulture <orders@eatkravekulture.com>";
@@ -23,6 +23,7 @@ function emailConfigured() {
 function build(order) {
   const spot = spotIsFresh(SPOT) ? SPOT.where + (SPOT.when ? ", " + SPOT.when : "") : "";
   const phone = LOCATION.phone || "";
+  const reviewUrl = REVIEWS && /^https:\/\//.test(REVIEWS.writeUrl || "") ? REVIEWS.writeUrl : "";
   const paid = order.paid;
   const charged = order.total + (order.tip || 0);
   const how = paid
@@ -44,6 +45,7 @@ function build(order) {
     "",
     "Lost this email? Find your order at " + SITE + "/track.html with your name and the last 4 digits of your phone.",
     phone ? "Need to change something? Call the truck: " + phone : "",
+    reviewUrl ? "\nEnjoyed it? A Google review helps the truck a lot: " + reviewUrl : "",
     "",
     "Krave it. Taste it. Live the Kulture.",
   ].filter((l) => l !== "").join("\n");
@@ -73,6 +75,7 @@ function build(order) {
     (spot ? '<p style="margin:16px 0 0;font-size:15px"><b>Pick up at:</b> ' + esc(spot) + "</p>" : "") +
     '<p style="margin:20px 0 0;font-size:14px;color:#55534e">Lost this email? <a href="' + SITE + '/track.html" style="color:#1f47cc">Find your order</a> with your name and the last 4 digits of your phone.' +
     (phone ? ' Need to change something? <a href="tel:' + esc(phone.replace(/[^\d+]/g, "")) + '" style="color:#1f47cc">Call the truck</a>.' : "") + "</p>" +
+    (reviewUrl ? '<p style="margin:16px 0 0;font-size:15px"><b>Enjoyed it?</b> A Google review helps the truck a lot. <a href="' + esc(reviewUrl) + '" style="color:#d92b1f;font-weight:700">Leave us a review</a></p>' : "") +
     "</div>" +
     '<p style="margin:14px 0 0;font-size:12px;color:#55534e;text-align:center">Krave it. Taste it. Live the Kulture. · <a href="' + SITE + '" style="color:#55534e">eatkravekulture.com</a></p>' +
     "</div></body></html>";

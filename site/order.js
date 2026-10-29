@@ -404,6 +404,10 @@
     const mailed = $("[data-confirm-emailed]");
     mailed.hidden = !order.emailed;
     mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + ". Don't see it in a minute? Check your spam and trash folders." : "";
+    const review = $("[data-review]");
+    const writeUrl = typeof REVIEWS !== "undefined" && /^https:\/\//.test(REVIEWS.writeUrl || "") ? REVIEWS.writeUrl : "";
+    if (writeUrl) $("[data-review-link]", review).href = writeUrl;
+    review.hidden = !writeUrl;
     const box = $("#confirm");
     box.hidden = false;
     window.scrollTo(0, 0);

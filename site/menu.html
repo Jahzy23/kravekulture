@@ -487,6 +487,36 @@
       </div>
     </section>
 
+    <!-- Shown only when REVIEWS.writeUrl is set in menu-data.js. -->
+    <section class="stall" id="reviews" aria-labelledby="reviews-title" hidden>
+      <div class="board board-red">
+        <div class="wrap">
+          <div class="board-head">
+            <h2 class="display board-title" id="reviews-title">Reviews</h2>
+            <span class="board-kreyol">Sa moun di</span>
+          </div>
+        </div>
+      </div>
+      <div class="wrap find">
+        <p class="review-score" data-review-score hidden>
+          <span class="review-rating" data-review-rating></span>
+          <span class="review-stars" data-review-stars aria-hidden="true"></span>
+          <span class="review-count" data-review-count></span>
+        </p>
+        <ul class="review-list" data-review-list hidden></ul>
+        <p data-review-lead>Ate with us? Tell Miami how it was. A Google review helps the truck more than anything.</p>
+        <div class="find-actions">
+          <a class="btn btn-red" data-review-write href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>
+            <span>Leave a review</span>
+          </a>
+          <a class="btn btn-white" data-review-read href="#" target="_blank" rel="noopener" hidden>
+            <span>Read all on Google</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <section class="stall" id="about" aria-labelledby="about-title">
       <div class="board board-gold">
         <div class="wrap">
