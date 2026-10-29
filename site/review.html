@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Rate Your Order - Krave Kulture</title>
+  <meta name="description" content="Tell us how your Krave Kulture order was.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#c4261d">
+    <link rel="icon" href="images/logo-150.jpg">
+  <link rel="apple-touch-icon" href="images/logo-300.png">
+  <link rel="preload" href="fonts/bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/big-shoulders-text.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="order.css">
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+  <div class="awning" aria-hidden="true"></div>
+
+  <header class="sign">
+    <div class="wrap sign-inner">
+      <a class="sign-badge" href="menu.html" aria-label="Krave Kulture menu">
+        <picture>
+          <source srcset="images/logo-512.webp" type="image/webp">
+          <img src="images/logo-512.png" width="512" height="512" alt="Krave Kulture badge">
+        </picture>
+      </a>
+      <h1 class="painted sign-name">Rate Your Order</h1>
+      <p class="sign-tag">How was it? <span>Tell us straight.</span></p>
+    </div>
+  </header>
+
+  <main class="wrap track review-page">
+    <!-- Step 1, only without a signed link: which order? -->
+    <form class="order-form" data-find-form novalidate hidden>
+      <p class="track-how">Only customers can review. Type your order number and the last 4 digits of the phone you ordered with.</p>
+      <div class="field">
+        <label for="r-number">Order number</label>
+        <input id="r-number" name="number" type="text" inputmode="numeric" maxlength="6" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="r-last4">Last 4 digits of your phone</label>
+        <input id="r-last4" name="last4" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required>
+      </div>
+      <p class="form-error" data-find-error role="alert" hidden></p>
+      <button class="btn btn-red btn-wide" type="submit">Continue</button>
+    </form>
+
+    <p class="track-how" data-loading>Loading your order…</p>
+
+    <!-- Step 2: the review. -->
+    <form class="order-form" data-review-form novalidate hidden>
+      <div class="review-order" data-review-order></div>
+      <fieldset class="stars-pick">
+        <legend>Your rating</legend>
+        <div class="stars-row">
+          <input type="radio" name="stars" id="s5" value="5"><label for="s5" title="5 stars, loved it"><span class="sr-only">5 stars, loved it</span></label>
+          <input type="radio" name="stars" id="s4" value="4"><label for="s4" title="4 stars"><span class="sr-only">4 stars</span></label>
+          <input type="radio" name="stars" id="s3" value="3"><label for="s3" title="3 stars"><span class="sr-only">3 stars</span></label>
+          <input type="radio" name="stars" id="s2" value="2"><label for="s2" title="2 stars"><span class="sr-only">2 stars</span></label>
+          <input type="radio" name="stars" id="s1" value="1"><label for="s1" title="1 star"><span class="sr-only">1 star</span></label>
+        </div>
+      </fieldset>
+      <div class="field">
+        <label for="r-text">Tell us about it <span>(optional)</span></label>
+        <textarea id="r-text" name="text" rows="4" maxlength="600" placeholder="What did you get? How was it?"></textarea>
+      </div>
+      <div class="field">
+        <label for="r-name">Name to show</label>
+        <input id="r-name" name="name" type="text" maxlength="30" autocomplete="off" required>
+        <small>We show your first name and last initial. Change it if you like.</small>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="r-website">Leave this empty</label>
+        <input id="r-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <p class="form-error" data-review-error role="alert" hidden></p>
+      <button class="btn btn-red btn-wide" type="submit">Send review</button>
+      <p class="form-small">Reviews show on our menu page once the truck checks them.</p>
+    </form>
+
+    <!-- Step 3: thanks. -->
+    <div class="track-card review-done" data-review-done hidden tabindex="-1">
+      <p class="display review-done-title" data-done-title>Thank you!</p>
+      <p data-done-text>Your review is in. It shows on our menu page once the truck checks it.</p>
+      <p data-google hidden>Got a second more? <a data-google-link href="#" target="_blank" rel="noopener">Post it on Google too</a>. It helps people find the truck.</p>
+      <div class="find-actions">
+        <a class="btn btn-red" href="order.html">Order again</a>
+        <a class="btn btn-white" href="menu.html">See the menu</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <picture>
+        <source srcset="images/logo-512.webp" type="image/webp">
+        <img src="images/logo-300.png" width="68" height="68" alt="">
+      </picture>
+      <p class="foot-tag">Krave it. Taste it. Live the Kulture.</p>
+      <p class="foot-small">&copy; <span data-year>2026</span> Krave Kulture &middot; <a href="order.html">Order</a> &middot; <a href="menu.html">Menu</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a></p>
+    </div>
+  </footer>
+
+  <script src="menu-data.js"></script>
+  <script src="review.js"></script>
+</body>
+</html>

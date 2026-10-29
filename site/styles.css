@@ -831,9 +831,7 @@ button {
 
 /* ---------- reviews ---------- */
 .stall[hidden],
-.review-score[hidden],
-.review-list[hidden],
-.find-actions a[hidden] {
+.review-list[hidden] {
   display: none;
 }
 .review-score {
@@ -854,6 +852,10 @@ button {
 }
 .review-count {
   font-weight: 600;
+  color: var(--ink-soft);
+}
+.find p.review-how {
+  font-size: 1rem;
   color: var(--ink-soft);
 }
 .review-list {

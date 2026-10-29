@@ -12,8 +12,12 @@ const { configured, cmd } = require("./_lib/store");
 const { buildOrder, orderingState, underLimit, saveOrder, getOrder } = require("./_lib/orders");
 const { sendConfirmation, sendAlert } = require("./_lib/email");
 const square = require("./_lib/square");
+const { reviewToken } = require("./_lib/reviews");
 
 const TIPS = [0, 10, 15, 20]; // percent
+
+// The confirmation screen's "Rate your order" link needs the order's signed review token.
+const withReview = (order) => ({ ...order, reviewToken: reviewToken(order) });
 
 module.exports = async function handler(req, res) {
   try {
@@ -54,7 +58,7 @@ module.exports = async function handler(req, res) {
       const saved = await saveOrder(order);
       // The order is saved either way; the emails are a bonus.
       const [emailed] = await Promise.all([sendConfirmation(saved), sendAlert(saved, state.alertEmail)]);
-      return send(res, 201, { ok: true, order: saved, emailed });
+      return send(res, 201, { ok: true, order: withReview(saved), emailed });
     }
     return await payAndSave(res, body, order, state.alertEmail);
   } catch (e) {
@@ -77,7 +81,7 @@ async function payAndSave(res, body, order, alertEmail) {
   if ((await cmd("SET", lock, "pending", "NX", "EX", 3600)) !== "OK") {
     const number = await cmd("GET", lock);
     const existing = number && number !== "pending" ? await getOrder(number) : null;
-    if (existing) return send(res, 201, { ok: true, order: existing, emailed: false });
+    if (existing) return send(res, 201, { ok: true, order: withReview(existing), emailed: false });
     return send(res, 409, { error: "Your payment is still going through. Wait a moment before trying again." });
   }
 
@@ -111,5 +115,5 @@ async function payAndSave(res, body, order, alertEmail) {
   }
   await cmd("SET", lock, saved.number, "EX", 86400);
   const [emailed] = await Promise.all([sendConfirmation(saved), sendAlert(saved, alertEmail)]);
-  return send(res, 201, { ok: true, order: saved, emailed });
+  return send(res, 201, { ok: true, order: withReview(saved), emailed });
 }

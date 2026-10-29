@@ -1023,3 +1023,92 @@
   white-space: pre-wrap;
   font-weight: 500;
 }
+
+/* ---------- reviews (review.html + admin board) ---------- */
+.review-page [hidden] {
+  display: none !important;
+}
+.review-order {
+  padding: 12px 14px 10px;
+  border-left: 6px solid var(--blue);
+  background: var(--blue-tint);
+}
+.review-order p {
+  margin: 0;
+}
+.review-order-items {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.stars-pick {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.stars-pick legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
+.stars-row {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  gap: 4px;
+}
+.stars-row input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.stars-row label {
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  background: var(--ink);
+  clip-path: polygon(50% 4%, 63% 36%, 97% 38%, 70% 59%, 79% 93%, 50% 74%, 21% 93%, 30% 59%, 3% 38%, 37% 36%);
+  position: relative;
+}
+.stars-row label::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--white);
+  clip-path: inherit;
+}
+.stars-row input:checked ~ label::after,
+.stars-row label:hover::after,
+.stars-row label:hover ~ label::after {
+  background: var(--gold);
+}
+.stars-row input:focus-visible + label {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+.review-done-title {
+  font-size: clamp(1.8rem, 8vw, 2.6rem) !important;
+  line-height: 1;
+}
+.review-done a {
+  font-weight: 700;
+}
+.reviews-board {
+  margin-top: 36px;
+}
+.reviews-board[hidden] {
+  display: none;
+}
+.reviews-board h2 {
+  margin: 0 0 12px;
+}
+.review-ticket .ticket-number {
+  color: var(--red);
+  letter-spacing: 0.06em;
+}
+.review-ticket .ticket-notes {
+  white-space: pre-line;
+}

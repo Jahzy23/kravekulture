@@ -162,43 +162,33 @@
     }
   }
 
-  // Reviews section: hidden until REVIEWS.writeUrl is set in menu-data.js. The rating and
-  // a few recent reviews come from /api/reviews when Google is hooked up; otherwise the
-  // section is just the "Leave a review" button.
+  // Reviews section: customer reviews the truck approved on the admin board (/api/reviews).
+  // Stays hidden until there is at least one.
   function renderReviews() {
     const host = $("#reviews");
-    if (!host) return;
-    const R = typeof REVIEWS !== "undefined" ? REVIEWS : null;
-    const https = (u) => /^https:\/\//.test(u || "");
-    if (!R || !https(R.writeUrl)) { host.remove(); return; }
-    $("[data-review-write]", host).href = R.writeUrl;
-    const read = $("[data-review-read]", host);
-    const showRead = (url) => { if (https(url)) { read.href = url; read.hidden = false; } };
-    showRead(R.readUrl);
-    host.hidden = false;
-    if (!R.placeId || !window.fetch) return;
+    if (!host || !window.fetch) return;
+    const stars = (n) => "★★★★★".slice(0, Math.round(n)) + "☆☆☆☆☆".slice(0, 5 - Math.round(n));
     fetch("/api/reviews", { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (!d || !d.rating) return;
-        const stars = (n) => "★★★★★".slice(0, Math.round(n)) + "☆☆☆☆☆".slice(0, 5 - Math.round(n));
+        if (!d || !d.count) return;
         $("[data-review-rating]", host).textContent = d.rating.toFixed(1);
         $("[data-review-stars]", host).textContent = stars(d.rating);
-        $("[data-review-count]", host).textContent = d.count + (d.count === 1 ? " Google review" : " Google reviews");
-        $("[data-review-score]", host).setAttribute("aria-label", d.rating.toFixed(1) + " out of 5 stars from " + d.count + " Google reviews");
-        $("[data-review-score]", host).hidden = false;
-        if (!R.readUrl) showRead(d.url);
+        $("[data-review-count]", host).textContent = d.count + (d.count === 1 ? " review" : " reviews");
+        $("[data-review-score]", host).setAttribute("aria-label", d.rating.toFixed(1) + " out of 5 stars from " + d.count + (d.count === 1 ? " review" : " reviews"));
         const list = $("[data-review-list]", host);
         (d.reviews || []).forEach((r) => {
+          const when = new Date(r.createdAt);
           list.appendChild(el("li", null, [
             el("blockquote", { text: r.text }),
             el("p", { class: "review-by" }, [
               el("span", { text: stars(r.stars), "aria-label": r.stars + " stars" }),
-              document.createTextNode(" " + r.name + (r.when ? ", " + r.when : "") + " on Google"),
+              document.createTextNode(" " + r.name + (isNaN(when) ? "" : ", " + when.toLocaleDateString([], { month: "short", year: "numeric" }))),
             ]),
           ]));
         });
         list.hidden = !list.children.length;
+        host.hidden = false;
       })
       .catch(() => {});
   }

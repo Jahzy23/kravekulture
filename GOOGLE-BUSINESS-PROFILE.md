@@ -50,10 +50,6 @@ Google will ask to verify by phone, video call, or a mailed postcard; for a serv
 - Answer the "Where are you today?" questions; Google surfaces Q&A on the listing.
 - The site's structured data (`FoodEstablishment` with the same name, phone, website and `areaServed: Miami, FL`) already matches the listing, which helps Google tie the two together.
 
-## Turn on reviews on the site
+## Reviews on the site
 
-The site already has a Reviews section (menu page), a "Leave us a review" link on the order confirmation screen and one in the order email. All of it stays hidden until you fill in `REVIEWS` in `site/menu-data.js`:
-
-1. Once the profile is verified, open it and tap **Ask for reviews** (or "Get more reviews"). Copy the link (it looks like `https://g.page/r/…/review`) into `writeUrl`. That alone turns everything on.
-2. Optional: in Google Maps open the listing, **Share > Copy link**, and paste it into `readUrl` for a "Read all on Google" button.
-3. Optional, for the star rating and recent reviews on the page: put the listing's Place ID (find it at https://developers.google.com/maps/documentation/places/web-service/place-id) in `placeId`, and add a Google Maps Platform key with the Places API (New) enabled to Vercel as `GOOGLE_PLACES_API_KEY`. The site asks Google a few times a day at most, well inside the free monthly credit. Only 4 and 5 star reviews with text are shown.
+The site has its own reviews: customers rate their order from the link on the confirmation screen and email, you approve them on the admin board, and approved ones show on the menu page. Once this profile is verified, open it, tap **Ask for reviews**, and paste that link (it looks like `https://g.page/r/…/review`) into `REVIEWS.googleUrl` in `site/menu-data.js`. Customers who give 4 or 5 stars then also get a "Post it on Google too" link.

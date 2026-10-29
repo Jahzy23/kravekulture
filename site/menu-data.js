@@ -147,21 +147,15 @@ const SPOT = {
 const SPOT_FRESH_DAYS = 7;
 
 /* ---------------------------------------------------------------------
-   REVIEWS — Google reviews. Leave writeUrl empty to hide every review link
-   and the Reviews section.
-     writeUrl → Google Business Profile > "Ask for reviews" link,
-                e.g. "https://g.page/r/XXXXXXXX/review". Shown on the menu
-                page, the order confirmation screen and the order email.
-     readUrl  → optional: the listing on Google Maps (Maps > Share > Copy link)
-                for a "Read all reviews" button.
-     placeId  → optional: the Google Place ID. With GOOGLE_PLACES_API_KEY set in
-                Vercel the menu page also shows the star rating and a few
-                recent 4 and 5 star reviews, refreshed from Google.
+   REVIEWS — customers rate their order on review.html (link on the order
+   confirmation screen and in the order email). New reviews wait on the
+   admin board until you approve them; approved ones show on the menu page.
+     googleUrl → optional: once you have a Google Business Profile, paste its
+                 "Ask for reviews" link (https://g.page/r/.../review) to also
+                 offer "Post it on Google" after a 4 or 5 star review.
    --------------------------------------------------------------------- */
 const REVIEWS = {
-  writeUrl: "",
-  readUrl: "",
-  placeId: "",
+  googleUrl: "",
 };
 
 // One rule for both pages: a spot counts only with a place and a date no older than
