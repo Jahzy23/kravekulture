@@ -649,3 +649,123 @@
   font-size: 0.95rem;
   overflow-wrap: anywhere;
 }
+
+/* ---------- pay online (Square) ---------- */
+.pay-pick,
+.tip-pick {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+}
+.pay-pick[hidden],
+.pay-card[hidden] {
+  display: none;
+}
+.tip-pick legend span {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+.pick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pick {
+  position: relative;
+  cursor: pointer;
+}
+.pick input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.pick span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  font-weight: 700;
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+}
+.pick input:checked + span {
+  background: var(--gold);
+  box-shadow: inset 0 -4px 0 var(--ink);
+}
+.pick input:focus-visible + span {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+.pay-card {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: var(--rule) solid var(--ink);
+  background: var(--whitewash-deep);
+}
+.field-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
+.card-slot {
+  min-height: 56px;
+}
+.card-loading {
+  margin: 0;
+  padding: 14px 12px;
+  border: var(--rule) dashed var(--ink-soft);
+  color: var(--ink-soft);
+}
+.test-note {
+  margin: 0;
+  padding: 10px 12px 8px;
+  border-left: 6px solid var(--gold-deep);
+  background: var(--white);
+  font-size: 0.95rem;
+}
+.test-note[hidden] {
+  display: none;
+}
+.paid-stamp {
+  display: inline-block;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  padding: 4px 10px 2px;
+  margin-right: 6px;
+  border: var(--rule) solid var(--ink);
+  background: #1f9d4a;
+  color: var(--white);
+  transform: rotate(-3deg);
+}
+.confirm-lead[hidden] {
+  display: none;
+}
+
+/* admin: paid / unpaid on each ticket */
+.ticket-pay {
+  font-family: var(--display);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  padding: 3px 8px 1px;
+  border: 2px solid var(--ink);
+  background: var(--gold);
+}
+.ticket-pay[data-paid="yes"] {
+  background: #1f9d4a;
+  color: var(--white);
+}
+.ticket-pay[data-test="yes"]::after {
+  content: " · test";
+}
+.ticket-tip {
+  font-weight: 700;
+  color: #1f7a3c;
+}

@@ -43,7 +43,7 @@
           el("span", { text: l.qty + " × " + l.name + (l.flavor ? " (" + l.flavor + ")" : "") }),
           el("span", { text: money(l.lineTotal) }),
         ]))),
-        el("p", { class: "confirm-small", text: "Pay at the truck: " + money(o.total) + ". Placed " + (isNaN(placed) ? "" : placed.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })) + " for " + o.name + "." }),
+        el("p", { class: "confirm-small", text: (o.paid ? "Paid online: " + money(o.total + (o.tip || 0)) : "Pay at the truck: " + money(o.total)) + ". Placed " + (isNaN(placed) ? "" : placed.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })) + " for " + o.name + "." }),
       ]));
     });
   }

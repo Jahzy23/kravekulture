@@ -34,6 +34,9 @@
   const MAX_QTY = 20;
   let open = false;
   let sending = false;
+  // Square card field, set up once /api/orders says payments are on.
+  let card = null;
+  let payKey = null; // one per checkout attempt; reused only to retry after a dropped connection
   // cart: [{ name, flavor, qty, price }]
   let cart = store.get("kk_cart") || [];
 
@@ -136,6 +139,11 @@
 
   const lineLabel = (l) => l.name + (l.flavor ? " (" + l.flavor + ")" : "");
   const cartTotal = () => cart.reduce((s, l) => s + l.price * l.qty, 0);
+  const payingByCard = () => squareOn && ($("input[name=pay]:checked") || {}).value === "card";
+  const tipPct = () => (payingByCard() ? Number(($("input[name=tip]:checked") || {}).value) || 0 : 0);
+  const tipCents = () => Math.round((Math.round(cartTotal() * 100) * tipPct()) / 100);
+  const chargeTotal = () => (Math.round(cartTotal() * 100) + tipCents()) / 100;
+  const cents = (n) => "$" + n.toFixed(2);
   const cartCount = () => cart.reduce((s, l) => s + l.qty, 0);
 
   function renderCart() {
@@ -155,7 +163,7 @@
     const empty = !cart.length;
     $("[data-cart-empty]").hidden = !empty;
     $("[data-cart-total]").hidden = empty;
-    $("[data-cart-total-value]").textContent = money(cartTotal());
+    renderPayTotals();
 
     const bar = $("[data-cart-bar]");
     bar.hidden = empty;
@@ -167,6 +175,65 @@
       const q = cart.filter((l) => l.name === n.getAttribute("data-in-cart")).reduce((s, l) => s + l.qty, 0);
       n.textContent = q ? q + " in order" : "";
     });
+  }
+
+  // Total line and button label follow the pay choice and tip.
+  function renderPayTotals() {
+    const byCard = payingByCard();
+    $("[data-cart-total-label]").textContent = byCard ? (tipPct() ? "Total with " + cents(tipCents() / 100) + " tip" : "Total") : "Total, pay at the truck";
+    $("[data-cart-total-value]").textContent = byCard ? cents(chargeTotal()) : money(cartTotal());
+    $("[data-pay-card]").hidden = !byCard;
+    if (!sending) $("[data-submit]").textContent = byCard ? "Pay " + cents(chargeTotal()) + " · place order" : "Place order · pay at the truck";
+  }
+
+  const SQUARE_STYLE = {
+    ".input-container": { borderColor: "#111111", borderWidth: "3px", borderRadius: "0px" },
+    ".input-container.is-focus": { borderColor: "#1f47cc" },
+    ".input-container.is-error": { borderColor: "#d92b1f" },
+    ".message-text": { color: "#55534e" },
+    ".message-text.is-error": { color: "#d92b1f" },
+    ".message-icon.is-error": { color: "#d92b1f" },
+    input: { backgroundColor: "#ffffff", color: "#111111", fontSize: "18px" },
+    "input::placeholder": { color: "#55534e" },
+    "input.is-error": { color: "#d92b1f" },
+  };
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error("Could not load " + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  // Loads Square's card field. If anything fails, the page quietly stays pay at the truck.
+  let squareOn = false;
+  async function setupSquare(cfg) {
+    if (squareOn || !cfg || !cfg.appId || !cfg.locationId) return;
+    squareOn = true;
+    $("[data-pay-pick]").hidden = false;
+    $("[data-test-note]").hidden = !cfg.sandbox;
+    $("[data-pay-card]").hidden = false;
+    try {
+      await loadScript(cfg.sandbox ? "https://sandbox.web.squarecdn.com/v1/square.js" : "https://web.squarecdn.com/v1/square.js");
+      const payments = window.Square.payments(cfg.appId, cfg.locationId);
+      const c = await payments.card({ style: SQUARE_STYLE });
+      const loading = $("[data-card-loading]");
+      if (loading) loading.remove();
+      await c.attach("#card-container");
+      card = c;
+      $("[data-pay-tag]").textContent = "Pay online or at the truck.";
+      $("[data-pay-band]").textContent = "Pay online or at the truck";
+      $("[data-pay-how]").textContent = "Add what you want, tell us your name and number, and we start cooking. Pay online now, or at the window when you pick up.";
+    } catch (e) {
+      console.error("[krave] Square card form failed:", e);
+      squareOn = false;
+      $("[data-pay-pick]").hidden = true;
+      $("[data-pay-card]").hidden = true;
+    }
+    renderPayTotals();
   }
 
   function setOpen(isOpen, message) {
@@ -185,6 +252,7 @@
       const res = await fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" });
       const data = await res.json();
       setOpen(Boolean(data && data.open));
+      if (data && data.open && data.square) setupSquare(data.square);
     } catch (e) {
       setOpen(false, "Online ordering isn't available right now. Order at the window.");
     }
@@ -211,12 +279,24 @@
     const email = form.email.value.trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) { form.email.focus(); return showError("That email address doesn't look right. Fix it, or leave it empty."); }
 
+    const byCard = payingByCard();
+    if (byCard && !card) return showError("The card form is still loading. Give it a second and tap Pay again.");
+    let token = null;
     sending = true;
     const btn = $("[data-submit]");
-    const label = btn.textContent;
     btn.disabled = true;
-    btn.textContent = "Sending…";
+    btn.textContent = byCard ? "Paying…" : "Sending…";
     try {
+      if (byCard) {
+        const result = await card.tokenize();
+        if (result.status !== "OK") {
+          const msg = result.errors && result.errors[0] && result.errors[0].message;
+          showError(msg ? "Check your card: " + msg : "Please check your card details.");
+          return;
+        }
+        token = result.token;
+        if (!payKey) payKey = newKey();
+      }
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -226,9 +306,14 @@
           notes: form.notes.value.trim(),
           website: form.website.value,
           items: cart.map((l) => ({ name: l.name, flavor: l.flavor, qty: l.qty })),
+          pay: byCard ? "card" : "truck",
+          token, payKey: byCard ? payKey : undefined,
+          tip: tipPct(),
         }),
       });
       const data = await res.json().catch(() => ({}));
+      // A real answer came back (yes or no), so the next try is a new payment.
+      payKey = null;
       if (!res.ok || !data.ok) {
         if (data && data.open === false) setOpen(false);
         showError((data && data.error) || "Something went wrong. Please try again, or order at the window.");
@@ -240,17 +325,31 @@
       store.local("kk_last_order", data.order);
       showConfirm(data.order);
     } catch (err) {
-      showError("We couldn't reach the truck's ordering system. Check your connection and try again.");
+      showError(byCard
+        ? "We couldn't reach the payment system. Check your connection and tap Pay again. You won't be charged twice."
+        : "We couldn't reach the truck's ordering system. Check your connection and try again.");
     } finally {
       sending = false;
-      btn.textContent = label;
       btn.disabled = !open;
+      renderPayTotals();
     }
+  }
+
+  function newKey() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "kk-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 14);
   }
 
   function showConfirm(order) {
     $("[data-confirm-number]").textContent = order.number;
     $("[data-confirm-total]").textContent = money(order.total);
+    const paid = order.paid;
+    $("[data-confirm-lead]").hidden = Boolean(paid);
+    $("[data-confirm-paid]").hidden = !paid;
+    if (paid) {
+      const brand = paid.brand ? String(paid.brand).toLowerCase().split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "card";
+      $("[data-confirm-paid-text]").textContent = cents(paid.amount) + " on your " + brand + (paid.last4 ? " ending " + paid.last4 : "") + (order.tip ? ", including a " + cents(order.tip) + " tip. Thank you!" : ".");
+    }
     const list = $("[data-confirm-items]");
     list.textContent = "";
     (order.items || []).forEach((l) => list.appendChild(el("li", {}, [
@@ -348,6 +447,9 @@
       if (b) addToCart(b.getAttribute("data-name"), b.getAttribute("data-flavor") || null, Number(b.getAttribute("data-step")));
     });
     $("[data-order-form]").addEventListener("submit", submit);
+    $("[data-order-form]").addEventListener("change", (e) => {
+      if (e.target.name === "pay" || e.target.name === "tip") renderPayTotals();
+    });
     $("[data-new-order]").addEventListener("click", newOrder);
 
     // Opening the order page always starts a fresh order. Only a reload of the

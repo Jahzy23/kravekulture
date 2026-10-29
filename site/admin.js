@@ -86,6 +86,7 @@
       list.appendChild(el("li", { class: "ticket" + (done ? " is-done" : ""), "data-number": o.number }, [
         el("div", { class: "ticket-top" }, [
           el("span", { class: "ticket-number display", text: "#" + o.number }),
+          el("span", { class: "ticket-pay", "data-paid": o.paid ? "yes" : "no", "data-test": o.test ? "yes" : null, text: o.paid ? "Paid" : "Unpaid" }),
           el("span", { class: "ticket-time", text: ago(o.createdAt) }),
         ]),
         el("p", { class: "ticket-who" }, [
@@ -99,9 +100,12 @@
             el("span", { text: money(l.lineTotal) }),
           ])
         )),
+        o.tip ? el("p", { class: "ticket-tip", text: "Tip " + money(o.tip) }) : null,
         o.notes ? el("p", { class: "ticket-notes", text: "Note: " + o.notes }) : null,
         el("div", { class: "ticket-foot" }, [
-          el("span", { class: "ticket-total" }, ["Due at truck ", el("b", { text: money(o.total) })]),
+          o.paid
+            ? el("span", { class: "ticket-total" }, ["Paid online ", el("b", { text: money(o.paid.amount) })])
+            : el("span", { class: "ticket-total" }, ["Due at truck ", el("b", { text: money(o.total) })]),
           el("button", { type: "button", class: done ? "btn btn-white" : "btn", "data-action": done ? "reopen" : "complete", "data-num": o.number },
             [done ? "Reopen" : "Mark complete"]),
         ]),
