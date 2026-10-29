@@ -56,8 +56,19 @@
       <ol class="tickets" data-tickets></ol>
       <p class="admin-empty" data-empty hidden>No orders here.</p>
     </section>
+
+    <section class="catering-board" data-catering hidden aria-labelledby="cat-title">
+      <h2 class="display" id="cat-title">Catering requests</h2>
+      <div class="tabs" role="tablist" aria-label="Which catering requests">
+        <button type="button" role="tab" data-cat-tab="new" aria-selected="true">Open <b data-cat-count="new">0</b></button>
+        <button type="button" role="tab" data-cat-tab="done" aria-selected="false">Handled <b data-cat-count="done">0</b></button>
+      </div>
+      <ol class="tickets" data-cat-list></ol>
+      <p class="admin-empty" data-cat-empty hidden>No catering requests here.</p>
+    </section>
   </main>
 
   <script src="admin.js"></script>
+  <script src="admin-catering.js"></script>
 </body>
 </html>

@@ -825,3 +825,52 @@
   background: var(--ink);
   opacity: 0.25;
 }
+
+/* ---------- catering (catering.html + admin board) ---------- */
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.field select {
+  font: inherit;
+  font-size: 1.1rem;
+  padding: 12px 12px 10px;
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+  color: var(--ink);
+  border-radius: 0;
+  width: 100%;
+}
+.catering-done[hidden] {
+  display: none;
+}
+.catering-done-title {
+  font-size: clamp(2.4rem, 10vw, 3.6rem) !important;
+  color: var(--red);
+  line-height: 1;
+}
+.catering-board {
+  display: grid;
+  gap: 12px;
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 4px solid var(--ink);
+}
+.catering-board[hidden] {
+  display: none;
+}
+.catering-board h2 {
+  margin: 0;
+}
+.catering-ticket .ticket-number {
+  font-size: 1.5rem;
+}
+.catering-ticket .ticket-items li span {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.catering-ticket .ticket-notes {
+  white-space: pre-wrap;
+  font-weight: 500;
+}
