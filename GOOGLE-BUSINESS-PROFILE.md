@@ -49,3 +49,11 @@ Google will ask to verify by phone, video call, or a mailed postcard; for a serv
 - Post this week's spot as a Google Post ("Update") each week, same text as `SPOT` in `site/menu-data.js`.
 - Answer the "Where are you today?" questions; Google surfaces Q&A on the listing.
 - The site's structured data (`FoodEstablishment` with the same name, phone, website and `areaServed: Miami, FL`) already matches the listing, which helps Google tie the two together.
+
+## Turn on reviews on the site
+
+The site already has a Reviews section (menu page), a "Leave us a review" link on the order confirmation screen and one in the order email. All of it stays hidden until you fill in `REVIEWS` in `site/menu-data.js`:
+
+1. Once the profile is verified, open it and tap **Ask for reviews** (or "Get more reviews"). Copy the link (it looks like `https://g.page/r/…/review`) into `writeUrl`. That alone turns everything on.
+2. Optional: in Google Maps open the listing, **Share > Copy link**, and paste it into `readUrl` for a "Read all on Google" button.
+3. Optional, for the star rating and recent reviews on the page: put the listing's Place ID (find it at https://developers.google.com/maps/documentation/places/web-service/place-id) in `placeId`, and add a Google Maps Platform key with the Places API (New) enabled to Vercel as `GOOGLE_PLACES_API_KEY`. The site asks Google a few times a day at most, well inside the free monthly credit. Only 4 and 5 star reviews with text are shown.
