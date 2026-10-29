@@ -1,0 +1,306 @@
+/* ============================================================
+   KRAVE KULTURE — checkout demo (checkout-demo.html)
+   Builds on styles.css + order.css. The card box mirrors how the
+   processor's embedded field would be themed to match the site.
+   ============================================================ */
+
+.demo-flag {
+  margin: 0;
+  padding: 8px var(--gutter) 6px;
+  background: var(--ink);
+  color: var(--gold);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.demo-page {
+  padding-bottom: 0;
+}
+
+/* step tracker */
+.steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 18px 0 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  max-width: 720px;
+}
+.steps li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  border-top: 5px solid var(--whitewash-deep);
+  padding-top: 8px;
+}
+.steps li b {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-family: var(--display);
+  font-weight: 400;
+  border: var(--rule) solid var(--ink-soft);
+  background: var(--white);
+}
+.steps li[data-state="now"] {
+  color: var(--ink);
+  border-top-color: var(--red);
+}
+.steps li[data-state="now"] b {
+  background: var(--red);
+  border-color: var(--ink);
+  color: var(--white);
+}
+.steps li[data-state="done"] {
+  color: var(--ink);
+  border-top-color: var(--ink);
+}
+.steps li[data-state="done"] b {
+  background: var(--gold);
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+/* steps */
+.co-step {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 4vw, 32px) 0 clamp(32px, 5vw, 48px);
+  max-width: 720px;
+}
+.co-step[hidden] {
+  display: none;
+}
+.co-step p {
+  margin: 0;
+}
+.co-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 8vw, 2.6rem);
+}
+.co-back {
+  justify-self: center;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  cursor: pointer;
+  padding: 6px;
+}
+
+/* totals */
+.sums {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.sums div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sums dt,
+.sums dd {
+  margin: 0;
+}
+.sums dt {
+  color: var(--ink-soft);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sums dd {
+  font-family: var(--display);
+}
+.sums .sum-total {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: var(--rule) solid var(--ink);
+  align-items: baseline;
+}
+.sums .sum-total dt {
+  color: var(--ink);
+}
+.sums .sum-total dd {
+  font-size: 1.6rem;
+}
+
+/* pickup */
+.co-where {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px 10px;
+  border-left: 6px solid var(--blue);
+  background: var(--blue-tint);
+}
+.co-where b {
+  font-size: 1.15rem;
+}
+.co-times,
+.co-tip {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+}
+.co-tip legend span {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  min-height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+}
+.chip[aria-pressed="true"] {
+  background: var(--gold);
+  box-shadow: inset 0 -4px 0 var(--ink);
+}
+
+/* payment */
+.wallet {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  border: 0;
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font: 600 1.3rem/1 -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  cursor: pointer;
+}
+.wallet svg {
+  width: 18px;
+  height: 21px;
+  margin-top: -3px;
+}
+.or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-soft);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+}
+.or::before,
+.or::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--ink);
+  opacity: 0.25;
+}
+.card-box {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: var(--rule) solid var(--ink);
+  background: var(--whitewash-deep);
+}
+.card-box input {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.card-box input:focus {
+  outline: 3px solid var(--gold);
+  outline-offset: 0;
+  border-color: var(--ink);
+}
+.card-num {
+  position: relative;
+}
+.card-num input {
+  padding-right: 128px;
+}
+.brands {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+}
+.brands i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 22px;
+  border-radius: 3px;
+  font: italic 800 0.6rem/1 Arial, sans-serif;
+  color: #fff;
+}
+.b-visa {
+  background: #1a1f71;
+}
+.b-mc {
+  background:
+    radial-gradient(circle at 38% 50%, #eb001b 0 7px, transparent 7.5px),
+    radial-gradient(circle at 62% 50%, #f79e1b 0 7px, transparent 7.5px),
+    #222;
+}
+.b-amex {
+  background: #2e77bc;
+  font-style: normal !important;
+  font-size: 0.5rem !important;
+}
+.card-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 10px;
+}
+.secure {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.secure svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+/* paid */
+.paid-stamp {
+  justify-self: start;
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: 1.4rem !important;
+  padding: 8px 16px 6px;
+  border: var(--rule) solid var(--ink);
+  background: #1f9d4a;
+  color: var(--white);
+  transform: rotate(-3deg);
+  box-shadow: var(--shadow-paint);
+}
