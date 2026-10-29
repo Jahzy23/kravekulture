@@ -66,9 +66,22 @@
       <ol class="tickets" data-cat-list></ol>
       <p class="admin-empty" data-cat-empty hidden>No catering requests here.</p>
     </section>
+
+    <section class="reviews-board" data-reviews hidden aria-labelledby="rev-title">
+      <h2 class="display" id="rev-title">Reviews</h2>
+      <p class="admin-note">New reviews wait here. Only the ones you approve show on the menu page.</p>
+      <div class="tabs" role="tablist" aria-label="Which reviews">
+        <button type="button" role="tab" data-rev-tab="pending" aria-selected="true">To check <b data-rev-count="pending">0</b></button>
+        <button type="button" role="tab" data-rev-tab="approved" aria-selected="false">On the site <b data-rev-count="approved">0</b></button>
+        <button type="button" role="tab" data-rev-tab="hidden" aria-selected="false">Hidden <b data-rev-count="hidden">0</b></button>
+      </div>
+      <ol class="tickets" data-rev-list></ol>
+      <p class="admin-empty" data-rev-empty hidden>No reviews here.</p>
+    </section>
   </main>
 
   <script src="admin.js"></script>
   <script src="admin-catering.js"></script>
+  <script src="admin-reviews.js"></script>
 </body>
 </html>
