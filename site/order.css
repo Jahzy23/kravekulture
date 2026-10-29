@@ -77,6 +77,12 @@
 @media (prefers-reduced-motion: reduce) {
   .add.added { animation: none; }
 }
+.add[hidden],
+.add-off[hidden],
+.flavor[hidden],
+.sticker[hidden] {
+  display: none;
+}
 .add-off {
   font-weight: 700;
   text-transform: uppercase;
@@ -547,6 +553,149 @@
   font-size: 1.3rem;
 }
 .ticket .btn {
+  cursor: pointer;
+  padding: 12px 16px 10px;
+}
+
+/* new-order banner */
+.order-alert {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 14px 16px;
+  background: var(--red);
+  color: var(--white);
+  border: var(--rule) solid var(--ink);
+  box-shadow: var(--shadow-paint);
+  animation: alert-flash 1s steps(2, jump-none) infinite;
+}
+.order-alert p {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.order-alert .display {
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+@keyframes alert-flash {
+  50% { background: #8f1810; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .order-alert { animation: none; }
+}
+.alerts-btn {
+  padding: 8px 12px 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.alerts-btn[hidden] {
+  display: none;
+}
+
+/* sold-out switches */
+.stock-panel,
+.alerts-panel {
+  display: grid;
+  gap: 14px;
+  max-width: 720px;
+}
+.stock-panel > .btn {
+  justify-self: start;
+  cursor: pointer;
+}
+.stock-section {
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: 1rem;
+  margin: 10px 0 6px;
+}
+.stock-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 2px solid var(--ink);
+}
+.stock-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--whitewash-deep);
+}
+.stock-row .switch {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.1rem;
+}
+.stock-state {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  color: #1f7a3c;
+}
+.stock-row.is-out .stock-name {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 2px;
+}
+.stock-row.is-out .stock-state {
+  color: var(--red);
+}
+
+/* alerts settings */
+.alerts-block {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--white);
+  border: var(--rule) solid var(--ink);
+}
+.alerts-block h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.alerts-block > .btn {
+  justify-self: start;
+  cursor: pointer;
+}
+.alerts-status {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.alerts-status li {
+  padding-left: 28px;
+  position: relative;
+  font-weight: 700;
+}
+.alerts-status li::before {
+  content: "\2715";
+  position: absolute;
+  left: 0;
+  color: var(--red);
+}
+.alerts-status li[data-ok="yes"]::before {
+  content: "\2713";
+  color: #1f7a3c;
+}
+.alerts-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+.alerts-actions .btn {
   cursor: pointer;
   padding: 12px 16px 10px;
 }
