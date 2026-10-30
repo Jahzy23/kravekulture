@@ -78,6 +78,18 @@
     return new Date().toDateString() === d.toDateString() ? time : d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + ", " + time;
   }
 
+  // "ASAP" or "6:30 PM" in the truck's time zone (with the day if it isn't today).
+  const TZ = "America/New_York";
+  function pickupText(o) {
+    if (!o.pickupAt) return "ASAP";
+    const d = new Date(o.pickupAt);
+    const time = d.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+    const day = (x) => x.toLocaleDateString("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" });
+    return day(d) === day(new Date()) ? time : day(d) + ", " + time;
+  }
+  // When the food has to be ready: the chosen time, or right away for ASAP.
+  const dueAt = (o) => Date.parse(o.pickupAt || o.createdAt);
+
   function render() {
     const counts = { new: 0, done: 0, all: orders.length, stock: soldOut.length };
     orders.forEach((o) => (counts[o.status === "done" ? "done" : "new"] += 1));
@@ -93,7 +105,8 @@
 
     const list = $("[data-tickets]");
     list.textContent = "";
-    // Open orders oldest first (the next one to cook is on top); others newest first.
+    // Open orders by when they're due (the next one to cook is on top, so a pickup set
+    // for later waits its turn); others newest first.
     // Search: any word of the name, the order number, or phone digits. While searching,
     // look across every tab so an order marked done by mistake still turns up.
     const q = $("[data-search]").value.trim().toLowerCase();
@@ -106,7 +119,7 @@
       return false;
     };
     const shown = orders.filter((o) => (q ? true : tab === "all" || (tab === "done" ? o.status === "done" : o.status !== "done")) && matches(o));
-    if (tab === "new" && !q) shown.reverse();
+    if (tab === "new" && !q) shown.sort((a, b) => dueAt(a) - dueAt(b));
     shown.forEach((o) => {
       const done = o.status === "done";
       const ready = o.status === "ready";
@@ -117,6 +130,7 @@
           el("span", { class: "ticket-pay", "data-paid": o.paid ? "yes" : "no", "data-test": o.test ? "yes" : null, text: o.paid ? "Paid" : "Unpaid" }),
           el("span", { class: "ticket-time", text: ago(o.createdAt) }),
         ]),
+        el("p", { class: "ticket-pickup", "data-later": o.pickupAt ? "yes" : null, text: "Pickup " + pickupText(o) }),
         el("p", { class: "ticket-who" }, [
           el("b", { text: o.name }),
           tel ? el("a", { href: "tel:" + tel, text: o.phone }) : null,
@@ -258,7 +272,7 @@
     if (!canNotify() || Notification.permission !== "granted") return;
     const title = "New order #" + o.number + " · " + o.name;
     const opts = {
-      body: itemsLine(o) + (o.paid ? " · Paid" : " · Pay at truck"),
+      body: (o.pickupAt ? "Pickup " + pickupText(o) + " · " : "") + itemsLine(o) + (o.paid ? " · Paid" : " · Pay at truck"),
       tag: "kk-order-" + o.number,
       icon: "images/logo-150.jpg",
       requireInteraction: true,
@@ -275,7 +289,7 @@
     fresh.forEach(notify);
     const last = fresh[fresh.length - 1];
     $("[data-alert-title]").textContent = pending.length > 1 ? pending.length + " new orders!" : "New order!";
-    $("[data-alert-text]").textContent = "#" + last.number + " " + last.name + ": " + itemsLine(last);
+    $("[data-alert-text]").textContent = "#" + last.number + " " + last.name + (last.pickupAt ? " (pickup " + pickupText(last) + ")" : "") + ": " + itemsLine(last);
     $("[data-alert]").hidden = false;
     chime();
     chimeUntil = Date.now() + CHIME_FOR_MS;

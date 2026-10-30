@@ -51,6 +51,7 @@
       <p class="label">Order placed</p>
       <p class="confirm-number display">#<span data-confirm-number></span></p>
       <p class="confirm-status" data-confirm-status data-state="new">Received. We're on it.</p>
+      <p class="confirm-pickup" data-confirm-pickup></p>
       <p class="confirm-lead" data-confirm-lead>Show this number at the window. <strong>Pay at the truck</strong> when you pick up: <strong data-confirm-total></strong>.</p>
       <p class="confirm-lead" data-confirm-paid hidden><strong class="paid-stamp">Paid</strong> <span data-confirm-paid-text></span> Show this number at the window and grab your food.</p>
       <p class="confirm-emailed" data-confirm-emailed hidden></p>
@@ -107,6 +108,18 @@
           <p class="cart-total" data-cart-total hidden><span data-cart-total-label>Total, pay at the truck</span> <b data-cart-total-value></b></p>
 
           <form class="order-form" data-order-form novalidate>
+            <fieldset class="when-pick">
+              <legend class="label">When do you want it?</legend>
+              <div class="pick-row">
+                <label class="pick"><input type="radio" name="when" value="asap" checked><span>ASAP</span></label>
+                <label class="pick"><input type="radio" name="when" value="later"><span>Pick a time</span></label>
+              </div>
+              <div class="field" data-when-later hidden>
+                <label for="o-pickup">Pickup time</label>
+                <select id="o-pickup" name="pickupAt" data-pickup></select>
+                <small>We'll have it hot and ready at the window around then.</small>
+              </div>
+            </fieldset>
             <div class="field">
               <label for="o-name">Your name</label>
               <input id="o-name" name="name" type="text" autocomplete="given-name" maxlength="60" required>

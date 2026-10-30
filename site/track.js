@@ -40,6 +40,7 @@
         el("p", { class: "label", text: "Order number" }),
         el("p", { class: "confirm-number display", text: "#" + o.number }),
         el("p", { class: "confirm-status", "data-state": stateOf(o.status), text: STATUS[stateOf(o.status)] }),
+        el("p", { class: "confirm-pickup", text: o.pickupAt ? "Pickup at " + new Date(o.pickupAt).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) + "." : "Pickup ASAP." }),
         el("ul", { class: "confirm-items" }, (o.items || []).map((l) => el("li", {}, [
           el("span", { text: l.qty + " × " + l.name + (l.flavor ? " (" + l.flavor + ")" : "") }),
           el("span", { text: money(l.lineTotal) }),

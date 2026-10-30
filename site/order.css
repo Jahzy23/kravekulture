@@ -913,6 +913,34 @@
   overflow-wrap: anywhere;
 }
 
+/* ---------- pickup time ---------- */
+.when-pick {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+}
+.when-pick .field[hidden],
+.order-form.is-later [data-wait] {
+  display: none;
+}
+.ticket-pickup {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  padding: 6px 10px 4px;
+  border: 2px solid var(--ink);
+  background: var(--white);
+  justify-self: start;
+}
+.ticket-pickup[data-later="yes"] {
+  background: var(--gold);
+}
+.confirm-pickup {
+  font-size: 1.2rem;
+}
+
 /* ---------- pay online (Square) ---------- */
 .pay-pick,
 .tip-pick {

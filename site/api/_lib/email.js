@@ -17,6 +17,16 @@ const lineLabel = (l) => l.qty + " × " + l.name + (l.flavor ? " (" + l.flavor +
 // VISA → Visa, MASTERCARD → Mastercard, AMERICAN_EXPRESS → American Express
 const cardName = (brand) => String(brand).toLowerCase().split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
+// "ASAP" or "6:30 PM" (with the day when it isn't today), in the truck's time zone.
+function pickupLabel(order) {
+  if (!order.pickupAt) return "ASAP";
+  const at = new Date(order.pickupAt);
+  const tz = { timeZone: "America/New_York" };
+  const time = at.toLocaleTimeString("en-US", { ...tz, hour: "numeric", minute: "2-digit" });
+  const day = (d) => d.toLocaleDateString("en-US", { ...tz, weekday: "short", month: "short", day: "numeric" });
+  return day(at) === day(new Date()) ? time : day(at) + ", " + time;
+}
+
 function emailConfigured() {
   return Boolean(KEY);
 }
@@ -36,6 +46,7 @@ function build(order) {
     "Thanks, " + order.name + "! Your Krave Kulture order is in.",
     "",
     "Order number: #" + order.number,
+    "Pickup: " + pickupLabel(order),
     how,
     "We'll email you again the moment it's ready.",
     "",
@@ -70,6 +81,7 @@ function build(order) {
     '<p style="margin:0 0 6px;font-size:16px">Thanks, ' + esc(order.name) + "! Your order is in.</p>" +
     '<p style="margin:14px 0 2px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#55534e">Order number</p>' +
     '<p style="margin:0 0 12px;font-size:56px;line-height:1;font-weight:900;color:#d92b1f">#' + esc(order.number) + "</p>" +
+    '<p style="margin:0 0 12px;font-size:18px"><b>Pickup:</b> ' + esc(pickupLabel(order)) + "</p>" +
     '<p style="margin:0 0 16px;font-size:16px">' + (paid ? "<b>It's paid.</b> Show this number at the window and grab your food." : "Show this number at the window. <b>Pay at the truck</b> when you pick up.") + " We'll email you again the moment it's ready.</p>" +
     '<table style="width:100%;border-collapse:collapse;border-top:3px solid #111;font-size:15px">' + rows +
     '<tr><td style="padding:12px 0 0;font-weight:700;text-transform:uppercase">' + esc(totalLabel) + '</td><td style="padding:12px 0 0;text-align:right;font-size:20px;font-weight:900">' + esc(money(charged)) + "</td></tr></table>" +
@@ -138,8 +150,10 @@ function buildAlert(order) {
   const paid = order.paid;
   const amount = paid ? "PAID " + money(paid.amount) : "Pay at truck " + money(order.total);
   const items = order.items.map(lineLabel);
+  const pickup = order.pickupAt ? "Pickup " + pickupLabel(order) : "ASAP";
   const text = [
     "New order #" + order.number + " for " + order.name + " (" + amount + ")",
+    "Pickup: " + pickupLabel(order),
     "",
     ...items,
     order.notes ? "\nNote: " + order.notes : "",
@@ -152,12 +166,13 @@ function buildAlert(order) {
     '<div style="max-width:520px;margin:0 auto;padding:16px">' +
     '<p style="margin:0;font-size:40px;font-weight:900;color:#d92b1f">#' + esc(order.number) + "</p>" +
     '<p style="margin:4px 0 12px;font-size:18px"><b>' + esc(order.name) + "</b> · " + esc(amount) + "</p>" +
+    '<p style="margin:0 0 12px;font-size:20px;font-weight:900;background:' + (order.pickupAt ? "#ffc72c" : "#fff") + ';padding:4px 8px">Pickup: ' + esc(pickupLabel(order)) + "</p>" +
     '<ul style="margin:0 0 12px;padding-left:20px;font-size:17px">' + items.map((i) => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
     (order.notes ? '<p style="margin:0 0 12px;background:#ffc72c;padding:8px 10px;font-weight:700">Note: ' + esc(order.notes) + "</p>" : "") +
     '<p style="margin:0 0 12px">Phone: <a href="tel:' + esc(String(order.phone).replace(/[^\d+]/g, "")) + '">' + esc(order.phone) + "</a></p>" +
     '<p style="margin:0"><a href="' + SITE + '/admin.html" style="color:#1f47cc;font-weight:700">Open the order board</a></p>' +
     "</div></body></html>";
-  return { subject: "New order #" + order.number + ": " + order.name + " · " + items.join(", "), text, html };
+  return { subject: "New order #" + order.number + ": " + order.name + " · " + pickup + " · " + items.join(", "), text, html };
 }
 
 // Never throws. Test orders from the sandbox preview don't alert.
@@ -195,4 +210,4 @@ async function deliver(to, { subject, text, html }) {
   }
 }
 
-module.exports = { emailConfigured, sendConfirmation, sendReady, sendAlert, sendAlertTest, build, buildReady, buildAlert };
+module.exports = { pickupLabel, emailConfigured, sendConfirmation, sendReady, sendAlert, sendAlertTest, build, buildReady, buildAlert };
