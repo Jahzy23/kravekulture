@@ -320,11 +320,36 @@
       const data = await res.json();
       const gone = applySoldOut(data && data.soldOut);
       setOpen(Boolean(data && data.open));
+      renderWait(data && data.open ? data.wait : null);
       if (gone.length) showError(soldOutMessage(gone));
       if (data && data.open && data.square) setupSquare(data.square);
     } catch (e) {
       setOpen(false, "Online ordering isn't available right now. Order at the window.");
+      renderWait(null);
     }
+  }
+
+  // "Ready in about 15–20 min" from how many orders are on the board right now.
+  function renderWait(wait) {
+    const ok = wait && Number.isFinite(wait.minutes) && Number.isFinite(wait.ahead);
+    const text = !ok ? "" : "Ready in about " + wait.minutes + "–" + (wait.minutes + 5) + " min. " + (wait.ahead
+      ? wait.ahead + (wait.ahead === 1 ? " order" : " orders") + " ahead of you."
+      : "No line right now.");
+    document.querySelectorAll("[data-wait]").forEach((n) => {
+      n.hidden = !ok;
+      const t = $("[data-wait-text]", n);
+      if (t) t.textContent = text;
+    });
+  }
+
+  // Keep the estimate current while someone is building their order.
+  async function refreshWait() {
+    if (document.visibilityState !== "visible" || $("#order-flow").hidden || !open) return;
+    try {
+      const res = await fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" });
+      const data = await res.json();
+      renderWait(data && data.open ? data.wait : null);
+    } catch (e) { /* keep the last estimate */ }
   }
 
   const soldOutMessage = (names) => "Sorry, " + names.join(" and ") + (names.length > 1 ? " just sold out and were" : " just sold out and was") + " taken off your order.";
@@ -543,5 +568,6 @@
     const last = store.local("kk_last_order");
     if (nav && nav.type === "reload" && last && last.number && Date.now() - Date.parse(last.createdAt) < 24 * 3600e3) showConfirm(last);
     checkOpen();
+    setInterval(refreshWait, 60000);
   });
 })();

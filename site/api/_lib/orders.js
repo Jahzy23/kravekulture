@@ -192,6 +192,30 @@ async function findOrders(name, last4, number) {
     }));
 }
 
+// Wait estimate for a new order: orders not yet marked done, placed in the last
+// WAIT_WINDOW_HOURS (so a forgotten order from yesterday never inflates it).
+// About BASE_MINUTES to cook any order, plus PER_ORDER_MINUTES for each one ahead.
+const WAIT_WINDOW_HOURS = 4;
+const BASE_MINUTES = 10;
+const PER_ORDER_MINUTES = 4;
+const MAX_MINUTES = 90;
+
+async function waitEstimate() {
+  const now = Date.now();
+  const numbers = await cmd("ZRANGEBYSCORE", "orders", now - WAIT_WINDOW_HOURS * 3600e3, "+inf");
+  let ahead = 0;
+  if (numbers && numbers.length) {
+    const values = await cmd("MGET", ...numbers.map((n) => "order:" + n));
+    values.forEach((v) => {
+      if (!v) return;
+      try { if (JSON.parse(v).status !== "done") ahead += 1; } catch (e) { /* skip a damaged entry */ }
+    });
+  }
+  // Rounded up to 5 minutes: "about 25" reads better than "about 22".
+  const minutes = Math.ceil((BASE_MINUTES + PER_ORDER_MINUTES * ahead) / 5) * 5;
+  return { ahead, minutes: Math.min(MAX_MINUTES, minutes) };
+}
+
 async function getOrder(number) {
   if (!/^\d{4,5}$/.test(String(number))) return null;
   const raw = await cmd("GET", "order:" + number);
@@ -211,4 +235,4 @@ async function setStatus(number, status) {
   return order;
 }
 
-module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus };
+module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus, waitEstimate };
