@@ -55,6 +55,59 @@
   padding: 6px 9px 4px;
 }
 
+/* "Your last order" card: one tap fills the cart again. */
+.reorder {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 14px 16px 16px;
+  border: var(--rule) solid var(--ink);
+  background: var(--white);
+  box-shadow: var(--shadow-paint);
+}
+.reorder[hidden] {
+  display: none;
+}
+.order-intro .reorder .label {
+  font-size: 0.85rem;
+}
+.order-intro .reorder-items {
+  font-weight: 700;
+}
+.order-intro .reorder-note {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.reorder .btn {
+  margin-top: 4px;
+}
+
+.remember {
+  display: grid;
+  gap: 2px;
+}
+.remember .check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.remember .check input {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  accent-color: var(--ink);
+}
+.forget {
+  margin: 0;
+  color: var(--ink-soft);
+}
+.forget[hidden] {
+  display: none;
+}
+
 .order-row {
   grid-template-areas:
     "name price"

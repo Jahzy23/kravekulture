@@ -42,6 +42,9 @@
   let payKey = null; // one per checkout attempt; reused only to retry after a dropped connection
   // cart: [{ name, flavor, qty, price }]
   let cart = store.get("kk_cart") || [];
+  // Saved on this phone after an order, unless the customer unticks "Remember me":
+  // kk_me = { name, phone, email }, kk_reorder = { items: [{ name, flavor, qty }], at }.
+  const REORDER_DAYS = 120;
 
   const orderable = new Map(); // name → { price, flavors }
   let soldOutNow = new Set(); // marked sold out on the order board today
@@ -149,6 +152,7 @@
       store.set("kk_cart", cart);
       renderCart();
     }
+    renderReorder();
     return gone;
   }
 
@@ -312,6 +316,95 @@
       : "We're not taking online orders right now. Check Instagram for today's spot, or order at the window.");
     document.querySelectorAll("[data-add], select.flavor").forEach((b) => (b.disabled = !isOpen));
     $("[data-submit]").disabled = !isOpen;
+    renderReorder();
+  }
+
+  // ---- Reorder + remembered details ----
+
+  function savedReorder() {
+    const r = store.local("kk_reorder");
+    if (!r || !Array.isArray(r.items) || !r.items.length) return null;
+    if (!(Date.now() - Number(r.at) < REORDER_DAYS * 864e5)) return null;
+    return r;
+  }
+
+  // Splits the last order into what can be ordered right now and what can't
+  // (sold out today, off the menu, or a flavor we stopped making).
+  function reorderLines(r) {
+    const ok = [];
+    const missing = [];
+    r.items.forEach((l) => {
+      const info = orderable.get(l.name);
+      const qty = Math.max(1, Math.min(MAX_QTY, Math.floor(Number(l.qty)) || 1));
+      if (!info || soldOutNow.has(l.name) || (info.flavors && !info.flavors.includes(l.flavor))) missing.push(lineLabel(l));
+      else ok.push({ name: l.name, flavor: info.flavors ? l.flavor : null, qty, price: info.price });
+    });
+    return { ok, missing };
+  }
+
+  function renderReorder() {
+    const box = $("[data-reorder]");
+    if (!box) return;
+    const r = savedReorder();
+    const lines = r ? reorderLines(r) : { ok: [], missing: [] };
+    if (!lines.ok.length) { box.hidden = true; return; }
+    const total = lines.ok.reduce((s, l) => s + l.price * l.qty, 0);
+    $("[data-reorder-items]", box).textContent = lines.ok.map((l) => l.qty + " × " + lineLabel(l)).join(", ");
+    const note = $("[data-reorder-note]", box);
+    note.textContent = lines.missing.length ? lines.missing.join(", ") + (lines.missing.length > 1 ? " aren't available right now, so we'll leave them off." : " isn't available right now, so we'll leave it off.") : "";
+    note.hidden = !lines.missing.length;
+    const btn = $("[data-reorder-btn]", box);
+    btn.textContent = "Reorder · " + money(total);
+    btn.disabled = !open;
+    box.hidden = false;
+  }
+
+  function reorder() {
+    const r = savedReorder();
+    if (!r || !open) return;
+    const lines = reorderLines(r);
+    if (!lines.ok.length) return renderReorder();
+    cart = lines.ok;
+    store.set("kk_cart", cart);
+    renderCart();
+    showError("");
+    const form = $("[data-order-form]");
+    const ready = form.name.value.trim() && form.phone.value.trim();
+    // Show the filled cart. With details remembered the pay button is next; otherwise
+    // the first empty box gets focus.
+    $("#checkout").scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = ready ? $("[data-submit]") : !form.name.value.trim() ? form.name : form.phone;
+    target.focus({ preventScroll: true });
+  }
+
+  function prefillMe() {
+    const me = store.local("kk_me");
+    const form = $("[data-order-form]");
+    if (!me || !form) return;
+    if (me.name && !form.name.value) form.name.value = me.name;
+    if (me.phone && !form.phone.value) form.phone.value = me.phone;
+    if (me.email && !form.email.value) form.email.value = me.email;
+    $("[data-forget]").hidden = false;
+  }
+
+  function forgetMe() {
+    store.local("kk_me", null);
+    store.local("kk_reorder", null);
+    const form = $("[data-order-form]");
+    ["name", "phone", "email"].forEach((k) => (form[k].value = ""));
+    $("[data-forget]").hidden = true;
+    renderReorder();
+    form.name.focus();
+  }
+
+  function rememberMe(form, order) {
+    if (!form.remember.checked) {
+      store.local("kk_me", null);
+      store.local("kk_reorder", null);
+      return;
+    }
+    store.local("kk_me", { name: form.name.value.trim(), phone: form.phone.value.trim(), email: form.email.value.trim() });
+    store.local("kk_reorder", { items: (order.items || []).map((l) => ({ name: l.name, flavor: l.flavor || null, qty: l.qty })), at: Date.now() });
   }
 
   async function checkOpen() {
@@ -428,6 +521,7 @@
       store.set("kk_cart", cart);
       data.order.emailed = Boolean(data.emailed);
       store.local("kk_last_order", data.order);
+      rememberMe(form, data.order);
       showConfirm(data.order);
     } catch (err) {
       showError(byCard
@@ -518,7 +612,9 @@
     store.local("kk_last_order", null);
     $("#confirm").hidden = true;
     $("#order-flow").hidden = false;
+    prefillMe();
     renderCart();
+    renderReorder();
     checkOpen();
     window.scrollTo(0, 0);
   }
@@ -547,6 +643,7 @@
     });
     syncCart();
     store.set("kk_cart", cart);
+    prefillMe();
     renderCart();
     setOpen(false, "Checking if we're taking orders…");
 
@@ -561,6 +658,8 @@
       if (e.target.name === "pay" || e.target.name === "tip") renderPayTotals();
     });
     $("[data-new-order]").addEventListener("click", newOrder);
+    $("[data-reorder-btn]").addEventListener("click", reorder);
+    $("[data-forget-btn]").addEventListener("click", forgetMe);
 
     // Opening the order page always starts a fresh order. Only a reload of the
     // confirmation itself (within 24 hours) shows that order again.

@@ -74,6 +74,12 @@
           <span class="spot-when" data-spot-when></span>
         </p>
         <p class="wait" data-wait hidden><strong class="wait-label">Wait</strong> <span data-wait-text></span></p>
+        <div class="reorder" data-reorder hidden>
+          <p class="label">Your last order</p>
+          <p class="reorder-items" data-reorder-items></p>
+          <p class="reorder-note" data-reorder-note hidden></p>
+          <button type="button" class="btn btn-red" data-reorder-btn>Reorder</button>
+        </div>
         <p class="order-how" data-pay-how>Add what you want, tell us your name and number, and we start cooking. You pay at the window when you pick up.</p>
         <p class="order-find">Already ordered? <a href="track.html">Find your order</a></p>
       </div>
@@ -118,6 +124,10 @@
             <div class="field">
               <label for="o-notes">Notes <span>(optional)</span></label>
               <textarea id="o-notes" name="notes" rows="2" maxlength="300" placeholder="Extra pikliz, no onions…"></textarea>
+            </div>
+            <div class="remember">
+              <label class="check"><input type="checkbox" name="remember" checked> <span>Remember my name, number and order on this phone</span></label>
+              <p class="forget" data-forget hidden>Not you? <button type="button" class="link-btn" data-forget-btn>Forget me</button></p>
             </div>
             <div class="hp" aria-hidden="true">
               <label for="o-website">Leave this empty</label>
