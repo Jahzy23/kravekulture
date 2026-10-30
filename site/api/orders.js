@@ -1,8 +1,9 @@
 /* /api/orders
-   GET  → { open, soldOut, square, wait }   whether the truck is taking online orders right
+   GET  → { open, soldOut, square, wait, today }   whether the truck is taking online orders right
                              now, what's sold out today, (when Square is set up) what the
                              page needs to show the card field, and (while open) how many
-                             orders are in the queue and about how long a new one takes
+                             orders are in the queue and about how long a new one takes, and
+                             today's spot + closing time when set on the board
    POST → places a pickup order and returns its order number. With pay: "card" the card
           is charged through Square first, and the order is saved only once Square
           confirms the payment. Otherwise it's pay at the truck. */
@@ -25,10 +26,10 @@ module.exports = async function handler(req, res) {
     if (!configured()) return send(res, 200, { open: false, soldOut: [] });
 
     if (req.method === "GET") {
-      const { open, soldOut } = await orderingState();
+      const { open, soldOut, today } = await orderingState();
       // The estimate is a bonus: if it fails, ordering still works without it.
       const wait = open ? await waitEstimate().catch(() => null) : null;
-      return send(res, 200, { open, soldOut, square: square.publicConfig(), wait });
+      return send(res, 200, { open, soldOut, square: square.publicConfig(), wait, today });
     }
 
     if (req.method !== "POST") {
@@ -45,8 +46,8 @@ module.exports = async function handler(req, res) {
     if (!state.open) {
       return send(res, 409, { error: "We're not taking online orders right now. Check Instagram for today's spot and hours.", open: false });
     }
-    const { order, error, soldOut } = buildOrder(body, state.soldOut);
-    if (error) return send(res, soldOut ? 409 : 400, { error, soldOut });
+    const { order, error, soldOut, field } = buildOrder(body, state.soldOut, state.today && state.today.closeAt);
+    if (error) return send(res, soldOut ? 409 : 400, { error, soldOut, field });
 
     const byCard = body.pay === "card";
     if (byCard && !square.squareConfigured()) return send(res, 400, { error: "Paying online isn't available right now. Pick pay at the truck." });

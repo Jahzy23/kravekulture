@@ -81,9 +81,17 @@
           <p class="reorder-note" data-reorder-note hidden></p>
           <button type="button" class="btn btn-red" data-reorder-btn>Reorder</button>
         </div>
+        <div class="find-actions closed-actions" data-closed-actions>
+          <a class="btn btn-red" href="menu.html">See the menu</a>
+          <a class="btn btn-white" data-ig-link href="https://www.instagram.com/eatkravekulture/" target="_blank" rel="noopener">Today's spot on Instagram</a>
+        </div>
         <p class="order-how" data-pay-how>Add what you want, tell us your name and number, and we start cooking. You pay at the window when you pick up.</p>
         <p class="order-find">Already ordered? <a href="track.html">Find your order</a></p>
       </div>
+
+      <nav class="rail order-rail" aria-label="Order sections">
+        <div class="wrap rail-inner" id="order-rail"></div>
+      </nav>
 
       <div id="order-menu">
         <noscript>
@@ -106,6 +114,10 @@
           <p class="cart-empty" data-cart-empty>Nothing yet. Tap <b>Add</b> on anything above.</p>
           <ul class="cart" data-cart></ul>
           <p class="cart-total" data-cart-total hidden><span data-cart-total-label>Total, pay at the truck</span> <b data-cart-total-value></b></p>
+          <div class="upsell" data-upsell hidden>
+            <p class="label">Add a drink or dessert?</p>
+            <div class="upsell-row" data-upsell-items></div>
+          </div>
 
           <form class="order-form" data-order-form novalidate>
             <fieldset class="when-pick">

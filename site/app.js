@@ -284,17 +284,72 @@
     update();
   }
 
-  // "Order ahead" links stay hidden unless the truck is taking online orders right now.
+  // The Order tab shows only while the truck is taking online orders. The box above the
+  // menu always shows once we know: "Order ahead" when open, and when closed a note that
+  // online ordering opens when the truck is out, so people still learn it exists.
   function orderCta() {
-    const ctas = document.querySelectorAll("[data-order-cta]");
-    if (!ctas.length || !window.fetch) return;
+    const box = $("[data-order-box]");
+    if (!window.fetch) return;
     fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d && d.open) ctas.forEach((n) => (n.hidden = false));
-        if (d && Array.isArray(d.soldOut)) markSoldOut(d.soldOut);
+        if (!d) return;
+        const open = Boolean(d.open);
+        document.querySelectorAll("[data-order-cta]").forEach((n) => (n.hidden = !open));
+        if (box) {
+          const text = $("[data-order-text]", box);
+          const btn = $("[data-order-btn]", box);
+          const pay = d.square ? "pay online or at the truck." : "pay at the truck.";
+          text.textContent = "";
+          text.appendChild(el("b", { text: open ? "Skip the line." : "Order online." }));
+          text.appendChild(document.createTextNode(open
+            ? " Order ahead for pickup, " + pay
+            : " Online ordering opens when the truck is out. Today's spot is below."));
+          btn.textContent = open ? "Order ahead" : "Find the truck";
+          btn.href = open ? "order.html" : "#find";
+          btn.className = open ? "btn btn-red" : "btn btn-white";
+          box.hidden = false;
+        }
+        if (Array.isArray(d.soldOut)) markSoldOut(d.soldOut);
+        renderLiveSpot(d.today);
       })
       .catch(() => {});
+  }
+
+  // Today's spot and closing time, set on the order board. Takes over the "This week"
+  // line from menu-data.js until closing time.
+  function renderLiveSpot(today) {
+    if (!today || !today.where || !(Date.parse(today.closeAt) > Date.now())) return;
+    let host = $("[data-spot]");
+    if (!host) {
+      // renderSpot() removed the empty placeholder; build it again.
+      host = el("p", { class: "spot", "data-spot": "" }, [
+        el("strong", { class: "spot-label" }),
+        el("span", { class: "spot-where", "data-spot-where": "" }),
+        el("span", { class: "sr-only", "data-spot-sep": "", text: ", " }),
+        el("span", { class: "spot-when", "data-spot-when": "" }),
+        el("a", { class: "spot-map", "data-spot-map": "", target: "_blank", rel: "noopener", text: "Map" }),
+      ]);
+      $("#find .find").prepend(host);
+    }
+    const close = new Date(today.closeAt).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+    $(".spot-label", host).textContent = "Today";
+    $("[data-spot-where]", host).textContent = today.where;
+    let when = $("[data-spot-when]", host);
+    if (!when) host.insertBefore(when = el("span", { class: "spot-when", "data-spot-when": "" }), $("[data-spot-map]", host));
+    when.textContent = "Open until " + close;
+    let sep = $("[data-spot-sep]", host);
+    if (!sep) host.insertBefore(el("span", { class: "sr-only", "data-spot-sep": "", text: ", " }), when);
+    let map = $("[data-spot-map]", host);
+    if (/^https:\/\//.test(today.mapUrl || "")) {
+      if (!map) host.appendChild(map = el("a", { class: "spot-map", "data-spot-map": "", target: "_blank", rel: "noopener", text: "Map" }));
+      map.href = today.mapUrl;
+      map.setAttribute("aria-label", "Map to " + today.where + " (opens in a new tab)");
+      map.hidden = false;
+    } else if (map) map.remove();
+    host.hidden = false;
+    const txt = $("[data-location-text]");
+    if (txt) txt.textContent = "Day-of changes are posted on Instagram.";
   }
 
   // Items switched off on the order board today read "sold out" on the menu too.
