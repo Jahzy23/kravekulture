@@ -193,7 +193,7 @@ async function findOrders(name, last4, number) {
     }));
 }
 
-// Wait estimate for a new order: orders not yet marked done, placed in the last
+// Wait estimate for a new order: orders not yet marked ready or done, placed in the last
 // WAIT_WINDOW_HOURS (so a forgotten order from yesterday never inflates it).
 // About BASE_MINUTES to cook any order, plus PER_ORDER_MINUTES for each one ahead.
 const WAIT_WINDOW_HOURS = 4;
