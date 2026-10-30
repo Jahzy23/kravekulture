@@ -32,6 +32,11 @@
   };
 
   const MAX_QTY = 20;
+  // Pickup slots: same rules as api/_lib/orders.js (every 15 min, 20 min to 3 hours out).
+  const SLOT_MIN = 15;
+  const LEAD_MIN = 20;
+  const AHEAD_HOURS = 3;
+  const TZ = "America/New_York";
   let open = false;
   let sending = false;
   // Square card field, set up once /api/orders says payments are on.
@@ -307,6 +312,43 @@
     $("[data-wallets]").hidden = !(wallets.apple || wallets.google);
   }
 
+  // "6:30 PM", or "Tomorrow 12:15 AM" for a late-night slot past midnight. Always the
+  // truck's time, wherever the phone thinks it is.
+  function slotLabel(t) {
+    const d = new Date(t);
+    const time = d.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+    const day = (x) => x.toLocaleDateString("en-US", { timeZone: TZ });
+    return day(d) === day(new Date()) ? time : "Tomorrow " + time;
+  }
+
+  let waitMinutes = 0; // from the wait estimate
+  function pickupSlots() {
+    const step = SLOT_MIN * 60000;
+    const now = Date.now();
+    const slots = [];
+    for (let t = Math.ceil((now + Math.max(LEAD_MIN, waitMinutes) * 60000) / step) * step; t <= now + AHEAD_HOURS * 3600e3; t += step) slots.push(t);
+    return slots;
+  }
+
+  // Rebuilt every minute so times that got too close drop off. Keeps the customer's pick
+  // while it's still offered, otherwise moves to the earliest slot.
+  function fillSlots() {
+    const select = $("[data-pickup]");
+    const keep = select.value;
+    select.textContent = "";
+    pickupSlots().forEach((t) => select.appendChild(el("option", { value: new Date(t).toISOString(), text: slotLabel(t) })));
+    if (keep && Array.from(select.options).some((o) => o.value === keep)) select.value = keep;
+  }
+
+  const wantsLater = () => ($("input[name=when]:checked") || {}).value === "later";
+  const pickupAt = () => (wantsLater() ? $("[data-pickup]").value : "");
+
+  function renderWhen() {
+    $("[data-when-later]").hidden = !wantsLater();
+    // The "ready in about…" line by the button is for ASAP orders.
+    $("[data-order-form]").classList.toggle("is-later", wantsLater());
+  }
+
   function setOpen(isOpen, message) {
     open = isOpen;
     document.body.dataset.ordering = isOpen ? "open" : "closed";
@@ -425,6 +467,9 @@
   // "Ready in about 15–20 min" from how many orders are on the board right now.
   function renderWait(wait) {
     const ok = wait && Number.isFinite(wait.minutes) && Number.isFinite(wait.ahead);
+    // No pickup slot sooner than the food could be ready.
+    const minutes = ok ? wait.minutes : 0;
+    if (minutes !== waitMinutes) { waitMinutes = minutes; fillSlots(); }
     const text = !ok ? "" : "Ready in about " + wait.minutes + "–" + (wait.minutes + 5) + " min. " + (wait.ahead
       ? wait.ahead + (wait.ahead === 1 ? " order" : " orders") + " ahead of you."
       : "No line right now.");
@@ -498,6 +543,7 @@
           name, phone,
           email: form.email.value.trim(),
           notes: form.notes.value.trim(),
+          pickupAt: pickupAt(),
           website: form.website.value,
           items: cart.map((l) => ({ name: l.name, flavor: l.flavor, qty: l.qty })),
           pay: byCard ? "card" : "truck",
@@ -560,6 +606,7 @@
     $("#order-flow").hidden = true;
     $("[data-cart-bar]").hidden = true;
     setConfirmStatus(order.status);
+    $("[data-confirm-pickup]").textContent = order.pickupAt ? "Pickup at " + slotLabel(order.pickupAt) + "." : "Pickup ASAP.";
     const mailed = $("[data-confirm-emailed]");
     mailed.hidden = !order.emailed;
     mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + " and we'll email again when it's ready. Don't see it in a minute? Check your spam and trash folders." : "";
@@ -662,10 +709,14 @@
     $("#google-pay-button").addEventListener("click", (e) => wallets.google && submit(e, wallets.google));
     $("[data-order-form]").addEventListener("change", (e) => {
       if (e.target.name === "pay" || e.target.name === "tip") renderPayTotals();
+      if (e.target.name === "when") { fillSlots(); renderWhen(); }
     });
     $("[data-new-order]").addEventListener("click", newOrder);
     $("[data-reorder-btn]").addEventListener("click", reorder);
     $("[data-forget-btn]").addEventListener("click", forgetMe);
+    fillSlots();
+    renderWhen(); // the browser may have kept "Pick a time" from before a reload
+    setInterval(fillSlots, 60000);
 
     // Opening the order page always starts a fresh order. Only a reload of the
     // confirmation itself (within 24 hours) shows that order again.

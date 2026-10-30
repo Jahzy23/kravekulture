@@ -15,6 +15,23 @@ const KEEP_DAYS = 60;
 const MAX_QTY = 20; // per line
 const MAX_LINES = 25;
 
+// Pickup time: ASAP, or a slot every SLOT_MIN minutes from LEAD_MIN out to AHEAD_HOURS out.
+// order.js builds the same list for the picker; the server only checks the rules.
+const SLOT_MIN = 15;
+const LEAD_MIN = 20;
+const AHEAD_HOURS = 3;
+
+// Returns the ISO time for a valid slot, "" for ASAP, or null when the slot is no good.
+function cleanPickup(value, now) {
+  if (value == null || value === "" || value === "asap") return "";
+  const t = Date.parse(value);
+  if (!Number.isFinite(t) || t % (SLOT_MIN * 60000) !== 0) return null;
+  const at = now || Date.now();
+  // A few minutes of grace so a slot picked just before it rolled off still works.
+  if (t < at + (LEAD_MIN - 10) * 60000 || t > at + AHEAD_HOURS * 3600e3 + SLOT_MIN * 60000) return null;
+  return new Date(t).toISOString();
+}
+
 // Everything that can be ordered: items with a number price that are not sold out,
 // either in menu-data.js or (when soldOut is given) on the order board.
 function catalog(soldOut) {
@@ -85,6 +102,8 @@ function buildOrder(body, soldOut) {
   if (name.length < 2) return { error: "Please add your name so we can call it out at the window." };
   if (digits.length < 10 || digits.length > 11) return { error: "Please add a phone number we can reach you on (10 digits)." };
   if (email && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email)) return { error: "That email address doesn't look right. Fix it, or leave it empty." };
+  const pickupAt = cleanPickup(body.pickupAt);
+  if (pickupAt === null) return { error: "That pickup time has passed or isn't available. Pick another time, or ASAP." };
   if (!Array.isArray(body.items) || !body.items.length) return { error: "Your order is empty." };
   if (body.items.length > MAX_LINES) return { error: "That's a big order! Please call the truck for catering." };
 
@@ -112,7 +131,7 @@ function buildOrder(body, soldOut) {
 
   const items = Array.from(lines.values()).map((l) => ({ ...l, lineTotal: l.price * l.qty }));
   const total = items.reduce((sum, l) => sum + l.lineTotal, 0);
-  return { order: { name, phone, email: email || undefined, notes, items, total } };
+  return { order: { name, phone, email: email || undefined, notes, pickupAt: pickupAt || undefined, items, total } };
 }
 
 async function isOrderingOn() {
@@ -186,6 +205,7 @@ async function findOrders(name, last4, number) {
       readyAt: o.readyAt || null,
       completedAt: o.completedAt || null,
       name: o.name,
+      pickupAt: o.pickupAt || null,
       items: o.items,
       total: o.total,
       tip: o.tip || 0,
@@ -209,8 +229,12 @@ async function waitEstimate() {
     const values = await cmd("MGET", ...numbers.map((n) => "order:" + n));
     values.forEach((v) => {
       if (!v) return;
-      // Ready orders are already cooked, so only ones still on the grill count.
-      try { const s = JSON.parse(v).status; if (s !== "done" && s !== "ready") ahead += 1; } catch (e) { /* skip a damaged entry */ }
+      try {
+        const o = JSON.parse(v);
+        // Ready orders are already cooked, so only ones still on the grill count. Pickups
+        // set for later than the next half hour aren't in the line yet.
+        if (o.status !== "done" && o.status !== "ready" && !(o.pickupAt && Date.parse(o.pickupAt) > now + 30 * 60000)) ahead += 1;
+      } catch (e) { /* skip a damaged entry */ }
     });
   }
   // Rounded up to 5 minutes: "about 25" reads better than "about 22".
@@ -243,4 +267,4 @@ async function setStatus(number, status, extra) {
   return order;
 }
 
-module.exports = { catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus, waitEstimate };
+module.exports = { SLOT_MIN, LEAD_MIN, AHEAD_HOURS, cleanPickup, catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus, waitEstimate };
