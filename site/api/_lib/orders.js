@@ -209,7 +209,8 @@ async function waitEstimate() {
     const values = await cmd("MGET", ...numbers.map((n) => "order:" + n));
     values.forEach((v) => {
       if (!v) return;
-      try { if (JSON.parse(v).status !== "done") ahead += 1; } catch (e) { /* skip a damaged entry */ }
+      // Ready orders are already cooked, so only ones still on the grill count.
+      try { const s = JSON.parse(v).status; if (s !== "done" && s !== "ready") ahead += 1; } catch (e) { /* skip a damaged entry */ }
     });
   }
   // Rounded up to 5 minutes: "about 25" reads better than "about 22".
