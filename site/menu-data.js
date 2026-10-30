@@ -135,6 +135,8 @@ const LOCATION = {
    `updated`, whatever `when` says. After that it hides itself and both pages
    go back to "check Instagram". If the plan changes or the spot is over
    early, change or clear `where` and redeploy. Leave `where` empty to hide it.
+   Day of: "Today's spot" on the owner portal (admin.html) sets where you are and when
+   you close, with no redeploy. It shows instead of this one until closing time.
    --------------------------------------------------------------------- */
 const SPOT = {
   updated: "", // today's date, exactly YYYY-MM-DD with zeros, e.g. "2026-10-06".

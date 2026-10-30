@@ -260,6 +260,57 @@
   font-family: var(--display);
   font-size: 1.6rem;
 }
+
+/* "Add a drink or dessert?" under the cart */
+.upsell {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  border: 2px dashed var(--ink);
+  background: var(--white);
+}
+.upsell[hidden] {
+  display: none;
+}
+.upsell .label {
+  margin: 0;
+}
+.upsell-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.upsell-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border: var(--rule) solid var(--ink);
+  cursor: pointer;
+}
+.upsell-add b {
+  font-family: var(--display);
+}
+
+/* Closed: say so up top and hide the menu, checkout and section tabs. */
+.closed-actions {
+  display: none;
+}
+[data-closed="true"] .closed-actions {
+  display: flex;
+}
+[data-closed="true"] #order-menu,
+[data-closed="true"] #checkout,
+[data-closed="true"] .order-rail,
+[data-closed="true"] .order-how,
+[data-closed="true"] .cart-bar {
+  display: none;
+}
 .cart-total[hidden] {
   display: none;
 }
@@ -741,6 +792,25 @@
   color: var(--red);
 }
 
+/* today's spot + closing time (top of the board) */
+.today-block {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px;
+  background: var(--white);
+  border: var(--rule) solid var(--ink);
+  border-top: 10px solid var(--gold);
+}
+.today-block h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.today-block .admin-note {
+  margin: 0;
+  font-weight: 700;
+}
+
 /* alerts settings */
 .alerts-block {
   display: grid;
@@ -968,6 +1038,9 @@
 .pick {
   position: relative;
   cursor: pointer;
+}
+.pick[hidden] {
+  display: none;
 }
 .pick input {
   position: absolute;

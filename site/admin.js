@@ -31,6 +31,8 @@
   let soldOut = [];
   let alertEmail = "";
   let emailReady = false;
+  let today = null; // { where, mapUrl, closeAt } from the board, or null
+  let todayShown = false;
   let tab = "new";
   let seen = null; // order numbers already shown, to spot new ones
   let timer = null;
@@ -307,6 +309,43 @@
     render();
   }
 
+  // "Open until" choices: every half hour from the next one, up to 16 hours out, in the
+  // truck's time zone (TZ above).
+  const timeLabel = (t) => {
+    const d = new Date(t);
+    const time = d.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+    const day = (x) => x.toLocaleDateString("en-US", { timeZone: TZ });
+    return day(d) === day(new Date()) ? time : "Tomorrow " + time;
+  };
+
+  function fillClose() {
+    const select = $("[data-close]");
+    if (document.activeElement === select) return;
+    const step = 30 * 60000;
+    const keep = select.value || (today ? today.closeAt : "");
+    select.textContent = "";
+    select.appendChild(el("option", { value: "", text: "Pick a time" }));
+    for (let t = Math.ceil((Date.now() + 60000) / step) * step; t <= Date.now() + 16 * 3600e3; t += step) {
+      select.appendChild(el("option", { value: new Date(t).toISOString(), text: timeLabel(t) }));
+    }
+    if (keep && !Array.from(select.options).some((o) => o.value === keep) && Date.parse(keep) > Date.now()) {
+      select.appendChild(el("option", { value: keep, text: timeLabel(Date.parse(keep)) }));
+    }
+    select.value = keep || "";
+  }
+
+  function renderToday(fillInputs) {
+    const form = $("[data-today-form]");
+    $("[data-today-now]").textContent = today
+      ? "Customers see: " + (today.where ? today.where + ", open" : "Open") + " until " + timeLabel(Date.parse(today.closeAt)).replace("Tomorrow", "tomorrow") + "."
+      : "Not set. Customers see \"check Instagram\" and can pick pickup times up to 3 hours out.";
+    if (fillInputs && today) {
+      form.where.value = today.where;
+      form.mapUrl.value = today.mapUrl;
+    }
+    fillClose();
+  }
+
   function setSwitch(open) {
     $("[data-ordering]").checked = open;
     $("[data-ordering-label]").textContent = open ? "Taking orders" : "Not taking orders";
@@ -331,6 +370,10 @@
     soldOut = r.data.soldOut || [];
     alertEmail = r.data.alertEmail || "";
     emailReady = Boolean(r.data.emailReady);
+    today = r.data.today || null;
+    // Fill the boxes on the first load only, so a refresh never wipes what's being typed.
+    renderToday(!todayShown);
+    todayShown = true;
     setSwitch(Boolean(r.data.open));
     show("board");
     if (arrived.length) alertNew(arrived);
@@ -371,6 +414,38 @@
       const r = await api("POST", { action: "ordering", open: want });
       if (r.status === 200) setSwitch(Boolean(r.data.open));
       else { e.target.checked = !want; alert(r.data.error || "Couldn't change that. Try again."); }
+      // Nudge toward a closing time so ordering shuts off on its own tonight.
+      if (want && r.status === 200 && !today) {
+        $("[data-today-form]").scrollIntoView({ behavior: "smooth", block: "start" });
+        $("[data-today-error]").textContent = "Set where you are and when you close, so customers can find you and ordering turns off on its own.";
+        $("[data-today-error]").hidden = false;
+      }
+    });
+
+    $("[data-today-form]").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const err = $("[data-today-error]");
+      err.hidden = true;
+      if (!f.closeAt.value) { err.textContent = "Pick the time you close today."; err.hidden = false; f.closeAt.focus(); return; }
+      const r = await api("POST", { action: "today", where: f.where.value, mapUrl: f.mapUrl.value, closeAt: f.closeAt.value });
+      if (r.status === 401) return show("login");
+      if (r.status !== 200) { err.textContent = r.data.error || "Couldn't save that. Try again."; err.hidden = false; return; }
+      today = r.data.today;
+      renderToday(true);
+    });
+
+    $("[data-today-clear]").addEventListener("click", async () => {
+      const r = await api("POST", { action: "today", where: "", closeAt: "" });
+      if (r.status === 401) return show("login");
+      if (r.status !== 200) return alert(r.data.error || "Couldn't clear that. Try again.");
+      today = null;
+      const f = $("[data-today-form]");
+      f.where.value = "";
+      f.mapUrl.value = "";
+      $("[data-close]").value = "";
+      $("[data-today-error]").hidden = true;
+      renderToday(false);
     });
 
     $("[data-tickets]").addEventListener("click", async (e) => {

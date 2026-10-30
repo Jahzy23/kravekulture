@@ -1,17 +1,18 @@
 /* /api/admin — the order board behind admin.html. Everything but "login" needs the
    admin cookie.
-   GET  → { orders, open, soldOut, items, alertEmail, emailReady }
+   GET  → { orders, open, soldOut, items, alertEmail, emailReady, today }
    POST { action: "login", password } | { action: "logout" }
         { action: "ready" | "complete" | "reopen", number }   ("ready" emails the customer once)
         { action: "ordering", open: true | false }
         { action: "soldout", name, out: true | false } | { action: "soldout-clear" }
-        { action: "alertemail", email }   ("" turns alert emails off) */
+        { action: "alertemail", email }   ("" turns alert emails off)
+        { action: "today", where, mapUrl, closeAt }   (empty where + no closeAt clears it) */
 "use strict";
 
 const { send, readJson, clientIp, sameOrigin } = require("./_lib/http");
 const { configured } = require("./_lib/store");
 const auth = require("./_lib/auth");
-const { catalog, orderingState, setOrdering, setSoldOut, clearSoldOut, setAlertEmail, underLimit, listOrders, getOrder, setStatus } = require("./_lib/orders");
+const { catalog, setToday, orderingState, setOrdering, setSoldOut, clearSoldOut, setAlertEmail, underLimit, listOrders, getOrder, setStatus } = require("./_lib/orders");
 const { emailConfigured, sendAlertTest, sendReady } = require("./_lib/email");
 
 // Everything the board can mark sold out, in menu order.
@@ -75,6 +76,12 @@ module.exports = async function handler(req, res) {
       const soldOut = await setSoldOut(String(body.name || ""), Boolean(body.out));
       if (!soldOut) return send(res, 404, { error: "That item isn't on the menu anymore. Refresh the page." });
       return send(res, 200, { ok: true, soldOut });
+    }
+
+    if (body.action === "today") {
+      const r = await setToday(body);
+      if (r.error) return send(res, 400, { error: r.error });
+      return send(res, 200, { ok: true, today: r.today });
     }
 
     if (body.action === "soldout-clear") {

@@ -440,9 +440,10 @@
   </div>
 
   <main id="menu">
-    <div class="wrap order-cta" data-order-cta hidden>
-      <p><b>Skip the line.</b> Order ahead for pickup, pay at the truck.</p>
-      <a class="btn btn-red" href="order.html">Order ahead</a>
+    <!-- Open: "Order ahead". Closed: says when ordering opens (see orderCta in app.js). -->
+    <div class="wrap order-cta" data-order-box hidden>
+      <p data-order-text><b>Skip the line.</b> Order ahead for pickup, pay at the truck.</p>
+      <a class="btn btn-red" href="order.html" data-order-btn>Order ahead</a>
     </div>
     <div id="menu-sections">
       <noscript>

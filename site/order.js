@@ -39,6 +39,7 @@
   const TZ = "America/New_York";
   let open = false;
   let sending = false;
+  let closeAt = 0; // today's closing time (ms) from the board; 0 = not set
   // Square card field, set up once /api/orders says payments are on.
   let card = null;
   // Apple Pay / Google Pay, when the device and Square support them.
@@ -90,6 +91,8 @@
         ]);
         list.appendChild(li);
       });
+      const rail = $("#order-rail");
+      if (rail) rail.appendChild(el("a", { href: "#" + id, text: section.title }));
       host.appendChild(el("section", { class: "stall", id, "aria-labelledby": id + "-title" }, [
         el("div", { class: "board board-" + board }, [
           el("div", { class: "wrap" }, [
@@ -103,6 +106,9 @@
         el("div", { class: "wrap stall-body no-plate" }, [list]),
       ]));
     });
+
+    const rail = $("#order-rail");
+    if (rail) rail.appendChild(el("a", { href: "#checkout", text: "Your order" }));
 
     host.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-add]");
@@ -209,6 +215,8 @@
     $("[data-cart-total]").hidden = empty;
     renderPayTotals();
 
+    renderUpsell();
+
     const bar = $("[data-cart-bar]");
     bar.hidden = empty;
     $("[data-cart-bar-count]").textContent = cartCount() + (cartCount() === 1 ? " item" : " items");
@@ -219,6 +227,25 @@
       const q = cart.filter((l) => l.name === n.getAttribute("data-in-cart")).reduce((s, l) => s + l.qty, 0);
       n.textContent = q ? q + " in order" : "";
     });
+  }
+
+  // "Add a drink or dessert?" under the cart, until one of them is in the order.
+  const UPSELL_SECTIONS = ["Dessert", "Drinks"];
+  const UPSELL_MAX = 3;
+  function renderUpsell() {
+    const box = $("[data-upsell]");
+    if (!box || typeof MENU === "undefined") return;
+    const extras = MENU.filter((s) => UPSELL_SECTIONS.includes(s.title)).flatMap((s) => s.items || []).map((i) => i.name)
+      .filter((n) => orderable.has(n) && !orderable.get(n).flavors);
+    const hasOne = cart.some((l) => extras.includes(l.name));
+    const picks = extras.filter((n) => !soldOutNow.has(n)).slice(0, UPSELL_MAX);
+    box.hidden = !cart.length || hasOne || !picks.length;
+    if (box.hidden) return;
+    const row = $("[data-upsell-items]", box);
+    row.textContent = "";
+    picks.forEach((n) => row.appendChild(el("button", { type: "button", class: "upsell-add", "data-upsell-add": n, "aria-label": "Add " + n + " to your order" }, [
+      el("span", { text: "+ " + n }), el("b", { text: money(orderable.get(n).price) }),
+    ])));
   }
 
   // Total line and button label follow the pay choice and tip.
@@ -321,12 +348,16 @@
     return day(d) === day(new Date()) ? time : "Tomorrow " + time;
   }
 
+  // Closing time reads best as just the time: "until 12:30 AM".
+  const closeLabel = (t) => new Date(t).toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+
   let waitMinutes = 0; // from the wait estimate
   function pickupSlots() {
     const step = SLOT_MIN * 60000;
     const now = Date.now();
     const slots = [];
-    for (let t = Math.ceil((now + Math.max(LEAD_MIN, waitMinutes) * 60000) / step) * step; t <= now + AHEAD_HOURS * 3600e3; t += step) slots.push(t);
+    const last = closeAt ? Math.min(closeAt, now + AHEAD_HOURS * 3600e3) : now + AHEAD_HOURS * 3600e3;
+    for (let t = Math.ceil((now + Math.max(LEAD_MIN, waitMinutes) * 60000) / step) * step; t <= last; t += step) slots.push(t);
     return slots;
   }
 
@@ -338,6 +369,15 @@
     select.textContent = "";
     pickupSlots().forEach((t) => select.appendChild(el("option", { value: new Date(t).toISOString(), text: slotLabel(t) })));
     if (keep && Array.from(select.options).some((o) => o.value === keep)) select.value = keep;
+    // Too close to closing for a later pickup: ASAP only.
+    const later = $("input[name=when][value=later]");
+    const none = !select.options.length;
+    later.disabled = none;
+    later.closest(".pick").hidden = none;
+    if (none && later.checked) {
+      $("input[name=when][value=asap]").checked = true;
+      renderWhen();
+    }
   }
 
   const wantsLater = () => ($("input[name=when]:checked") || {}).value === "later";
@@ -354,8 +394,8 @@
     document.body.dataset.ordering = isOpen ? "open" : "closed";
     const status = $("[data-order-status]");
     status.textContent = message || (isOpen
-      ? "We're taking orders now. Order here, pick up at the truck."
-      : "We're not taking online orders right now. Check Instagram for today's spot, or order at the window.");
+      ? (closeAt ? "We're taking orders until " + closeLabel(closeAt) + ". Order here, pick up at the truck." : "We're taking orders now. Order here, pick up at the truck.")
+      : "We're not taking online orders right now. Check Instagram for today's spot and hours.");
     document.querySelectorAll("[data-add], select.flavor").forEach((b) => (b.disabled = !isOpen));
     $("[data-submit]").disabled = !isOpen;
     renderReorder();
@@ -389,7 +429,7 @@
     if (!box) return;
     const r = savedReorder();
     const lines = r ? reorderLines(r) : { ok: [], missing: [] };
-    if (!lines.ok.length) { box.hidden = true; return; }
+    if (!lines.ok.length || !open) { box.hidden = true; return; }
     const total = lines.ok.reduce((s, l) => s + l.price * l.qty, 0);
     $("[data-reorder-items]", box).textContent = lines.ok.map((l) => l.qty + " × " + lineLabel(l)).join(", ");
     const note = $("[data-reorder-note]", box);
@@ -454,12 +494,20 @@
       const res = await fetch("/api/orders", { headers: { Accept: "application/json" }, cache: "no-store" });
       const data = await res.json();
       const gone = applySoldOut(data && data.soldOut);
+      const today = data && data.today;
+      closeAt = today && Date.parse(today.closeAt) > Date.now() ? Date.parse(today.closeAt) : 0;
+      renderPickup(today);
+      fillSlots();
       setOpen(Boolean(data && data.open));
+      // Closed: show the reason up top and hide the menu and checkout instead of a page
+      // full of buttons that do nothing.
+      document.body.dataset.closed = data && data.open ? "false" : "true";
       renderWait(data && data.open ? data.wait : null);
       if (gone.length) showError(soldOutMessage(gone));
       if (data && data.open && data.square) setupSquare(data.square);
     } catch (e) {
       setOpen(false, "Online ordering isn't available right now. Order at the window.");
+      document.body.dataset.closed = "true";
       renderWait(null);
     }
   }
@@ -492,10 +540,18 @@
 
   const soldOutMessage = (names) => "Sorry, " + names.join(" and ") + (names.length > 1 ? " just sold out and were" : " just sold out and was") + " taken off your order.";
 
-  function showError(msg) {
+  // With a field, the message goes right under that box (and scrolls into view), so on a
+  // phone it never prints off screen by the button. Without one it sits above the button.
+  function showError(msg, field) {
     const box = $("[data-form-error]");
     box.textContent = msg;
     box.hidden = !msg;
+    if (!msg) return;
+    const spot = field && field.closest(".field");
+    if (spot) spot.after(box);
+    else $("[data-submit]").before(box);
+    if (field) field.focus({ preventScroll: true });
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   // `wallet` is Apple Pay or Google Pay when one of their buttons was tapped. Apple
@@ -509,11 +565,11 @@
     if (!cart.length) return showError("Your order is empty. Tap Add on something above.");
     const name = form.name.value.trim();
     const phone = form.phone.value.trim();
-    if (name.length < 2) { form.name.focus(); return showError("Please add your name so we can call it out at the window."); }
+    if (name.length < 2) return showError("Please add your name so we can call it out at the window.", form.name);
     const digits = phone.replace(/\D/g, "");
-    if (digits.length < 10 || digits.length > 11) { form.phone.focus(); return showError("Please add a phone number we can reach you on (10 digits)."); }
+    if (digits.length < 10 || digits.length > 11) return showError("Please add a phone number we can reach you on (10 digits).", form.phone);
     const email = form.email.value.trim();
-    if (email && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) { form.email.focus(); return showError("That email address doesn't look right. Fix it, or leave it empty."); }
+    if (email && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) return showError("That email address doesn't look right. Fix it, or leave it empty.", form.email);
 
     const byCard = Boolean(wallet) || payingByCard();
     if (byCard && !card) return showError("The card form is still loading. Give it a second and tap Pay again.");
@@ -560,7 +616,8 @@
           const gone = applySoldOut(data.soldOut);
           if (gone.length) return showError(soldOutMessage(gone) + " Check your order and send it again.");
         }
-        showError((data && data.error) || "Something went wrong. Please try again, or order at the window.");
+        showError((data && data.error) || "Something went wrong. Please try again, or order at the window.", data && data.field === "pickupAt" ? $("[data-pickup]") : null);
+        fillSlots();
         return;
       }
       cart = [];
@@ -612,7 +669,6 @@
     mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + " and we'll email again when it's ready. Don't see it in a minute? Check your spam and trash folders." : "";
     const review = $("[data-review]");
     $("[data-review-link]", review).href = "review.html?o=" + encodeURIComponent(order.number) + (order.reviewToken ? "&t=" + encodeURIComponent(order.reviewToken) : "");
-    review.hidden = false;
     const box = $("#confirm");
     box.hidden = false;
     window.scrollTo(0, 0);
@@ -631,6 +687,8 @@
     if (state === "ready") document.title = "\u2705 READY - Order #" + $("[data-confirm-number]").textContent;
     n.dataset.state = state;
     n.textContent = STATUS_TEXT[state];
+    // Ask for a rating once they've picked up the food, not before they've eaten.
+    $("[data-review]").hidden = state !== "done";
   }
 
   // Keep the status on the confirmation screen fresh (every 30s while the page is open,
@@ -672,12 +730,19 @@
     window.scrollTo(0, 0);
   }
 
-  function renderPickup() {
+  // Where to pick up: today's spot from the board (live), else this week's from menu-data.js.
+  function renderPickup(today) {
     const host = $("[data-spot]");
-    if (typeof SPOT === "undefined" || typeof spotIsFresh !== "function" || !spotIsFresh(SPOT)) { host.remove(); return; }
-    $("[data-spot-where]", host).textContent = SPOT.where;
-    if (SPOT.when) $("[data-spot-when]", host).textContent = SPOT.when;
-    else { $("[data-spot-when]", host).remove(); $("[data-spot-sep]", host).remove(); }
+    if (!host) return;
+    const live = today && today.where && Date.parse(today.closeAt) > Date.now();
+    const weekly = typeof SPOT !== "undefined" && typeof spotIsFresh === "function" && spotIsFresh(SPOT);
+    if (!live && !weekly) { host.hidden = true; return; }
+    const where = live ? today.where : SPOT.where;
+    const when = live ? "Until " + closeLabel(Date.parse(today.closeAt)) : SPOT.when;
+    $("[data-spot-where]", host).textContent = where;
+    $("[data-spot-when]", host).textContent = when || "";
+    $("[data-spot-when]", host).hidden = !when;
+    $("[data-spot-sep]", host).hidden = !when;
     host.hidden = false;
   }
 
@@ -685,6 +750,7 @@
     document.querySelectorAll("[data-year]").forEach((n) => (n.textContent = new Date().getFullYear()));
     if (typeof LOCATION === "undefined") return;
     document.querySelectorAll("[data-city]").forEach((n) => (n.textContent = LOCATION.city));
+    document.querySelectorAll("[data-ig-link]").forEach((n) => (n.href = LOCATION.instagram));
     const a = $("[data-phone-link]");
     if (a && LOCATION.phone) a.href = "tel:" + LOCATION.phone.replace(/[^\d+]/g, "");
     else if (a) a.parentNode.remove();
@@ -700,6 +766,10 @@
     renderCart();
     setOpen(false, "Checking if we're taking orders…");
 
+    $("[data-upsell]").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-upsell-add]");
+      if (b && open) addToCart(b.getAttribute("data-upsell-add"), null, 1);
+    });
     $("[data-cart]").addEventListener("click", (e) => {
       const b = e.target.closest("[data-step]");
       if (b) addToCart(b.getAttribute("data-name"), b.getAttribute("data-flavor") || null, Number(b.getAttribute("data-step")));

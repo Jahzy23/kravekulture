@@ -4,7 +4,9 @@
      orders             sorted set of order numbers, scored by time placed
      settings:ordering  "on" | "off" (missing = off) — the admin "Taking orders" switch
      settings:soldout   set of item names marked sold out on the order board
-     settings:alertemail  where to email each new order (empty = no alert emails) */
+     settings:alertemail  where to email each new order (empty = no alert emails)
+     settings:today     JSON { where, mapUrl, closeAt } — today's spot and closing time from
+                        the board. Ordering shuts itself off at closeAt. */
 "use strict";
 
 const crypto = require("crypto");
@@ -22,13 +24,15 @@ const LEAD_MIN = 20;
 const AHEAD_HOURS = 3;
 
 // Returns the ISO time for a valid slot, "" for ASAP, or null when the slot is no good.
-function cleanPickup(value, now) {
+// closeAt (ms, optional) is today's closing time: no pickups after it.
+function cleanPickup(value, now, closeAt) {
   if (value == null || value === "" || value === "asap") return "";
   const t = Date.parse(value);
   if (!Number.isFinite(t) || t % (SLOT_MIN * 60000) !== 0) return null;
   const at = now || Date.now();
   // A few minutes of grace so a slot picked just before it rolled off still works.
   if (t < at + (LEAD_MIN - 10) * 60000 || t > at + AHEAD_HOURS * 3600e3 + SLOT_MIN * 60000) return null;
+  if (closeAt && t > closeAt) return null;
   return new Date(t).toISOString();
 }
 
@@ -68,12 +72,47 @@ async function clearSoldOut() {
   return [];
 }
 
-// The ordering switch, the sold-out list and the alert address in one round trip.
-// alertEmail is private: never send it to customers.
+// Today's spot and closing time, set on the board. Only counts until closeAt.
+const MAX_OPEN_HOURS = 18;
+function parseToday(raw, now) {
+  let t = null;
+  try { t = raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  if (!t || !Number.isFinite(Date.parse(t.closeAt)) || Date.parse(t.closeAt) <= (now || Date.now())) return null;
+  return { where: t.where || "", mapUrl: t.mapUrl || "", closeAt: t.closeAt };
+}
+
+// Returns the saved { where, mapUrl, closeAt }, or { error }. Empty `where` and no
+// closeAt clears it.
+async function setToday(body) {
+  const where = clean(body && body.where, 80);
+  const mapUrl = clean(body && body.mapUrl, 500);
+  const close = Date.parse(body && body.closeAt);
+  if (!where && !body.closeAt) {
+    await cmd("DEL", "settings:today");
+    return { today: null };
+  }
+  if (mapUrl && !/^https:\/\/[^\s]+$/.test(mapUrl)) return { error: "The map link should start with https://. Copy it from Google Maps > Share." };
+  if (!Number.isFinite(close) || close <= Date.now() || close > Date.now() + MAX_OPEN_HOURS * 3600e3) return { error: "Pick the time you close today." };
+  const today = { where, mapUrl, closeAt: new Date(close).toISOString() };
+  await cmd("SET", "settings:today", JSON.stringify(today), "PX", close - Date.now() + 864e5);
+  return { today };
+}
+
+// The ordering switch, the sold-out list, the alert address and today's spot in one
+// round trip. alertEmail is private: never send it to customers. Once today's closing
+// time has passed the switch turns itself off, so nobody can order (or prepay) after close.
 async function orderingState() {
-  const [on, names, alertEmail] = await pipe([["GET", "settings:ordering"], ["SMEMBERS", "settings:soldout"], ["GET", "settings:alertemail"]]);
+  const now = Date.now();
+  const [on, names, alertEmail, todayRaw] = await pipe([["GET", "settings:ordering"], ["SMEMBERS", "settings:soldout"], ["GET", "settings:alertemail"], ["GET", "settings:today"]]);
   const menu = catalog();
-  return { open: on === "on", soldOut: (names || []).filter((n) => menu.has(n)), alertEmail: alertEmail || "" };
+  const today = parseToday(todayRaw, now);
+  let open = on === "on";
+  if (open && todayRaw && !today) {
+    await cmd("SET", "settings:ordering", "off");
+    await cmd("DEL", "settings:today");
+    open = false;
+  }
+  return { open, soldOut: (names || []).filter((n) => menu.has(n)), alertEmail: alertEmail || "", today };
 }
 
 async function getAlertEmail() {
@@ -92,7 +131,7 @@ const clean = (v, max) => String(v == null ? "" : v).replace(/[\u0000-\u001f\u00
 
 // Turns what the browser sent into a priced order, or returns { error }.
 // Prices always come from menu-data.js, never from the browser.
-function buildOrder(body, soldOut) {
+function buildOrder(body, soldOut, closeAt) {
   if (!body || typeof body !== "object") return { error: "Something went wrong. Please try again." };
   const name = clean(body.name, 60);
   const phone = clean(body.phone, 20);
@@ -102,8 +141,8 @@ function buildOrder(body, soldOut) {
   if (name.length < 2) return { error: "Please add your name so we can call it out at the window." };
   if (digits.length < 10 || digits.length > 11) return { error: "Please add a phone number we can reach you on (10 digits)." };
   if (email && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email)) return { error: "That email address doesn't look right. Fix it, or leave it empty." };
-  const pickupAt = cleanPickup(body.pickupAt);
-  if (pickupAt === null) return { error: "That pickup time has passed or isn't available. Pick another time, or ASAP." };
+  const pickupAt = cleanPickup(body.pickupAt, null, closeAt ? Date.parse(closeAt) : null);
+  if (pickupAt === null) return { error: "That pickup time has passed or isn't available. Pick another time, or ASAP.", field: "pickupAt" };
   if (!Array.isArray(body.items) || !body.items.length) return { error: "Your order is empty." };
   if (body.items.length > MAX_LINES) return { error: "That's a big order! Please call the truck for catering." };
 
@@ -267,4 +306,4 @@ async function setStatus(number, status, extra) {
   return order;
 }
 
-module.exports = { SLOT_MIN, LEAD_MIN, AHEAD_HOURS, cleanPickup, catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus, waitEstimate };
+module.exports = { setToday, SLOT_MIN, LEAD_MIN, AHEAD_HOURS, cleanPickup, catalog, buildOrder, isOrderingOn, setOrdering, orderingState, getSoldOut, setSoldOut, clearSoldOut, getAlertEmail, setAlertEmail, underLimit, saveOrder, getOrder, listOrders, findOrders, setStatus, waitEstimate };

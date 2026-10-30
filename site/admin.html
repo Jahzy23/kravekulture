@@ -49,6 +49,30 @@
     </div>
 
     <section data-board hidden>
+      <form class="today-block" data-today-form>
+        <h2 class="display">Today's spot</h2>
+        <p class="admin-note" data-today-now>Not set. Customers see "check Instagram".</p>
+        <div class="field">
+          <label for="a-where">Where's the truck today?</label>
+          <input id="a-where" name="where" type="text" maxlength="80" placeholder="e.g. Little Haiti, NE 2nd Ave &amp; 59th St">
+        </div>
+        <div class="field">
+          <label for="a-map">Map link <span>(optional)</span></label>
+          <input id="a-map" name="mapUrl" type="url" inputmode="url" maxlength="500" placeholder="https://maps.app.goo.gl/…">
+          <small>Google Maps &gt; Share &gt; Copy link.</small>
+        </div>
+        <div class="field">
+          <label for="a-close">Open until</label>
+          <select id="a-close" name="closeAt" data-close></select>
+          <small>Online ordering turns itself off at this time, and nobody can pick a pickup time after it.</small>
+        </div>
+        <p class="form-error" data-today-error role="alert" hidden></p>
+        <div class="alerts-actions">
+          <button class="btn btn-red" type="submit">Save</button>
+          <button class="link-btn" type="button" data-today-clear>Clear</button>
+        </div>
+      </form>
+
       <div class="tabs" role="tablist" aria-label="Which orders">
         <button type="button" role="tab" data-tab="new" aria-selected="true">Open <b data-count="new">0</b></button>
         <button type="button" role="tab" data-tab="done" aria-selected="false">Done <b data-count="done">0</b></button>
