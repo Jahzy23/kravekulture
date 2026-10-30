@@ -183,6 +183,7 @@ async function findOrders(name, last4, number) {
       number: o.number,
       status: o.status,
       createdAt: o.createdAt,
+      readyAt: o.readyAt || null,
       completedAt: o.completedAt || null,
       name: o.name,
       items: o.items,
@@ -222,15 +223,21 @@ async function getOrder(number) {
   return raw ? JSON.parse(raw) : null;
 }
 
-async function setStatus(number, status) {
+// status: "new" (cooking) → "ready" (customer told to come get it) → "done" (picked up).
+// Reopening goes back to "new". readyEmailedAt marks a sent "ready" email, so a second
+// tap never emails twice.
+async function setStatus(number, status, extra) {
   if (!/^\d{4,5}$/.test(String(number))) return null;
   const key = "order:" + number;
   const raw = await cmd("GET", key);
   if (!raw) return null;
   const order = JSON.parse(raw);
   order.status = status;
+  if (status === "ready") order.readyAt = order.readyAt || new Date().toISOString();
   if (status === "done") order.completedAt = new Date().toISOString();
   else delete order.completedAt;
+  if (status === "new") delete order.readyAt;
+  Object.assign(order, extra || {});
   await cmd("SET", key, JSON.stringify(order), "KEEPTTL");
   return order;
 }

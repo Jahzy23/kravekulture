@@ -468,7 +468,7 @@
     setConfirmStatus(order.status);
     const mailed = $("[data-confirm-emailed]");
     mailed.hidden = !order.emailed;
-    mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + ". Don't see it in a minute? Check your spam and trash folders." : "";
+    mailed.textContent = order.emailed ? "We emailed your order number to " + order.email + " and we'll email again when it's ready. Don't see it in a minute? Check your spam and trash folders." : "";
     const review = $("[data-review]");
     $("[data-review-link]", review).href = "review.html?o=" + encodeURIComponent(order.number) + (order.reviewToken ? "&t=" + encodeURIComponent(order.reviewToken) : "");
     review.hidden = false;
@@ -479,11 +479,17 @@
     watchStatus(order);
   }
 
-  const STATUS_TEXT = { new: "Received. We're on it.", done: "Done. Thanks for ordering!" };
+  const STATUS_TEXT = { new: "Received. We're on it.", ready: "Ready! Come grab it at the window.", done: "Done. Thanks for ordering!" };
   function setConfirmStatus(status) {
     const n = $("[data-confirm-status]");
-    n.dataset.state = status === "done" ? "done" : "new";
-    n.textContent = STATUS_TEXT[n.dataset.state];
+    const state = STATUS_TEXT[status] ? status : "new";
+    // Buzz the phone and flag the tab the moment it turns ready, in case they're not looking.
+    if (state === "ready" && n.dataset.state === "new") {
+      try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) { /* not supported */ }
+    }
+    if (state === "ready") document.title = "\u2705 READY - Order #" + $("[data-confirm-number]").textContent;
+    n.dataset.state = state;
+    n.textContent = STATUS_TEXT[state];
   }
 
   // Keep the status on the confirmation screen fresh (every 30s while the page is open,

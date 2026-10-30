@@ -18,7 +18,8 @@
     return node;
   };
   const money = (n) => "$" + (Number.isInteger(n) ? n : Number(n).toFixed(2));
-  const STATUS = { new: "Received. We're on it.", done: "Done. Thanks for ordering!" };
+  const STATUS = { new: "Received. We're on it.", ready: "Ready! Come grab it at the window.", done: "Done. Thanks for ordering!" };
+  const stateOf = (s) => (STATUS[s] ? s : "new");
 
   function showError(msg) {
     const box = $("[data-track-error]");
@@ -35,10 +36,10 @@
     }
     orders.forEach((o) => {
       const placed = new Date(o.createdAt);
-      host.appendChild(el("article", { class: "track-card", "data-state": o.status === "done" ? "done" : "new" }, [
+      host.appendChild(el("article", { class: "track-card", "data-state": stateOf(o.status) }, [
         el("p", { class: "label", text: "Order number" }),
         el("p", { class: "confirm-number display", text: "#" + o.number }),
-        el("p", { class: "confirm-status", "data-state": o.status === "done" ? "done" : "new", text: STATUS[o.status === "done" ? "done" : "new"] }),
+        el("p", { class: "confirm-status", "data-state": stateOf(o.status), text: STATUS[stateOf(o.status)] }),
         el("ul", { class: "confirm-items" }, (o.items || []).map((l) => el("li", {}, [
           el("span", { text: l.qty + " × " + l.name + (l.flavor ? " (" + l.flavor + ")" : "") }),
           el("span", { text: money(l.lineTotal) }),
