@@ -109,8 +109,9 @@
     if (tab === "new" && !q) shown.reverse();
     shown.forEach((o) => {
       const done = o.status === "done";
+      const ready = o.status === "ready";
       const tel = String(o.phone || "").replace(/[^\d+]/g, "");
-      list.appendChild(el("li", { class: "ticket" + (done ? " is-done" : ""), "data-number": o.number }, [
+      list.appendChild(el("li", { class: "ticket" + (done ? " is-done" : ready ? " is-ready" : ""), "data-number": o.number }, [
         el("div", { class: "ticket-top" }, [
           el("span", { class: "ticket-number display", text: "#" + o.number }),
           el("span", { class: "ticket-pay", "data-paid": o.paid ? "yes" : "no", "data-test": o.test ? "yes" : null, text: o.paid ? "Paid" : "Unpaid" }),
@@ -133,9 +134,16 @@
           o.paid
             ? el("span", { class: "ticket-total" }, ["Paid online ", el("b", { text: money(o.paid.amount) })])
             : el("span", { class: "ticket-total" }, ["Due at truck ", el("b", { text: money(o.total) })]),
-          el("button", { type: "button", class: done ? "btn btn-white" : "btn", "data-action": done ? "reopen" : "complete", "data-num": o.number },
-            [done ? "Reopen" : "Mark complete"]),
+          el("span", { class: "ticket-actions" }, done
+            ? [el("button", { type: "button", class: "btn btn-white", "data-action": "reopen", "data-num": o.number }, ["Reopen"])]
+            : ready
+              ? [el("button", { type: "button", class: "btn", "data-action": "complete", "data-num": o.number }, ["Picked up"])]
+              : [
+                  el("button", { type: "button", class: "btn btn-white", "data-action": "complete", "data-num": o.number }, ["Picked up"]),
+                  el("button", { type: "button", class: "btn btn-ready", "data-action": "ready", "data-num": o.number }, [o.email && emailReady ? "Ready, email them" : "Ready"]),
+                ]),
         ]),
+        ready || (done && o.readyAt) ? el("p", { class: "ticket-ready", text: "Ready " + ago(o.readyAt) + (o.readyEmailedAt ? ". Emailed " + o.email + "." : o.email ? ". Email didn't send." : ". No email on this order, call their name.") }) : null,
       ]));
     });
     $("[data-empty]").hidden = shown.length > 0;
@@ -357,6 +365,9 @@
       b.disabled = true;
       const r = await api("POST", { action: b.getAttribute("data-action"), number: b.getAttribute("data-num") });
       if (r.status === 200) {
+        if (b.getAttribute("data-action") === "ready" && r.data.order.email && !r.data.emailed && !r.data.order.readyEmailedAt) {
+          alert("Marked ready, but the email to " + r.data.order.email + " didn't send. Call their name at the window.");
+        }
         orders = orders.map((o) => (o.number === r.data.order.number ? r.data.order : o));
         pending = pending.filter((o) => o.number !== r.data.order.number);
         if (!pending.length) ackAlert();

@@ -566,6 +566,22 @@
   gap: 10px;
   box-shadow: var(--shadow-paint);
 }
+.ticket.is-ready {
+  border-top-color: #1f9d4a;
+}
+.ticket-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ticket .btn-ready {
+  background: #1f9d4a;
+  color: var(--white);
+}
+.ticket-ready {
+  font-weight: 700;
+  color: #17763a;
+}
 .ticket.is-done {
   border-top-color: #1f9d4a;
   opacity: 0.7;
@@ -785,6 +801,17 @@
   border: var(--rule) solid var(--ink);
   background: var(--gold);
 }
+.confirm-status[data-state="ready"] {
+  background: #1f9d4a;
+  color: var(--white);
+  animation: ready-pulse 1.2s ease-in-out 3;
+}
+@keyframes ready-pulse {
+  50% { transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-status[data-state="ready"] { animation: none; }
+}
 .confirm-status[data-state="done"] {
   background: #1f9d4a;
   color: var(--white);
@@ -827,6 +854,7 @@
   border-top: 10px solid var(--red);
   scroll-margin-top: 16px;
 }
+.track-card[data-state="ready"],
 .track-card[data-state="done"] {
   border-top-color: #1f9d4a;
 }

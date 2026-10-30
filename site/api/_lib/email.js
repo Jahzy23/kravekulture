@@ -37,6 +37,7 @@ function build(order) {
     "",
     "Order number: #" + order.number,
     how,
+    "We'll email you again the moment it's ready.",
     "",
     ...order.items.map((l) => lineLabel(l) + "  " + money(l.lineTotal)),
     order.tip ? "Tip  " + money(order.tip) : "",
@@ -69,7 +70,7 @@ function build(order) {
     '<p style="margin:0 0 6px;font-size:16px">Thanks, ' + esc(order.name) + "! Your order is in.</p>" +
     '<p style="margin:14px 0 2px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#55534e">Order number</p>' +
     '<p style="margin:0 0 12px;font-size:56px;line-height:1;font-weight:900;color:#d92b1f">#' + esc(order.number) + "</p>" +
-    '<p style="margin:0 0 16px;font-size:16px">' + (paid ? "<b>It's paid.</b> Show this number at the window and grab your food." : "Show this number at the window. <b>Pay at the truck</b> when you pick up.") + "</p>" +
+    '<p style="margin:0 0 16px;font-size:16px">' + (paid ? "<b>It's paid.</b> Show this number at the window and grab your food." : "Show this number at the window. <b>Pay at the truck</b> when you pick up.") + " We'll email you again the moment it's ready.</p>" +
     '<table style="width:100%;border-collapse:collapse;border-top:3px solid #111;font-size:15px">' + rows +
     '<tr><td style="padding:12px 0 0;font-weight:700;text-transform:uppercase">' + esc(totalLabel) + '</td><td style="padding:12px 0 0;text-align:right;font-size:20px;font-weight:900">' + esc(money(charged)) + "</td></tr></table>" +
     (paid && paid.receiptUrl ? '<p style="margin:10px 0 0;font-size:14px"><a href="' + esc(paid.receiptUrl) + '" style="color:#1f47cc">View your card receipt</a></p>' : "") +
@@ -88,6 +89,48 @@ function build(order) {
 async function sendConfirmation(order) {
   if (!KEY || !order.email) return false;
   return deliver(order.email, build(order));
+}
+
+// "Come get it": sent once when the truck taps Ready on the order board.
+function buildReady(order) {
+  const spot = spotIsFresh(SPOT) ? SPOT.where : "";
+  const paid = order.paid;
+  const pay = paid ? "It's paid, just show your number." : "Pay at the truck: " + money(order.total) + ".";
+  const items = order.items.map(lineLabel);
+  const text = [
+    order.name + ", your Krave Kulture order is ready!",
+    "",
+    "Order number: #" + order.number,
+    "Come grab it at the window while it's hot. " + pay,
+    spot ? "Pick up at: " + spot : "",
+    "",
+    ...items,
+    "",
+    "Krave it. Taste it. Live the Kulture.",
+  ].filter((l, i, a) => l !== "" || a[i - 1] !== "").join("\n");
+  const html =
+    '<!doctype html><html><body style="margin:0;background:#fdfbf5;font-family:Arial,Helvetica,sans-serif;color:#111">' +
+    '<div style="max-width:520px;margin:0 auto;padding:24px 16px">' +
+    '<div style="background:#d92b1f;padding:16px 20px;text-align:center">' +
+    '<img src="' + SITE + '/images/email/logo.png" width="80" height="80" alt="Krave Kulture" style="display:block;margin:0 auto;border:0;width:80px;height:80px">' +
+    "</div>" +
+    '<div style="background:#fff;border:3px solid #111;border-top:0;padding:22px 20px">' +
+    '<p style="margin:0;font-size:30px;line-height:1.1;font-weight:900;text-transform:uppercase;color:#1f9d4a">Your order is ready!</p>' +
+    '<p style="margin:10px 0 2px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#55534e">Order number</p>' +
+    '<p style="margin:0 0 12px;font-size:56px;line-height:1;font-weight:900;color:#d92b1f">#' + esc(order.number) + "</p>" +
+    '<p style="margin:0 0 12px;font-size:16px">' + esc(order.name) + ", come grab it at the window while it's hot. " +
+    (paid ? "<b>It's paid,</b> just show your number." : "<b>Pay at the truck:</b> " + esc(money(order.total)) + ".") + "</p>" +
+    (spot ? '<p style="margin:0 0 12px;font-size:15px"><b>Pick up at:</b> ' + esc(spot) + "</p>" : "") +
+    '<ul style="margin:0;padding-left:20px;font-size:15px">' + items.map((i) => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
+    "</div>" +
+    '<p style="margin:14px 0 0;font-size:12px;color:#55534e;text-align:center">Krave it. Taste it. Live the Kulture. · <a href="' + SITE + '" style="color:#55534e">eatkravekulture.com</a></p>' +
+    "</div></body></html>";
+  return { subject: "Order #" + order.number + " is ready! Come grab it", text, html };
+}
+
+async function sendReady(order) {
+  if (!KEY || !order.email) return false;
+  return deliver(order.email, buildReady(order));
 }
 
 // The heads-up to the truck: a short ticket so the phone's lock screen shows what to cook.
@@ -152,4 +195,4 @@ async function deliver(to, { subject, text, html }) {
   }
 }
 
-module.exports = { emailConfigured, sendConfirmation, sendAlert, sendAlertTest, build, buildAlert };
+module.exports = { emailConfigured, sendConfirmation, sendReady, sendAlert, sendAlertTest, build, buildReady, buildAlert };

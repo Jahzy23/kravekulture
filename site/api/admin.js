@@ -2,7 +2,7 @@
    admin cookie.
    GET  → { orders, open, soldOut, items, alertEmail, emailReady }
    POST { action: "login", password } | { action: "logout" }
-        { action: "complete" | "reopen", number }
+        { action: "ready" | "complete" | "reopen", number }   ("ready" emails the customer once)
         { action: "ordering", open: true | false }
         { action: "soldout", name, out: true | false } | { action: "soldout-clear" }
         { action: "alertemail", email }   ("" turns alert emails off) */
@@ -11,8 +11,8 @@
 const { send, readJson, clientIp, sameOrigin } = require("./_lib/http");
 const { configured } = require("./_lib/store");
 const auth = require("./_lib/auth");
-const { catalog, orderingState, setOrdering, setSoldOut, clearSoldOut, setAlertEmail, underLimit, listOrders, setStatus } = require("./_lib/orders");
-const { emailConfigured, sendAlertTest } = require("./_lib/email");
+const { catalog, orderingState, setOrdering, setSoldOut, clearSoldOut, setAlertEmail, underLimit, listOrders, getOrder, setStatus } = require("./_lib/orders");
+const { emailConfigured, sendAlertTest, sendReady } = require("./_lib/email");
 
 // Everything the board can mark sold out, in menu order.
 const menuItems = () => Array.from(catalog().values()).map((i) => ({ name: i.name, section: i.section }));
@@ -51,6 +51,15 @@ module.exports = async function handler(req, res) {
     }
 
     if (!auth.isSignedIn(req)) return send(res, 401, { error: "Please sign in." });
+
+    if (body.action === "ready") {
+      const before = await getOrder(body.number);
+      if (!before) return send(res, 404, { error: "Order not found." });
+      const emailed = !before.readyEmailedAt && (await sendReady(before));
+      const order = await setStatus(body.number, "ready", emailed ? { readyEmailedAt: new Date().toISOString() } : null);
+      if (!order) return send(res, 404, { error: "Order not found." });
+      return send(res, 200, { ok: true, order, emailed });
+    }
 
     if (body.action === "complete" || body.action === "reopen") {
       const order = await setStatus(body.number, body.action === "complete" ? "done" : "new");
