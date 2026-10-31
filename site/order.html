@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://web.squarecdn.com https://sandbox.web.squarecdn.com https://pay.google.com; style-src 'self' 'unsafe-inline' https://web.squarecdn.com https://sandbox.web.squarecdn.com https://fonts.googleapis.com; img-src 'self' data: https://www.gstatic.com https://pay.google.com; font-src 'self' https://square-fonts-production-f.squarecdn.com https://d1g145x70srn7h.cloudfront.net https://fonts.gstatic.com; media-src 'self' blob:; frame-src https://web.squarecdn.com https://sandbox.web.squarecdn.com https://pay.google.com; connect-src 'self' https://web.squarecdn.com https://sandbox.web.squarecdn.com https://pci-connect.squareup.com https://pci-connect.squareupsandbox.com https://o160250.ingest.sentry.io https://pay.google.com https://google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Order Ahead - Krave Kulture</title>
-  <meta name="description" content="Order Krave Kulture ahead for pickup at the truck in Miami, FL. Pay online or at the window when you pick up.">
+  <meta name="description" content="Order Krave Kulture ahead for pickup at the truck in Miami, FL. Pay online when you order, then pick up at the window.">
   <meta name="theme-color" content="#c4261d">
   <meta property="og:title" content="Krave Kulture - Order Ahead">
-  <meta property="og:description" content="Order ahead for pickup at the Krave Kulture truck. Pay at the window.">
+  <meta property="og:description" content="Order ahead and pay online for pickup at the Krave Kulture truck.">
   <meta property="og:image" content="https://eatkravekulture.com/images/og-menu.jpg">
   <meta property="og:url" content="https://eatkravekulture.com/order.html">
   <meta property="og:type" content="website">
@@ -35,13 +35,13 @@
         </picture>
       </a>
       <h1 class="painted sign-name">Order Ahead</h1>
-      <p class="sign-tag">Pickup only. <span data-pay-tag>Pay at the truck.</span></p>
+      <p class="sign-tag">Pickup only. <span data-pay-tag>Pay online when you order.</span></p>
     </div>
   </header>
 
   <div class="band">
     <p class="wrap band-inner">
-      <span>Order online</span><span>Pick up at the window</span><span data-pay-band>Pay at the truck</span>
+      <span>Order online</span><span>Pick up at the window</span><span data-pay-band>Pay online</span>
     </p>
   </div>
 
@@ -85,7 +85,7 @@
           <a class="btn btn-red" href="menu.html">See the menu</a>
           <a class="btn btn-white" data-ig-link href="https://www.instagram.com/eatkravekulture/" target="_blank" rel="noopener">Today's spot on Instagram</a>
         </div>
-        <p class="order-how" data-pay-how>Add what you want, tell us your name and number, and we start cooking. You pay at the window when you pick up.</p>
+        <p class="order-how" data-pay-how>Add what you want, tell us your name and number, and we start cooking. You pay online when you order, and we start cooking once it goes through.</p>
         <p class="order-find">Already ordered? <a href="track.html">Find your order</a></p>
       </div>
 
@@ -113,7 +113,7 @@
         <div class="wrap checkout">
           <p class="cart-empty" data-cart-empty>Nothing yet. Tap <b>Add</b> on anything above.</p>
           <ul class="cart" data-cart></ul>
-          <p class="cart-total" data-cart-total hidden><span data-cart-total-label>Total, pay at the truck</span> <b data-cart-total-value></b></p>
+          <p class="cart-total" data-cart-total hidden><span data-cart-total-label>Total</span> <b data-cart-total-value></b></p>
           <div class="upsell" data-upsell hidden>
             <p class="label">Add a drink or dessert?</p>
             <div class="upsell-row" data-upsell-items></div>
@@ -158,15 +158,8 @@
               <label for="o-website">Leave this empty</label>
               <input id="o-website" name="website" type="text" tabindex="-1" autocomplete="off">
             </div>
-            <!-- Shown only when Square is set up (see api/_lib/square.js). -->
-            <fieldset class="pay-pick" data-pay-pick hidden>
-              <legend class="label">How do you want to pay?</legend>
-              <div class="pick-row">
-                <label class="pick"><input type="radio" name="pay" value="card" checked><span>Pay now online</span></label>
-                <label class="pick"><input type="radio" name="pay" value="truck"><span>Pay at the truck</span></label>
-              </div>
-            </fieldset>
-            <div class="pay-card" data-pay-card hidden>
+            <!-- Every online order is paid here first (Square, see api/_lib/square.js). -->
+            <div class="pay-card" data-pay-card>
               <fieldset class="tip-pick">
                 <legend class="label">Tip the crew <span>(optional)</span></legend>
                 <div class="pick-row" data-tips>
@@ -190,7 +183,7 @@
             </div>
             <p class="wait" data-wait hidden><strong class="wait-label">Wait</strong> <span data-wait-text></span></p>
             <p class="form-error" data-form-error role="alert" hidden></p>
-            <button class="btn btn-red btn-wide" type="submit" data-submit>Place order · pay at the truck</button>
+            <button class="btn btn-red btn-wide" type="submit" data-submit>Pay · place order</button>
             <p class="form-small">By ordering you agree to our <a href="terms.html">terms</a>. We keep your name and number for 60 days, see our <a href="privacy.html">privacy policy</a>.</p>
           </form>
         </div>

@@ -189,8 +189,8 @@
 
   const lineLabel = (l) => l.name + (l.flavor ? " (" + l.flavor + ")" : "");
   const cartTotal = () => cart.reduce((s, l) => s + l.price * l.qty, 0);
-  const payingByCard = () => squareOn && ($("input[name=pay]:checked") || {}).value === "card";
-  const tipPct = () => (payingByCard() ? Number(($("input[name=tip]:checked") || {}).value) || 0 : 0);
+  // Every online order is paid up front, so the tip always counts.
+  const tipPct = () => Number(($("input[name=tip]:checked") || {}).value) || 0;
   const tipCents = () => Math.round((Math.round(cartTotal() * 100) * tipPct()) / 100);
   const chargeTotal = () => (Math.round(cartTotal() * 100) + tipCents()) / 100;
   const cents = (n) => "$" + n.toFixed(2);
@@ -248,13 +248,11 @@
     ])));
   }
 
-  // Total line and button label follow the pay choice and tip.
+  // Total line and button label follow the tip.
   function renderPayTotals() {
-    const byCard = payingByCard();
-    $("[data-cart-total-label]").textContent = byCard ? (tipPct() ? "Total with " + cents(tipCents() / 100) + " tip" : "Total") : "Total, pay at the truck";
-    $("[data-cart-total-value]").textContent = byCard ? cents(chargeTotal()) : money(cartTotal());
-    $("[data-pay-card]").hidden = !byCard;
-    if (!sending) $("[data-submit]").textContent = byCard ? "Pay " + cents(chargeTotal()) + " · place order" : "Place order · pay at the truck";
+    $("[data-cart-total-label]").textContent = tipPct() ? "Total with " + cents(tipCents() / 100) + " tip" : "Total";
+    $("[data-cart-total-value]").textContent = cents(chargeTotal());
+    if (!sending) $("[data-submit]").textContent = "Pay " + cents(chargeTotal()) + " · place order";
     // Keep the Apple Pay / Google Pay sheet showing the same total we charge.
     if (paymentRequest && cart.length) {
       try { paymentRequest.update({ total: { amount: chargeTotal().toFixed(2), label: "Krave Kulture" } }); } catch (e) { /* sheet not open */ }
@@ -283,14 +281,13 @@
     });
   }
 
-  // Loads Square's card field. If anything fails, the page quietly stays pay at the truck.
+  // Loads Square's card field. Orders can't go through without it, so if it fails the
+  // customer is told to refresh instead of being offered another way to pay.
   let squareOn = false;
   async function setupSquare(cfg) {
     if (squareOn || !cfg || !cfg.appId || !cfg.locationId) return;
     squareOn = true;
-    $("[data-pay-pick]").hidden = false;
     $("[data-test-note]").hidden = !cfg.sandbox;
-    $("[data-pay-card]").hidden = false;
     try {
       await loadScript(cfg.sandbox ? "https://sandbox.web.squarecdn.com/v1/square.js" : "https://web.squarecdn.com/v1/square.js");
       const payments = window.Square.payments(cfg.appId, cfg.locationId);
@@ -300,14 +297,11 @@
       await c.attach("#card-container");
       card = c;
       setupWallets(payments);
-      $("[data-pay-tag]").textContent = "Pay online or at the truck.";
-      $("[data-pay-band]").textContent = "Pay online or at the truck";
-      $("[data-pay-how]").textContent = "Add what you want, tell us your name and number, and we start cooking. Pay online now, or at the window when you pick up.";
     } catch (e) {
       console.error("[krave] Square card form failed:", e);
       squareOn = false;
-      $("[data-pay-pick]").hidden = true;
-      $("[data-pay-card]").hidden = true;
+      const loading = $("[data-card-loading]");
+      if (loading) loading.textContent = "The secure card form didn't load. Refresh the page to try again.";
     }
     renderPayTotals();
   }
@@ -571,27 +565,26 @@
     const email = form.email.value.trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) return showError("That email address doesn't look right. Fix it, or leave it empty.", form.email);
 
-    const byCard = Boolean(wallet) || payingByCard();
-    if (byCard && !card) return showError("The card form is still loading. Give it a second and tap Pay again.");
+    if (!card) return showError(squareOn
+      ? "The card form is still loading. Give it a second and tap Pay again."
+      : "The secure card form didn't load. Refresh the page and try again, or order at the window.");
     const method = wallet || card;
     let token = null;
     sending = true;
     const btn = $("[data-submit]");
     btn.disabled = true;
-    btn.textContent = byCard ? "Paying…" : "Sending…";
+    btn.textContent = "Paying…";
     try {
-      if (byCard) {
-        const result = await method.tokenize();
-        if (result.status !== "OK") {
-          // Closing the Apple Pay / Google Pay sheet is not an error.
-          if (wallet) return;
-          const msg = result.errors && result.errors[0] && result.errors[0].message;
-          showError(msg ? "Check your card: " + msg : "Please check your card details.");
-          return;
-        }
-        token = result.token;
-        if (!payKey) payKey = newKey();
+      const result = await method.tokenize();
+      if (result.status !== "OK") {
+        // Closing the Apple Pay / Google Pay sheet is not an error.
+        if (wallet) return;
+        const msg = result.errors && result.errors[0] && result.errors[0].message;
+        showError(msg ? "Check your card: " + msg : "Please check your card details.");
+        return;
       }
+      token = result.token;
+      if (!payKey) payKey = newKey();
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -602,8 +595,8 @@
           pickupAt: pickupAt(),
           website: form.website.value,
           items: cart.map((l) => ({ name: l.name, flavor: l.flavor, qty: l.qty })),
-          pay: byCard ? "card" : "truck",
-          token, payKey: byCard ? payKey : undefined,
+          pay: "card",
+          token, payKey,
           tip: tipPct(),
         }),
       });
@@ -627,9 +620,7 @@
       rememberMe(form, data.order);
       showConfirm(data.order);
     } catch (err) {
-      showError(byCard
-        ? "We couldn't reach the payment system. Check your connection and tap Pay again. You won't be charged twice."
-        : "We couldn't reach the truck's ordering system. Check your connection and try again.");
+      showError("We couldn't reach the payment system. Check your connection and tap Pay again. You won't be charged twice.");
     } finally {
       sending = false;
       btn.disabled = !open;
@@ -778,7 +769,7 @@
     $("[data-apple-pay]").addEventListener("click", (e) => wallets.apple && submit(e, wallets.apple));
     $("#google-pay-button").addEventListener("click", (e) => wallets.google && submit(e, wallets.google));
     $("[data-order-form]").addEventListener("change", (e) => {
-      if (e.target.name === "pay" || e.target.name === "tip") renderPayTotals();
+      if (e.target.name === "tip") renderPayTotals();
       if (e.target.name === "when") { fillSlots(); renderWhen(); }
     });
     $("[data-new-order]").addEventListener("click", newOrder);

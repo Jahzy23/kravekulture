@@ -4,9 +4,11 @@
                              page needs to show the card field, and (while open) how many
                              orders are in the queue and about how long a new one takes, and
                              today's spot + closing time when set on the board
-   POST → places a pickup order and returns its order number. With pay: "card" the card
-          is charged through Square first, and the order is saved only once Square
-          confirms the payment. Otherwise it's pay at the truck. */
+   POST → places a pickup order and returns its order number. Every online order is
+          paid up front: the card (or Apple Pay / Google Pay) is charged through Square
+          first, and the order is saved, shown on the board, alerted and emailed only
+          once Square confirms the payment. There is no pay-at-the-truck option online,
+          so if Square isn't set up, online ordering stays closed. */
 "use strict";
 
 const { send, readJson, clientIp, sameOrigin } = require("./_lib/http");
@@ -26,7 +28,10 @@ module.exports = async function handler(req, res) {
     if (!configured()) return send(res, 200, { open: false, soldOut: [] });
 
     if (req.method === "GET") {
-      const { open, soldOut, today } = await orderingState();
+      const state = await orderingState();
+      const { soldOut, today } = state;
+      // No Square, no online orders: every order has to be paid before it comes through.
+      const open = state.open && square.squareConfigured();
       // The estimate is a bonus: if it fails, ordering still works without it.
       const wait = open ? await waitEstimate().catch(() => null) : null;
       return send(res, 200, { open, soldOut, square: square.publicConfig(), wait, today });
@@ -43,14 +48,11 @@ module.exports = async function handler(req, res) {
     if (body && body.website) return send(res, 200, { ok: true, order: { number: "0000", items: [], total: 0 } });
 
     const state = await orderingState();
-    if (!state.open) {
+    if (!state.open || !square.squareConfigured()) {
       return send(res, 409, { error: "We're not taking online orders right now. Check Instagram for today's spot and hours.", open: false });
     }
     const { order, error, soldOut, field } = buildOrder(body, state.soldOut, state.today && state.today.closeAt);
     if (error) return send(res, soldOut ? 409 : 400, { error, soldOut, field });
-
-    const byCard = body.pay === "card";
-    if (byCard && !square.squareConfigured()) return send(res, 400, { error: "Paying online isn't available right now. Pick pay at the truck." });
 
     // Counts only orders that would go through, so fixing a typo never locks anyone out.
     // Card attempts count too, which also slows down anyone testing stolen cards.
@@ -58,12 +60,8 @@ module.exports = async function handler(req, res) {
       return send(res, 429, { error: "That's a lot of orders in a few minutes. Please call the truck instead." });
     }
 
-    if (!byCard) {
-      const saved = await saveOrder(order);
-      // The order is saved either way; the emails are a bonus.
-      const [emailed] = await Promise.all([sendConfirmation(saved), sendAlert(saved, state.alertEmail)]);
-      return send(res, 201, { ok: true, order: withReview(saved), emailed });
-    }
+    // Pay first, always. Nothing is saved (so nothing reaches the board, the alerts, the
+    // emails or order tracking) unless Square says the payment went through.
     return await payAndSave(res, body, order, state.alertEmail);
   } catch (e) {
     console.error("[orders]", e);

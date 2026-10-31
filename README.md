@@ -9,7 +9,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step. Online 
   - `menu.html` menu + find the truck (the QR code points here)
   - `menu-data.js` **the only file you edit** to change dishes, prices, city, phone
   - `qr.html` print page for the QR card
-  - `order.html` + `order.js` order ahead for pickup, pay at the truck (see "Online ordering" below)
+  - `order.html` + `order.js` order ahead for pickup, paid online up front (see "Online ordering" below)
   - `track.html` + `track.js` customers find a lost order by name + last 4 digits of their phone
   - `admin.html` + `admin.js` password-protected order board; `order.css` styles both
   - `api/` Vercel serverless functions behind ordering (`orders.js`, `track.js`, `admin.js`, helpers in `api/_lib/`)
@@ -33,7 +33,7 @@ Open `site/menu-data.js`. Change names, prices, flavors, this week's spot, city 
 
 - Set `SPOT` to this week's spot: `where`, `when`, and today's date in `updated`, exactly `YYYY-MM-DD` (`2026-10-06`; any other format hides it). It shows under Find the Truck on the menu page and in the truck scene on the home page for 7 days after that date, whatever `when` says, then hides itself and both pages go back to pointing at Instagram. If the plan changes or the spot ends early, change or clear `where` and redeploy. Paste a Google Maps share link (`https://...`) into `mapUrl` to get a Map link.
 - `phone` in `LOCATION` (currently `786-999-4019`) powers the **Call us** button under Find the Truck and the `telephone` field in the JSON-LD. The number is never printed on the page, only in the `tel:` link. Leave it empty to hide the button.
-- There is no payment section on the site (removed September 23, 2026); online orders are paid at the truck.
+- Online orders are paid up front through Square (card, Apple Pay, Google Pay). There is no pay-at-the-truck option online.
 - Set `MENU_STATUS` to `"draft"` if you ever want a SAMPLE MENU tape across the top.
 - After editing prices, dishes or the phone number, run `node make-schema.js` so the structured data search engines read matches the real data.
 - The home page copy in `site/world/home.js` is hand-written and mentions a few prices and counts ("7 dinners", "From $20", "From $12"). It is not generated from `menu-data.js`, so check it after a price change.
@@ -41,7 +41,7 @@ Open `site/menu-data.js`. Change names, prices, flavors, this week's spot, city 
 
 ## Online ordering
 
-Customers order on `order.html` for **pickup only** and **pay at the truck**; nothing is charged online. Each order gets a random 4-digit order number shown on screen. Orders land on `admin.html`, where you sign in with the admin password, see open orders (oldest first, refreshed every 15 seconds with a beep for new ones), tap **Mark complete**, and flip the **Taking orders** switch. The switch starts **off**: while it is off the order page says online ordering is closed, and the "Order ahead" links on the menu page stay hidden.
+Customers order on `order.html` for **pickup only** and **pay online up front** through Square (card, Apple Pay or Google Pay). The order is saved only after Square confirms the payment, so unpaid or declined orders never reach the board, the alerts, the emails or `track.html`. If the `SQUARE_*` env vars are missing, online ordering stays closed. Each order gets a random 4-digit order number shown on screen. Orders land on `admin.html`, where you sign in with the admin password, see open orders (oldest first, refreshed every 15 seconds with a beep for new ones), tap **Mark complete**, and flip the **Taking orders** switch. The switch starts **off**: while it is off the order page says online ordering is closed, and the "Order ahead" links on the menu page stay hidden.
 
 After ordering, the confirmation screen shows the order number and a live status (Received → Done, checked every 30 seconds), tells the customer to screenshot it, and is remembered on that phone for 24 hours. Customers can also leave an email address (optional) and get the order number by email: `site/api/_lib/email.js` sends it through Resend from `orders@eatkravekulture.com` using the `RESEND_API_KEY` env var (a send-only key for the domain). The sending domain's DNS records (DKIM TXT at `resend._domainkey`, MX + SPF TXT at `send`, CNAME at `rsend`) live at Porkbun. If the key is missing or Resend is down, the order still goes through, just without the email. Anyone who loses the number can get it back on `track.html` with their name (first name is enough) and the last 4 digits of the phone they ordered with; it shows orders from the last 36 hours. On `admin.html` the search box finds orders by name, phone digits or order number across all tabs.
 
@@ -107,7 +107,7 @@ If the host name ever changes again, run `node set-domain.js new-domain.com`: it
 
 ## Terms and privacy pages
 
-`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, one optional pickup order form (name, phone, notes, kept 60 days), no visitor cookies, payments at the truck, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram. They are a starting point, not legal advice; have someone qualified read them if the business grows.
+`site/terms.html` and `site/privacy.html` are plain-English pages written to match what the site actually does today: no accounts, one optional pickup order form (name, phone, notes, kept 60 days), no visitor cookies, online orders paid up front through Square, cookieless Vercel Web Analytics, Vercel hosting logs, links to Instagram. They are a starting point, not legal advice; have someone qualified read them if the business grows.
 
 Things to keep true:
 

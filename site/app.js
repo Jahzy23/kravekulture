@@ -299,11 +299,10 @@
         if (box) {
           const text = $("[data-order-text]", box);
           const btn = $("[data-order-btn]", box);
-          const pay = d.square ? "pay online or at the truck." : "pay at the truck.";
           text.textContent = "";
           text.appendChild(el("b", { text: open ? "Skip the line." : "Order online." }));
           text.appendChild(document.createTextNode(open
-            ? " Order ahead for pickup, " + pay
+            ? " Order ahead and pay online, then grab it at the window."
             : " Online ordering opens when the truck is out. Today's spot is below."));
           btn.textContent = open ? "Order ahead" : "Find the truck";
           btn.href = open ? "order.html" : "#find";
