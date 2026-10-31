@@ -29,8 +29,6 @@ const MENU = [
     kreyol: "Pla konplè",
     board: "red",
     note: "Every dinner comes with rice, meat and plantain. Mac is $7 on the side. House-made pikliz on the side — ask for extra scotch bonnet if you're brave.",
-    photo: "images/dinner-plate.jpg",
-    photoAlt: "Dinner plate: chicken with peppers and onions, rice and beans, baked mac and cheese, and fried plantain",
     items: [
       { name: "Griot Dinner", desc: "Fried pork. The plate we're known for.", price: 20, tag: "popular" },
       { name: "Turkey Dinner", desc: "Tasso turkey.", price: 22 },
@@ -78,8 +76,6 @@ const MENU = [
     board: "blue",
     note: "All wings come with fries. Pick your flavor.",
     choices: { label: "Flavors", options: ["Honey Hot", "Lemon Pepper", "BBQ", "Buffalo", "Jerk", "Plain"] },
-    photo: "images/wings-plate.jpg",
-    photoAlt: "Sauced wings with seasoned fries and street corn",
     items: [
       { name: "6 Pieces", desc: "With fries.", price: 12 },
       { name: "8 Pieces", desc: "With fries.", price: 14 },
