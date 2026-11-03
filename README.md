@@ -17,6 +17,7 @@ Static site for the Krave Kulture food truck (Miami, FL). No build step. Online 
   - `styles.css`, `app.js`, `fonts/`, `images/`
   - `vercel.json` — security headers + `cleanUrls: false` for the live Vercel deployment
 - `redirect/` — deployed to GitHub Pages only, forwards the old `jahzy23.github.io/kravekulture` URLs to the live Vercel site
+- `check-square.js` — checks a set of Square credentials before they go into Vercel (see Square account below)
 - `set-domain.js` — moves the site to a new host name: rewrites every absolute URL, then regenerates the JSON-LD and the QR card (`node set-domain.js eatkravekulture.com`)
 - `make-qr.js` — generates the QR code (one vector SVG card) for any URL
 - `make-qr-pdf.js` — renders that card as a print-ready vector PDF
@@ -42,6 +43,27 @@ Open `site/menu-data.js`. Change names, prices, flavors, this week's spot, city 
 ## Online ordering
 
 Customers order on `order.html` for **pickup only** and **pay online up front** through Square (card, Apple Pay or Google Pay). The order is saved only after Square confirms the payment, so unpaid or declined orders never reach the board, the alerts, the emails or `track.html`. If the `SQUARE_*` env vars are missing, online ordering stays closed. Each order gets a random 4-digit order number shown on screen. Orders land on `admin.html`, where you sign in with the admin password, see open orders (oldest first, refreshed every 15 seconds with a beep for new ones), tap **Mark complete**, and flip the **Taking orders** switch. The switch starts **off**: while it is off the order page says online ordering is closed, and the "Order ahead" links on the menu page stay hidden.
+
+### Square account (switching accounts)
+
+Payments go to whichever Square account these four Vercel env vars (Project → Settings → Environment Variables, Production) point at. Nothing Square-specific is hard-coded anywhere else.
+
+| Env var | Where to find it in the new account | Notes |
+|---|---|---|
+| `SQUARE_APPLICATION_ID` | developer.squareup.com → your app → Credentials | `sq0idp-…` in production, `sandbox-sq0idb-…` in sandbox |
+| `SQUARE_ACCESS_TOKEN` | same page, Access token | secret, mark it **Sensitive** |
+| `SQUARE_LOCATION_ID` | developer dashboard → Locations, or squareup.com Dashboard → Locations | the location the money lands in |
+| `SQUARE_ENVIRONMENT` | — | `production` for real money, `sandbox` for test cards (unset = sandbox) |
+
+All four must come from the same account and the same environment (the dashboard's Sandbox/Production toggle). If the application ID and `SQUARE_ENVIRONMENT` don't match, the server logs `[square] online payment off: …` and keeps online ordering closed instead of showing a broken card form. To switch:
+
+1. Check the new values locally first (read-only, charges nothing; it lists the account's locations if you leave the location out):
+   `SQUARE_ACCESS_TOKEN=… SQUARE_LOCATION_ID=… SQUARE_APPLICATION_ID=… SQUARE_ENVIRONMENT=production node check-square.js`
+2. Replace all four in Vercel and redeploy (env changes only apply to new deployments).
+3. Apple Pay: in the new app's developer dashboard → Apple Pay, add `eatkravekulture.com`, download its verification file over `site/.well-known/apple-developer-merchantid-domain-association`, push, then click Verify. Until then the Apple Pay button just stays hidden; card and Google Pay work.
+4. Place one small real order and refund it from the new Square Dashboard.
+
+Payments already taken stay in the old account; refund those from the old account's dashboard.
 
 After ordering, the confirmation screen shows the order number and a live status (Received → Done, checked every 30 seconds), tells the customer to screenshot it, and is remembered on that phone for 24 hours. Customers can also leave an email address (optional) and get the order number by email: `site/api/_lib/email.js` sends it through Resend from `orders@eatkravekulture.com` using the `RESEND_API_KEY` env var (a send-only key for the domain). The sending domain's DNS records (DKIM TXT at `resend._domainkey`, MX + SPF TXT at `send`, CNAME at `rsend`) live at Porkbun. If the key is missing or Resend is down, the order still goes through, just without the email. Anyone who loses the number can get it back on `track.html` with their name (first name is enough) and the last 4 digits of the phone they ordered with; it shows orders from the last 36 hours. On `admin.html` the search box finds orders by name, phone digits or order number across all tabs.
 
