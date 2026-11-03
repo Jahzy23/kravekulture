@@ -59,7 +59,7 @@ All four must come from the same account and the same environment (the dashboard
 
 1. Check the new values locally first (read-only, charges nothing; it lists the account's locations if you leave the location out):
    `SQUARE_ACCESS_TOKEN=… SQUARE_LOCATION_ID=… SQUARE_APPLICATION_ID=… SQUARE_ENVIRONMENT=production node check-square.js`
-2. Replace all four in Vercel and redeploy (env changes only apply to new deployments).
+2. Replace all four in Vercel and redeploy (env changes only apply to new deployments). Production and Preview each have their own set of the four: Production is the live site, Preview is the branch/PR preview URLs. Point Preview at the new account's sandbox keys if you want test cards there, or at the same production keys.
 3. Apple Pay: in the new app's developer dashboard → Apple Pay, add `eatkravekulture.com`, download its verification file over `site/.well-known/apple-developer-merchantid-domain-association`, push, then click Verify. Until then the Apple Pay button just stays hidden; card and Google Pay work.
 4. Place one small real order and refund it from the new Square Dashboard.
 
