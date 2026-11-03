@@ -6,18 +6,30 @@
      SQUARE_LOCATION_ID      public, which Square location the money goes to
      SQUARE_ACCESS_TOKEN     secret, mark it Sensitive
      SQUARE_ENVIRONMENT      "sandbox" (test cards, no real money) or "production"
-   With any of them missing, online payment is off and orders are pay at the truck. */
+   With any of them missing, online payment is off and online ordering stays closed.
+   All four come from the same Square account and the same environment; to switch
+   accounts, replace all four and run `node check-square.js` (see README). */
 "use strict";
 
-const APP_ID = process.env.SQUARE_APPLICATION_ID || "";
-const LOCATION_ID = process.env.SQUARE_LOCATION_ID || "";
-const TOKEN = process.env.SQUARE_ACCESS_TOKEN || "";
-const SANDBOX = String(process.env.SQUARE_ENVIRONMENT || "sandbox").toLowerCase() !== "production";
+// Trimmed, because a value pasted into Vercel with a stray space or newline fails silently.
+const env = (name) => String(process.env[name] || "").trim();
+const APP_ID = env("SQUARE_APPLICATION_ID");
+const LOCATION_ID = env("SQUARE_LOCATION_ID");
+const TOKEN = env("SQUARE_ACCESS_TOKEN");
+const SANDBOX = (env("SQUARE_ENVIRONMENT") || "sandbox").toLowerCase() !== "production";
 const API = SANDBOX ? "https://connect.squareupsandbox.com" : "https://connect.squareup.com";
 const VERSION = "2025-01-23";
 
+// Sandbox application IDs start with "sandbox-sq0idb-", production ones with "sq0idp-".
+// Mixing them (e.g. new account's production keys with SQUARE_ENVIRONMENT left on
+// sandbox) makes the card field fail to load, so treat it as not set up and say why.
+const MISMATCH = APP_ID && APP_ID.startsWith("sandbox-") !== SANDBOX
+  ? `SQUARE_APPLICATION_ID is a ${SANDBOX ? "production" : "sandbox"} ID but SQUARE_ENVIRONMENT is ${SANDBOX ? "sandbox (or unset)" : "production"}`
+  : "";
+if (MISMATCH) console.error("[square] online payment off: " + MISMATCH);
+
 function squareConfigured() {
-  return Boolean(APP_ID && LOCATION_ID && TOKEN);
+  return Boolean(APP_ID && LOCATION_ID && TOKEN && !MISMATCH);
 }
 
 // What the order page needs to load the card field. Nothing secret.
